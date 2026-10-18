@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "life-of-colors/instance/1",
+  "title": "Life of Colors game instance (schema_version 1.x)",
+  "description": "One puzzle. Produced by the private factory (export_catalog.py / instance.py), played by src/engine/engine.js, referenced by id in telemetry. Only rule, board and goal are hashed into the id; published instances are immutable. Add variations as NEW optional fields plus a feature tag in `requires`; never change the meaning of an existing field.",
+  "type": "object",
+  "required": ["schema_version", "id", "requires", "rule", "board", "goal", "level"],
+  "properties": {
+    "schema_version": { "type": "string", "pattern": "^1\\.[0-9]+$" },
+    "id": { "type": "string", "pattern": "^loc_[0-9a-f]{16}$",
+            "description": "'loc_' + first 16 hex of sha256(canonical JSON of {rule, board, goal}) -- sorted keys, no whitespace." },
+    "requires": { "type": "array", "items": { "type": "string" }, "minItems": 1,
+                  "description": "Feature tags the engine must support. Known: core." },
+    "rule": {
+      "type": "object",
+      "required": ["neighborhood", "table"],
+      "properties": {
+        "neighborhood": { "const": "moore8", "description": "Up to 8 surrounding cells that lie on the board." },
+        "table": { "type": "string", "pattern": "^[UOBGX]{165}$",
+                   "description": "New colour per (orange, blue, green) neighbour-count triple, o+b+g<=8, ordered o outer, b middle, g inner, ascending. U uncolored, O orange, B blue, G green, X unchanged." }
+      }
+    },
+    "board": {
+      "type": "object",
+      "required": ["rows", "cols", "start"],
+      "properties": {
+        "rows": { "type": "integer", "minimum": 1, "maximum": 9 },
+        "cols": { "type": "integer", "minimum": 1, "maximum": 6 },
+        "start": { "type": "array", "minItems": 1, "items": {
+          "type": "object", "required": ["at", "color"],
+          "properties": { "at": { "$ref": "#/$defs/cell" }, "color": { "enum": ["U", "O", "B", "G"] } } },
+          "description": "Cells that do not start uncolored." },
+        "special_cells": { "type": "array", "maxItems": 0,
+          "description": "Reserved for future variations (each entry {type, at, ...} with a feature tag). Must be empty for 'core'." }
+      }
+    },
+    "goal": {
+      "type": "object",
+      "required": ["type", "at", "color"],
+      "properties": {
+        "type": { "const": "cell-color" },
+        "at": { "$ref": "#/$defs/cell" },
+        "color": { "enum": ["O", "B", "G"] }
+      }
+    },
+    "level": { "type": "integer", "minimum": 1, "description": "App level the instance is offered under." },
+    "retired": { "type": "boolean", "description": "Kept so telemetry stays interpretable, but hidden by the app." },
+    "meta": { "type": "object", "description": "Analysis metadata (source rule_set_idx, moves_to_win, difficulty_rank, ...). Not hashed, not used by the engine." },
+    "ext": { "type": "object", "description": "Experimental attributes. Ignored by the app, not hashed." }
+  },
+  "$defs": {
+    "cell": { "type": "array", "items": { "type": "integer", "minimum": 0 }, "minItems": 2, "maxItems": 2,
+              "description": "[row, col], 0-based, row 0 at the top." }
+  }
+}

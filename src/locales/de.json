@@ -1,0 +1,37 @@
+{
+  "app": {
+    "title": "Life of Colors"
+  },
+  "levels": {
+    "label": "Stufe",
+    "1": "Hasenmatt",
+    "2": "Rigi",
+    "3": "Eiger",
+    "4": "Matterhorn",
+    "5": "Mont Blanc"
+  },
+  "home": {
+    "description": "Tippe auf ein Feld, um seine Farbe zu ändern. Die neue Farbe hängt von den Farben der Nachbarfelder ab, aber die Regeln sind geheim und jedes Rätsel hat seine eigenen.",
+    "how1": "Du beginnst beim grünen Feld mit der Fahne.",
+    "how2": "Färbe das Feld mit der Zielflagge grün, um zu gewinnen.",
+    "how3": "Probiere aus, finde die Regeln heraus und löse das Rätsel mit möglichst wenigen Zügen.",
+    "chooseLevel": "Wähle eine Stufe",
+    "levelLabel": "Stufe {{level}}",
+    "puzzleCount_one": "{{count}} Rätsel",
+    "puzzleCount_other": "{{count}} Rätsel",
+    "loading": "Rätsel werden geladen…",
+    "loadError": "Die Rätsel konnten nicht geladen werden. Bitte prüfe deine Verbindung und lade die Seite neu.",
+    "privacy": "Keine Anmeldung, keine Cookies. Um die Rätsel zu verbessern, speichern wir anonyme Spieldaten (Züge und Ergebnisse), gruppiert nach einer Zufallszahl, die beim Schliessen der Seite vergessen wird. Es wird nichts gespeichert, das dich identifiziert."
+  },
+  "game": {
+    "retry": "Nochmal",
+    "home": "Start",
+    "moves_one": "{{count}} Zug",
+    "moves_other": "{{count}} Züge"
+  },
+  "win": {
+    "title": "Geschafft!",
+    "moves_one": "Gelöst mit {{count}} Zug.",
+    "moves_other": "Gelöst mit {{count}} Zügen."
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "app": {
+    "title": "Life of Colors"
+  },
+  "levels": {
+    "label": "Level",
+    "1": "Hasenmatt",
+    "2": "Rigi",
+    "3": "Eiger",
+    "4": "Matterhorn",
+    "5": "Mont Blanc"
+  },
+  "home": {
+    "description": "Tap a cell to change its color. Its new color depends on the colors of its neighbours, but the rules are secret and every puzzle has its own.",
+    "how1": "Start from the green cell with the flag.",
+    "how2": "Turn the cell with the checkered flag green to win.",
+    "how3": "Experiment, find out the rules, then solve it in as few moves as you can.",
+    "chooseLevel": "Choose a level",
+    "levelLabel": "Level {{level}}",
+    "puzzleCount_one": "{{count}} puzzle",
+    "puzzleCount_other": "{{count}} puzzles",
+    "loading": "Loading puzzles…",
+    "loadError": "The puzzles could not be loaded. Please check your connection and reload the page.",
+    "privacy": "No sign-up, no cookies. To improve the puzzles we record anonymous game data (moves and results) grouped by a random number that is forgotten when you close the page. Nothing that identifies you is stored."
+  },
+  "game": {
+    "retry": "Retry",
+    "home": "Home",
+    "moves_one": "{{count}} move",
+    "moves_other": "{{count}} moves"
+  },
+  "win": {
+    "title": "You did it!",
+    "moves_one": "Solved in {{count}} move.",
+    "moves_other": "Solved in {{count}} moves."
+  }
+}
