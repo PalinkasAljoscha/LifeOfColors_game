@@ -3,20 +3,19 @@
     "title": "Life of Colors"
   },
   "levels": {
-    "label": "Niveau",
-    "1": "Hasenmatt",
-    "2": "Rigi",
-    "3": "Eiger",
-    "4": "Matterhorn",
-    "5": "Mont Blanc"
+    "1": "Level 1",
+    "2": "Level 2",
+    "3": "Level 3",
+    "4": "Level 4",
+    "5": "Level 5",
+    "note5": "Contient des puzzles non résolus, peut-être insolubles."
   },
   "home": {
     "description": "Touche une case pour changer sa couleur. Sa nouvelle couleur dépend des couleurs de ses voisines, mais les règles sont secrètes et chaque puzzle a les siennes.",
-    "how1": "Tu pars de la case verte avec le drapeau.",
-    "how2": "Rends verte la case au drapeau à damier pour gagner.",
+    "how1": "Tu pars de la case verte.",
+    "how2": "Rends verte la case au cadre doré pour gagner.",
     "how3": "Expérimente, découvre les règles, puis résous le puzzle en un minimum de coups.",
     "chooseLevel": "Choisis un niveau",
-    "levelLabel": "Niveau {{level}}",
     "puzzleCount_one": "{{count}} puzzle",
     "puzzleCount_other": "{{count}} puzzles",
     "loading": "Chargement des puzzles…",

@@ -26,9 +26,9 @@ export const palette = {
 
   // ── Misc ──
   overlayBlack: '#000000',
-  flagPoleColor: '#8b5a2b',
-  flagWhite:     '#eeeeee',
-  flagDark:      '#222222',
+  goalGold:      '#f1c40f',
+  goalGoldDark:  '#b7950b',
+  goalShine:     '#ffffff',
 
   // ── Life of Colors cells ──
   cellUncolored:       '#2e2e3a',

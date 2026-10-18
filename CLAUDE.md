@@ -26,7 +26,6 @@ src/
   engine/catalog.js       # loads public/catalog/{index,level-N}.json, random pick per level
   telemetry/telemetry.js  # anonymous session/attempt telemetry (see privacy rule below)
   game/GameScene.js       # Phaser scene: draws the board, turns taps into engine calls
-  game/phaserUI.js        # food-rain win celebration (from Maze Inc.)
   hooks/usePhaserGame.js  # Phaser mount/unmount (from Maze Inc., takes width/height/registry/events)
   components/             # HomeScreen, GameScreen (Retry/Home), Board, WinDialog
   theme.js                # all colours

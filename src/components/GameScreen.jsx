@@ -58,8 +58,8 @@ export default function GameScreen({ instance, onHome }) {
 
   function onWon() {
     telemetry.endAttempt('won')
-    // Let the board celebration play for a moment before the dialog covers it.
-    winTimer.current = setTimeout(() => setWon(true), 900)
+    // Short pause so the player sees the goal cell change before the dialog covers it.
+    winTimer.current = setTimeout(() => setWon(true), 400)
   }
   useEffect(() => () => clearTimeout(winTimer.current), [])
 
@@ -86,6 +86,8 @@ export default function GameScreen({ instance, onHome }) {
         <span className="text-game-silver">{t(`levels.${instance.level}`)}</span>
         <span className="text-game-score">{t('game.moves', { count: moves })}</span>
       </div>
+      {/* Instance id (same as in the factory files), so a played puzzle can be traced back. */}
+      <div className="mx-auto w-full max-w-md px-1 text-xs font-mono text-game-hint select-all">{instance.id}</div>
 
       <div className="flex-1 min-h-0 mt-2 relative">
         <Board key={round} instance={instance} onClick={onClick} onWon={onWon} />

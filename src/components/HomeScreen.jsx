@@ -18,7 +18,8 @@ function Logo() {
 }
 
 function LevelButton({ level, count, loading, disabled, onPress }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const noteKey = `levels.note${level}`
   return (
     <button
       onClick={onPress}
@@ -38,8 +39,11 @@ function LevelButton({ level, count, loading, disabled, onPress }) {
       <span className="flex-1 min-w-0">
         <span className="block text-xl font-black text-white leading-tight">{t(`levels.${level}`)}</span>
         <span className="block text-xs text-game-silver font-sans font-semibold">
-          {t('home.levelLabel', { level })} · {t('home.puzzleCount', { count })}
+          {t('home.puzzleCount', { count })}
         </span>
+        {i18n.exists(noteKey) && (
+          <span className="block text-xs text-game-hint font-sans font-semibold leading-snug">{t(noteKey)}</span>
+        )}
       </span>
       <span className="text-2xl text-white/70 shrink-0">{loading ? '…' : '▶'}</span>
     </button>
@@ -75,7 +79,7 @@ export default function HomeScreen({ levels, error, loadingLevel, onSelectLevel 
           <p className="text-base font-semibold leading-snug text-white/90">{t('home.description')}</p>
           <ul className="mt-3 space-y-1.5 text-sm text-game-silver font-semibold">
             <li>🟩 {t('home.how1')}</li>
-            <li>🏁 {t('home.how2')}</li>
+            <li>✨ {t('home.how2')}</li>
             <li>🔍 {t('home.how3')}</li>
           </ul>
         </section>
