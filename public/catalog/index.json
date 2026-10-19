@@ -1,12 +1,7 @@
 {
  "schema_version": "1.0",
-<<<<<<< HEAD
- "catalog_version": "20261018-4f50fbb6",
- "generated_at": "2026-10-18T21:09:13+00:00",
-=======
  "catalog_version": "20261019-301c76e7",
- "generated_at": "2026-10-19T20:13:48+00:00",
->>>>>>> dev
+ "generated_at": "2026-10-19T20:35:21+00:00",
  "features": [
   "core"
  ],
