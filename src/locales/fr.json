@@ -13,6 +13,7 @@
   "home": {
     "description": "Touche une case pour changer sa couleur. Sa nouvelle couleur dépend des couleurs de ses voisines, mais les règles sont secrètes et chaque puzzle a les siennes.",
     "how1": "Tu pars de la case verte.",
+    "how1NoStart": "Certains puzzles commencent avec une case verte, d'autres avec un plateau vide.",
     "how2": "Rends verte la case au cadre doré pour gagner.",
     "how3": "Expérimente, découvre les règles, puis résous le puzzle en un minimum de coups.",
     "chooseLevel": "Choisis un niveau",

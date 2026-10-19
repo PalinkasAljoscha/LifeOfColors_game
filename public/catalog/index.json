@@ -1,7 +1,7 @@
 {
  "schema_version": "1.0",
- "catalog_version": "20261018-b1a33cab",
- "generated_at": "2026-10-18T17:28:29+00:00",
+ "catalog_version": "20261019-301c76e7",
+ "generated_at": "2026-10-19T20:13:48+00:00",
  "features": [
   "core"
  ],
@@ -29,7 +29,7 @@
   {
    "level": 5,
    "file": "level-5.json",
-   "count": 49
+   "count": 19
   }
  ],
  "instances": {

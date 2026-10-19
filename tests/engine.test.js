@@ -32,3 +32,17 @@ test(`golden vectors (${vectors.length}) replay identically`, () => {
     assert.equal(firstWon, v.first_won_at, v.instance.id)
   }
 })
+
+test('start cell hidden only when the switch is on and start_cell_required === false', async () => {
+  const { startHidden } = await import('../src/engine/engine.js')
+  const inst = vectors[0].instance
+  const withFlag = (f) => ({ ...inst, start_cell_required: f })
+  assert.equal(startHidden(withFlag(false), true), true)
+  assert.equal(startHidden(withFlag(false), false), false)
+  assert.equal(startHidden(withFlag(true), true), false)
+  assert.equal(startHidden(withFlag(null), true), false)
+  assert.equal(startHidden({ ...inst, start_cell_required: undefined }, true), false)
+  const hidden = initialBoard(inst, { hideStart: true })
+  assert.ok(hidden.every((row) => row.every((v) => v === 'U')))
+  assert.deepEqual(initialBoard(inst), initialBoard(inst, { hideStart: false }))
+})

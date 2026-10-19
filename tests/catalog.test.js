@@ -27,6 +27,7 @@ test('catalog is consistent and every instance is valid', () => {
       const id = 'loc_' + createHash('sha256').update(idPayload(inst)).digest('hex').slice(0, 16)
       assert.equal(inst.id, id, `id hash mismatch for ${inst.id}`)
       assert.match(inst.rule.table, /^[UOBGX]{165}$/)
+      assert.ok([undefined, null, true, false].includes(inst.start_cell_required), `${inst.id}: start_cell_required`)
       const { rows, cols, start } = inst.board
       assert.ok(rows >= 1 && rows <= 9 && cols >= 1 && cols <= 6, `${inst.id}: board ${rows}x${cols} exceeds 9x6`)
       for (const s of start) assert.ok(s.at[0] < rows && s.at[1] < cols)
