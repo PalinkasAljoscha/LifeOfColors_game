@@ -13,6 +13,7 @@
   "home": {
     "description": "Tap a cell to change its color. Its new color depends on the colors of its neighbours, but the rules are secret and every puzzle has its own.",
     "how1": "Start from the green cell.",
+    "how1NoStart": "Some puzzles start from a green cell, others from an empty board.",
     "how2": "Turn the cell with the golden frame green to win.",
     "how3": "Experiment, find out the rules, then solve it in as few moves as you can.",
     "chooseLevel": "Choose a level",

@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import Board from './Board.jsx'
 import WinDialog from './WinDialog.jsx'
 import * as telemetry from '../telemetry/telemetry.js'
-import { initialBoard } from '../engine/engine.js'
+import { startBoard } from '../game/startBoard.js'
 
 // One instance. Retry remounts the board (fresh start of the same instance); Home goes back.
 export default function GameScreen({ instance, onHome }) {
@@ -17,7 +17,7 @@ export default function GameScreen({ instance, onHome }) {
   // A new attempt starts on mount and on every Retry.
   useEffect(() => {
     telemetry.startAttempt(instance)
-    boardRef.current = initialBoard(instance)
+    boardRef.current = startBoard(instance)
     setMoves(0)
     setWon(false)
   }, [instance, round])

@@ -13,6 +13,7 @@
   "home": {
     "description": "Tippe auf ein Feld, um seine Farbe zu ändern. Die neue Farbe hängt von den Farben der Nachbarfelder ab, aber die Regeln sind geheim und jedes Rätsel hat seine eigenen.",
     "how1": "Du beginnst beim grünen Feld.",
+    "how1NoStart": "Manche Rätsel beginnen mit einem grünen Feld, andere mit einem leeren Brett.",
     "how2": "Färbe das Feld mit dem goldenen Rahmen grün, um zu gewinnen.",
     "how3": "Probiere aus, finde die Regeln heraus und löse das Rätsel mit möglichst wenigen Zügen.",
     "chooseLevel": "Wähle eine Stufe",

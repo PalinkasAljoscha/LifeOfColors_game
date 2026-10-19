@@ -22,6 +22,15 @@ npm run build && npm run preview
 Copy `.env.example` to `.env.local` if you want to send telemetry while testing locally. Rows from
 local testing are tagged `env='dev'`.
 
+## Configuration
+
+`src/config.js` has one switch, `HIDE_START_CELL_IF_NOT_REQUIRED` (default `false`).
+- When it's `true`, puzzles marked `start_cell_required: false` by the factory start on an empty
+  board, with no green start cell. Their recorded solution also works without it.
+- All other puzzles keep their start cell.
+
+The puzzle id is the same either way, so keep the setting fixed once the game is live.
+
 ## Deploy
 
 Every push to `main` runs `.github/workflows/deploy.yml`: it installs, tests, builds and publishes

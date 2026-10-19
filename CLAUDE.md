@@ -54,6 +54,8 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   version, env, and per-attempt game data (instance, level, outcome, durations, click list). No
   cookies/localStorage ids, no user agent, screen size, language, location, referrer. Any new field
   must keep this property and must be added to `telemetry/schema.sql` and the factory's `stats_helpers.py`.
+- **Start cell switch** -- `src/config.js` `HIDE_START_CELL_IF_NOT_REQUIRED`: puzzles with
+  `start_cell_required: false` start all-uncolored (`src/game/startBoard.js`); same id either way.
 - **Mobile first** -- portrait phones are the main target; boards up to 9 rows x 6 cols must fit.
 
 ## Branching Strategy (as in Maze Inc.)

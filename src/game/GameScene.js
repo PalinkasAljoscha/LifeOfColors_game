@@ -1,6 +1,7 @@
 import Phaser from 'phaser'
 import { phaser as C, CELL_FILL, CELL_BORDER } from '../theme.js'
-import { initialBoard, applyClick, isWon } from '../engine/engine.js'
+import { applyClick, isWon } from '../engine/engine.js'
+import { startBoard } from './startBoard.js'
 
 // Board-only scene. All rules live in src/engine/engine.js (shared with the tests and
 // equivalent to the factory's engine); this scene draws the board, turns taps into
@@ -33,7 +34,7 @@ export default class GameScene extends Phaser.Scene {
     const { rows, cols } = this.inst.board
     this.rows = rows
     this.cols = cols
-    this.board = initialBoard(this.inst)
+    this.board = startBoard(this.inst)
     this.clicks = 0
     this.won = false
 

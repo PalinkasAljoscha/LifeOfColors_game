@@ -44,11 +44,19 @@ export function isPlayable(inst) {
   return typeof t === 'string' && t.length === TABLE_SIZE && inst.rule.neighborhood === 'moore8'
 }
 
-/** Board as an array of rows of letters ('U' | 'O' | 'B' | 'G'). */
-export function initialBoard(inst) {
+/** True if the instance should be shown without its start cell(s): the switch is on and the
+ *  factory marked the instance start_cell_required === false (its recorded solution also wins
+ *  from an all-uncolored board). Missing / null / true keeps the start cell. */
+export function startHidden(inst, hideIfNotRequired) {
+  return Boolean(hideIfNotRequired) && inst.start_cell_required === false
+}
+
+/** Board as an array of rows of letters ('U' | 'O' | 'B' | 'G').
+ *  hideStart: all cells uncolored (see startHidden). */
+export function initialBoard(inst, { hideStart = false } = {}) {
   const { rows, cols, start } = inst.board
   const board = Array.from({ length: rows }, () => Array(cols).fill('U'))
-  for (const s of start) board[s.at[0]][s.at[1]] = s.color
+  if (!hideStart) for (const s of start) board[s.at[0]][s.at[1]] = s.color
   return board
 }
 
