@@ -9,13 +9,13 @@ export default function WinDialog({ moves, onRetry, onPickNew, onHome }) {
         <h2 className="text-3xl font-black text-game-score">{t('win.title')}</h2>
         <p className="mt-2 mb-6 font-sans font-semibold text-game-silver">{t('win.moves', { count: moves })}</p>
         <button
-          onClick={onRetry}
+          onClick={onPickNew}
           className="w-full h-14 rounded-2xl bg-game-btn hover:bg-game-btn-hover active:scale-95 transition-transform text-xl font-black"
         >
-          ↻ {t('game.retry')}
+          {t('win.pickNew')}
         </button>
         <div className="mt-3 flex gap-3">
-          <button onClick={onPickNew} className={secondary}>{t('win.pickNew')}</button>
+          <button onClick={onRetry} className={secondary}>↻ {t('game.retry')}</button>
           <button onClick={onHome} className={secondary}>⌂ {t('game.home')}</button>
         </div>
       </div>
