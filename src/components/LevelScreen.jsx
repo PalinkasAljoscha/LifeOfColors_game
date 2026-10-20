@@ -10,20 +10,19 @@ export default function LevelScreen({ level, pool, onRandom, onPick, onBack }) {
     <div className="h-[100dvh] w-full flex flex-col bg-game-bg safe-pad">
       <div className="mx-auto w-full max-w-md">
         <div className="flex items-center gap-3">
-          <button
-            onClick={onBack}
-            className="h-12 px-4 rounded-2xl bg-game-panel border-2 border-white/15 active:scale-95 transition-transform
-                       text-base font-black flex items-center gap-1.5 shrink-0"
-            aria-label={t('levelScreen.back')}
-          >
-            <span aria-hidden="true">←</span> {t('levelScreen.back')}
-          </button>
           <div className="min-w-0">
             <h1 className="text-2xl font-black leading-tight">{t(`levels.${level}`)}</h1>
             <p className="text-xs text-game-silver font-sans font-semibold">
               {t('home.puzzleCount', { count: pool.length })}
             </p>
           </div>
+          <button
+            onClick={onBack}
+            className="ml-auto h-12 px-4 rounded-2xl bg-game-panel border-2 border-white/15 active:scale-95 transition-transform
+                       text-base font-black shrink-0"
+          >
+            {t('levelScreen.back')}
+          </button>
         </div>
 
         <button

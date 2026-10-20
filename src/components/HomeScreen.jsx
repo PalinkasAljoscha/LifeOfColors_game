@@ -1,7 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { LANGUAGES } from '../i18n.js'
 import { palette } from '../theme.js'
-import { HIDE_START_CELL_IF_NOT_REQUIRED } from '../config.js'
 
 const DOTS = [palette.cellOrangeFill, palette.cellBlueFill, palette.cellGreenFill]
 
@@ -78,11 +77,6 @@ export default function HomeScreen({ levels, error, loadingLevel, onSelectLevel 
 
         <section className="rounded-2xl bg-game-header p-4 mb-6 font-sans">
           <p className="text-base font-semibold leading-snug text-white/90">{t('home.description')}</p>
-          <ul className="mt-3 space-y-1.5 text-sm text-game-silver font-semibold">
-            <li>🟩 {t(HIDE_START_CELL_IF_NOT_REQUIRED ? 'home.how1NoStart' : 'home.how1')}</li>
-            <li>✨ {t('home.how2')}</li>
-            <li>🔍 {t('home.how3')}</li>
-          </ul>
         </section>
 
         <h2 className="text-sm uppercase tracking-widest text-game-silver mb-3">{t('home.chooseLevel')}</h2>

@@ -7,7 +7,7 @@ import { startBoard } from '../game/startBoard.js'
 
 // One instance. Retry remounts the board (fresh start of the same instance); Home goes back to
 // the level's grid. `pick` (how the puzzle was chosen) is passed on to telemetry.
-export default function GameScreen({ instance, pick, onHome }) {
+export default function GameScreen({ instance, pick, onPickNew, onHome }) {
   const { t } = useTranslation()
   const [round, setRound] = useState(0)        // bumped by Retry -> remounts <Board>
   const [moves, setMoves] = useState(0)        // clicks that changed a cell
@@ -43,10 +43,11 @@ export default function GameScreen({ instance, pick, onHome }) {
     setRound((n) => n + 1)
   }
 
-  function home() {
+  // Back to the level's puzzle grid (onPickNew) or all the way to the level list (onHome).
+  function leave(to) {
     clearTimeout(winTimer.current)
     if (!won) telemetry.endAttempt('home')
-    onHome()
+    to()
   }
 
   function onClick({ r, c, changed, board }) {
@@ -75,7 +76,7 @@ export default function GameScreen({ instance, pick, onHome }) {
           <span aria-hidden="true">↻</span> {t('game.retry')}
         </button>
         <button
-          onClick={home}
+          onClick={() => leave(onPickNew)}
           className="w-28 h-16 rounded-2xl bg-game-panel border-2 border-white/15 active:scale-95 transition-transform
                      text-lg font-black flex items-center justify-center gap-1.5"
         >
@@ -83,27 +84,27 @@ export default function GameScreen({ instance, pick, onHome }) {
         </button>
       </div>
 
-      <div className="mx-auto w-full max-w-md flex justify-between items-baseline mt-3 px-1 text-sm font-sans font-bold">
-        <span className="text-game-silver">{t(`levels.${instance.level}`)}</span>
-        <span className="text-game-score">{t('game.moves', { count: moves })}</span>
-      </div>
-      {/* Puzzle name (the factory finds the puzzle by it), with its tile colour from the level grid. */}
-      <div className="mx-auto w-full max-w-md px-1 flex items-center gap-2 text-sm font-sans font-bold text-white/90">
-        {instance.name_color && (
-          <span
-            className="w-3.5 h-3.5 rounded-sm ring-1 ring-inset ring-white/25 shrink-0"
-            style={{ background: instance.name_color }}
-            aria-hidden="true"
-          />
-        )}
-        <span className="truncate select-all">{instance.name ?? instance.id}</span>
+      <div className="mx-auto w-full max-w-md flex justify-between items-baseline gap-3 mt-3 px-1 text-sm font-sans font-bold">
+        <span className="min-w-0 flex items-center gap-1.5">
+          <span className="text-game-silver shrink-0">{t(`levels.${instance.level}`)}:</span>
+          {/* Puzzle name (the factory finds the puzzle by it), with its tile colour from the level grid. */}
+          {instance.name_color && (
+            <span
+              className="w-3.5 h-3.5 rounded-sm ring-1 ring-inset ring-white/25 shrink-0"
+              style={{ background: instance.name_color }}
+              aria-hidden="true"
+            />
+          )}
+          <span className="truncate select-all text-white/90">{instance.name ?? instance.id}</span>
+        </span>
+        <span className="text-game-score shrink-0">{t('game.moves', { count: moves })}</span>
       </div>
 
       <div className="flex-1 min-h-0 mt-2 relative">
         <Board key={round} instance={instance} onClick={onClick} onWon={onWon} />
       </div>
 
-      {won && <WinDialog moves={moves} onRetry={retry} onHome={home} />}
+      {won && <WinDialog moves={moves} onRetry={retry} onPickNew={() => leave(onPickNew)} onHome={() => leave(onHome)} />}
     </div>
   )
 }

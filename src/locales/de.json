@@ -11,17 +11,13 @@
     "note5": "Enthält ungelöste Rätsel, vielleicht auch unlösbare."
   },
   "home": {
-    "description": "Tippe auf ein Feld, um seine Farbe zu ändern. Die neue Farbe hängt von den Farben der Nachbarfelder ab, aber die Regeln sind geheim und jedes Rätsel hat seine eigenen.",
-    "how1": "Du beginnst beim grünen Feld.",
-    "how1NoStart": "Manche Rätsel beginnen mit einem grünen Feld, andere mit einem leeren Brett.",
-    "how2": "Färbe das Feld mit dem goldenen Rahmen grün, um zu gewinnen.",
-    "how3": "Probiere aus, finde die Regeln heraus und löse das Rätsel mit möglichst wenigen Zügen.",
+    "description": "Kannst du das goldumrandete Feld grün färben? Tippe auf ein beliebiges Feld, und je nach seinen Nachbarn ändert es vielleicht seine Farbe. Diese Regeln sind fest, aber für jedes Rätsel anders.",
     "chooseLevel": "Wähle eine Stufe",
     "puzzleCount_one": "{{count}} Rätsel",
     "puzzleCount_other": "{{count}} Rätsel",
     "loading": "Rätsel werden geladen…",
     "loadError": "Die Rätsel konnten nicht geladen werden. Bitte prüfe deine Verbindung und lade die Seite neu.",
-    "privacy": "Keine Anmeldung, keine Cookies. Um die Rätsel zu verbessern, speichern wir anonyme Spieldaten (Züge und Ergebnisse), gruppiert nach einer Zufallszahl, die beim Schliessen der Seite vergessen wird. Es wird nichts gespeichert, das dich identifiziert."
+    "privacy": "Keine Cookies, keine identifizierenden Daten. Züge und Ergebnisse können zur Verbesserung des Spiels erfasst werden."
   },
   "game": {
     "retry": "Nochmal",
@@ -32,11 +28,12 @@
   "win": {
     "title": "Geschafft!",
     "moves_one": "Gelöst mit {{count}} Zug.",
-    "moves_other": "Gelöst mit {{count}} Zügen."
+    "moves_other": "Gelöst mit {{count}} Zügen.",
+    "pickNew": "Neues wählen"
   },
   "levelScreen": {
-    "back": "Stufen",
+    "back": "Start",
     "random": "Zufällig wählen",
-    "orTap": "oder tippe auf ein Rätsel"
+    "orTap": "oder wähle dein Rätsel"
   }
 }

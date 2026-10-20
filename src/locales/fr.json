@@ -11,17 +11,13 @@
     "note5": "Contient des puzzles non résolus, peut-être insolubles."
   },
   "home": {
-    "description": "Touche une case pour changer sa couleur. Sa nouvelle couleur dépend des couleurs de ses voisines, mais les règles sont secrètes et chaque puzzle a les siennes.",
-    "how1": "Tu pars de la case verte.",
-    "how1NoStart": "Certains puzzles commencent avec une case verte, d'autres avec un plateau vide.",
-    "how2": "Rends verte la case au cadre doré pour gagner.",
-    "how3": "Expérimente, découvre les règles, puis résous le puzzle en un minimum de coups.",
+    "description": "Peux-tu rendre verte la case au cadre doré ? Touche n'importe quelle case et, selon ses voisines, elle peut changer de couleur. Ces règles sont fixes, mais différentes pour chaque puzzle.",
     "chooseLevel": "Choisis un niveau",
     "puzzleCount_one": "{{count}} puzzle",
     "puzzleCount_other": "{{count}} puzzles",
     "loading": "Chargement des puzzles…",
     "loadError": "Les puzzles n'ont pas pu être chargés. Vérifie ta connexion et recharge la page.",
-    "privacy": "Sans inscription, sans cookies. Pour améliorer les puzzles, nous enregistrons des données de jeu anonymes (coups et résultats), regroupées par un nombre aléatoire oublié à la fermeture de la page. Rien qui t'identifie n'est enregistré."
+    "privacy": "Pas de cookies, aucune donnée d'identification collectée. Les coups et résultats peuvent être collectés pour améliorer le jeu."
   },
   "game": {
     "retry": "Rejouer",
@@ -32,11 +28,12 @@
   "win": {
     "title": "Bravo !",
     "moves_one": "Résolu en {{count}} coup.",
-    "moves_other": "Résolu en {{count}} coups."
+    "moves_other": "Résolu en {{count}} coups.",
+    "pickNew": "Autre puzzle"
   },
   "levelScreen": {
-    "back": "Niveaux",
+    "back": "Accueil",
     "random": "Au hasard",
-    "orTap": "ou touche un puzzle"
+    "orTap": "ou choisis ton puzzle"
   }
 }

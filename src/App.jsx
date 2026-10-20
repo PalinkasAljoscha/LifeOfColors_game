@@ -69,7 +69,15 @@ export default function App() {
   }
 
   if (game) {
-    return <GameScreen key={game.instance.id} instance={game.instance} pick={game.pick} onHome={leaveGame} />
+    return (
+      <GameScreen
+        key={game.instance.id}
+        instance={game.instance}
+        pick={game.pick}
+        onPickNew={leaveGame}
+        onHome={() => { leaveGame(); setLevel(null) }}
+      />
+    )
   }
   if (level) {
     return (

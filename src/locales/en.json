@@ -11,17 +11,13 @@
     "note5": "Contains unsolved puzzles, maybe unsolvable ones."
   },
   "home": {
-    "description": "Tap a cell to change its color. Its new color depends on the colors of its neighbours, but the rules are secret and every puzzle has its own.",
-    "how1": "Start from the green cell.",
-    "how1NoStart": "Some puzzles start from a green cell, others from an empty board.",
-    "how2": "Turn the cell with the golden frame green to win.",
-    "how3": "Experiment, find out the rules, then solve it in as few moves as you can.",
+    "description": "Can you turn the golden-framed cell green? Tap any cell and, depending on its neighbors, it might change its color. These rules are fixed, but different for each puzzle.",
     "chooseLevel": "Choose a level",
     "puzzleCount_one": "{{count}} puzzle",
     "puzzleCount_other": "{{count}} puzzles",
     "loading": "Loading puzzles…",
     "loadError": "The puzzles could not be loaded. Please check your connection and reload the page.",
-    "privacy": "No sign-up, no cookies. To improve the puzzles we record anonymous game data (moves and results) grouped by a random number that is forgotten when you close the page. Nothing that identifies you is stored."
+    "privacy": "No cookies, no identifying data collected. Moves and results can be collected for improving the game."
   },
   "game": {
     "retry": "Retry",
@@ -32,11 +28,12 @@
   "win": {
     "title": "You did it!",
     "moves_one": "Solved in {{count}} move.",
-    "moves_other": "Solved in {{count}} moves."
+    "moves_other": "Solved in {{count}} moves.",
+    "pickNew": "Pick new"
   },
   "levelScreen": {
-    "back": "Levels",
+    "back": "Home",
     "random": "Random pick",
-    "orTap": "or tap a puzzle"
+    "orTap": "or choose your puzzle"
   }
 }
