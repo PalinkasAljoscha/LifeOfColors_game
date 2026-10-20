@@ -33,5 +33,10 @@
     "title": "You did it!",
     "moves_one": "Solved in {{count}} move.",
     "moves_other": "Solved in {{count}} moves."
+  },
+  "levelScreen": {
+    "back": "Levels",
+    "random": "Random pick",
+    "orTap": "or tap a puzzle"
   }
 }

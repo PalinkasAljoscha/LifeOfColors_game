@@ -33,5 +33,10 @@
     "title": "Geschafft!",
     "moves_one": "Gelöst mit {{count}} Zug.",
     "moves_other": "Gelöst mit {{count}} Zügen."
+  },
+  "levelScreen": {
+    "back": "Stufen",
+    "random": "Zufällig wählen",
+    "orTap": "oder tippe auf ein Rätsel"
   }
 }

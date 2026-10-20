@@ -1,15 +1,18 @@
 import { useEffect, useState } from 'react'
 import HomeScreen from './components/HomeScreen.jsx'
+import LevelScreen from './components/LevelScreen.jsx'
 import GameScreen from './components/GameScreen.jsx'
-import { loadIndex, pickRandom, findById } from './engine/catalog.js'
+import { loadIndex, loadLevel, pickRandom, markPlayed, findById } from './engine/catalog.js'
 import { setCatalogVersion } from './telemetry/telemetry.js'
 
-// Two screens: Home (description + level buttons) and Game (one instance).
-// Later: a third screen to choose an instance within a level.
+// Three screens: Home (description + level buttons) -> Level (Random pick + grid of all puzzles
+// of the level) -> Game (one instance). Home in the game goes back to the level's grid.
+// `pick` records how the puzzle was chosen (telemetry): 'random' | 'grid' | 'link' (?instance=).
 export default function App() {
   const [index, setIndex] = useState(null)
   const [error, setError] = useState(null)
-  const [instance, setInstance] = useState(null)
+  const [level, setLevel] = useState(null)       // { level, pool } while a level is open
+  const [game, setGame] = useState(null)         // { instance, pick } while playing
   const [loadingLevel, setLoadingLevel] = useState(null)
 
   useEffect(() => {
@@ -17,20 +20,24 @@ export default function App() {
       .then(async (idx) => {
         setIndex(idx)
         setCatalogVersion(idx.catalog_version)
-        // ?instance=loc_... opens one specific puzzle (testing, sharing).
-        const id = new URLSearchParams(window.location.search).get('instance')
-        if (id) {
-          const inst = await findById(id)
-          if (inst) setInstance(inst)
+        // ?instance=<name or id> opens one specific puzzle (testing, sharing).
+        const ref = new URLSearchParams(window.location.search).get('instance')
+        if (ref) {
+          const inst = await findById(ref)
+          if (inst) {
+            markPlayed(inst)
+            setLevel({ level: inst.level, pool: await loadLevel(inst.level) })
+            setGame({ instance: inst, pick: 'link' })
+          }
         }
       })
       .catch((e) => setError(String(e)))
   }, [])
 
-  async function startLevel(level) {
-    setLoadingLevel(level)
+  async function openLevel(lvl) {
+    setLoadingLevel(lvl)
     try {
-      setInstance(await pickRandom(level))
+      setLevel({ level: lvl, pool: await loadLevel(lvl) })
     } catch (e) {
       setError(String(e))
     } finally {
@@ -38,8 +45,22 @@ export default function App() {
     }
   }
 
-  function goHome() {
-    setInstance(null)
+  async function playRandom() {
+    try {
+      setGame({ instance: await pickRandom(level.level), pick: 'random' })
+    } catch (e) {
+      setError(String(e))
+      setLevel(null)
+    }
+  }
+
+  function playPicked(inst) {
+    markPlayed(inst, level.pool.length)
+    setGame({ instance: inst, pick: 'grid' })
+  }
+
+  function leaveGame() {
+    setGame(null)
     const url = new URL(window.location.href)
     if (url.searchParams.has('instance')) {
       url.searchParams.delete('instance')
@@ -47,15 +68,26 @@ export default function App() {
     }
   }
 
-  if (instance) {
-    return <GameScreen key={instance.id} instance={instance} onHome={goHome} />
+  if (game) {
+    return <GameScreen key={game.instance.id} instance={game.instance} pick={game.pick} onHome={leaveGame} />
+  }
+  if (level) {
+    return (
+      <LevelScreen
+        level={level.level}
+        pool={level.pool}
+        onRandom={playRandom}
+        onPick={playPicked}
+        onBack={() => setLevel(null)}
+      />
+    )
   }
   return (
     <HomeScreen
       levels={index?.levels ?? null}
       error={error}
       loadingLevel={loadingLevel}
-      onSelectLevel={startLevel}
+      onSelectLevel={openLevel}
     />
   )
 }

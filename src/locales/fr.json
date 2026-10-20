@@ -33,5 +33,10 @@
     "title": "Bravo !",
     "moves_one": "Résolu en {{count}} coup.",
     "moves_other": "Résolu en {{count}} coups."
+  },
+  "levelScreen": {
+    "back": "Niveaux",
+    "random": "Au hasard",
+    "orTap": "ou touche un puzzle"
   }
 }

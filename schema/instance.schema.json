@@ -11,7 +11,10 @@
     "rule",
     "board",
     "goal",
-    "level"
+    "level",
+    "name",
+    "name_color",
+    "seq"
   ],
   "properties": {
     "schema_version": {
@@ -133,6 +136,21 @@
         "null"
       ],
       "description": "Not hashed, optional. false = the factory's recorded solution also wins from an all-uncolored board; with the app's HIDE_START_CELL_IF_NOT_REQUIRED switch on, such puzzles are shown without their start cell(s). true / null / absent = the start cell is always shown."
+    },
+    "name": {
+      "type": "string",
+      "maxLength": 60,
+      "description": "Not hashed. Verbose puzzle name shown in the app instead of the id, '<colour word> <object word>' from the factory's naming_vocabulary.csv (e.g. 'Crimson Delta'). Assigned once when first published and never changed or reused (factory exports/published_instances.csv). Lookups ignore case, spaces and punctuation."
+    },
+    "name_color": {
+      "type": "string",
+      "pattern": "^#[0-9A-F]{6}$",
+      "description": "Not hashed. Colour of the name's colour word (#RRGGBB); the level grid draws the puzzle's tile in it. May be corrected in later exports, the name stays."
+    },
+    "seq": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Not hashed. Publication order (1 = first published); the level grid shows puzzles in this order, so new puzzles appear at the end."
     },
     "retired": {
       "type": "boolean",

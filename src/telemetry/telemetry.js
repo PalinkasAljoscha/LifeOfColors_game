@@ -5,8 +5,9 @@
 //                  stored in cookies/localStorage/sessionStorage, so a reload or a new visit is a
 //                  new, unlinkable session. It only groups the attempts of one page visit.
 //   * app_version, catalog_version, env ('prod' | 'dev')
-//   * per attempt: instance id, level, outcome, duration, click counts and the click list
-//                  [ms since attempt start, row, col, changed(0/1)]
+//   * per attempt: instance id, level, how the puzzle was chosen (pick: 'random' button, 'grid'
+//                  tile, or 'link' = ?instance= URL), outcome, duration, click counts and the
+//                  click list [ms since attempt start, row, col, changed(0/1)]
 // NOT collected: no IP address (not stored by our tables), no user agent, device, screen size,
 //   language, location, referrer, account, cookie or any other identifier.
 //
@@ -68,22 +69,22 @@ export function setCatalogVersion(v) {
   }
 }
 
-function openSegment(inst, attemptId, segment, startBoard) {
+function openSegment(inst, pick, attemptId, segment, startBoard) {
   current = {
-    inst, attemptId, segment, startBoard,
+    inst, pick, attemptId, segment, startBoard,
     t0: performance.now(),
     startedInSession: Math.round(performance.now() - sessionT0),
     events: [], nClicks: 0, nChanged: 0, closed: false,
   }
 }
 
-/** Call when a puzzle (re)starts from its initial board. */
-export function startAttempt(inst) {
+/** Call when a puzzle (re)starts from its initial board. pick: 'random' | 'grid' | 'link'. */
+export function startAttempt(inst, pick = null) {
   // Same puzzle re-started before any click (e.g. React StrictMode re-running effects): reuse.
   if (current && !current.closed && current.inst.id === inst.id && current.nClicks === 0 && current.segment === 0) return
   if (current && !current.closed) endAttempt('home')
   attemptNo += 1
-  openSegment(inst, uuid(), 0, null)
+  openSegment(inst, pick, uuid(), 0, null)
   current.attemptNo = attemptNo
 }
 
@@ -108,6 +109,7 @@ export function endAttempt(outcome) {
     attempt_no: s.attemptNo,
     instance_id: s.inst.id,
     level: s.inst.level ?? null,
+    pick: s.pick ?? null,
     catalog_version: catalogVersion,
     app_version: APP_VERSION,
     env: ENV,
@@ -133,7 +135,7 @@ export function onHidden() {
 export function resumeAttempt(board) {
   if (!board || !current || !current.closed || !current.hiddenOpen) return
   const prev = current
-  openSegment(prev.inst, prev.attemptId, prev.segment + 1, board.map((row) => row.join('')))
+  openSegment(prev.inst, prev.pick, prev.attemptId, prev.segment + 1, board.map((row) => row.join('')))
   current.attemptNo = prev.attemptNo
 }
 

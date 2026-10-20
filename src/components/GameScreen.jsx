@@ -5,8 +5,9 @@ import WinDialog from './WinDialog.jsx'
 import * as telemetry from '../telemetry/telemetry.js'
 import { startBoard } from '../game/startBoard.js'
 
-// One instance. Retry remounts the board (fresh start of the same instance); Home goes back.
-export default function GameScreen({ instance, onHome }) {
+// One instance. Retry remounts the board (fresh start of the same instance); Home goes back to
+// the level's grid. `pick` (how the puzzle was chosen) is passed on to telemetry.
+export default function GameScreen({ instance, pick, onHome }) {
   const { t } = useTranslation()
   const [round, setRound] = useState(0)        // bumped by Retry -> remounts <Board>
   const [moves, setMoves] = useState(0)        // clicks that changed a cell
@@ -16,11 +17,11 @@ export default function GameScreen({ instance, onHome }) {
 
   // A new attempt starts on mount and on every Retry.
   useEffect(() => {
-    telemetry.startAttempt(instance)
+    telemetry.startAttempt(instance, pick)
     boardRef.current = startBoard(instance)
     setMoves(0)
     setWon(false)
-  }, [instance, round])
+  }, [instance, pick, round])
 
   // Page hidden -> close the telemetry segment; visible again -> continue in a new segment.
   useEffect(() => {
@@ -86,8 +87,17 @@ export default function GameScreen({ instance, onHome }) {
         <span className="text-game-silver">{t(`levels.${instance.level}`)}</span>
         <span className="text-game-score">{t('game.moves', { count: moves })}</span>
       </div>
-      {/* Instance id (same as in the factory files), so a played puzzle can be traced back. */}
-      <div className="mx-auto w-full max-w-md px-1 text-xs font-mono text-game-hint select-all">{instance.id}</div>
+      {/* Puzzle name (the factory finds the puzzle by it), with its tile colour from the level grid. */}
+      <div className="mx-auto w-full max-w-md px-1 flex items-center gap-2 text-sm font-sans font-bold text-white/90">
+        {instance.name_color && (
+          <span
+            className="w-3.5 h-3.5 rounded-sm ring-1 ring-inset ring-white/25 shrink-0"
+            style={{ background: instance.name_color }}
+            aria-hidden="true"
+          />
+        )}
+        <span className="truncate select-all">{instance.name ?? instance.id}</span>
+      </div>
 
       <div className="flex-1 min-h-0 mt-2 relative">
         <Board key={round} instance={instance} onClick={onClick} onWon={onWon} />

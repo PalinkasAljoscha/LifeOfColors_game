@@ -1,6 +1,9 @@
 // Loads the game-instance catalog that the factory exports into public/catalog/.
-//   index.json         { catalog_version, levels: [{level, file, count}], instances: {id: level} }
-//   level-<n>.json     { catalog_version, level, instances: [ ...full instances... ] }
+//   index.json         { catalog_version, levels: [{level, file, count}], instances: {id: level},
+//                        names: {normalized name: id} }
+//   level-<n>.json     { catalog_version, level, instances: [ ...full instances, by seq... ] }
+// Every instance has a verbose `name` ("Crimson Delta"), its tile colour `name_color` and its
+// publication order `seq` (assigned by the factory, never changed).
 // In `npm run dev`, ?catalog=dev loads public/catalog-dev/ instead (factory --dev export).
 
 import { isPlayable } from './engine.js'
@@ -37,7 +40,7 @@ export async function loadLevel(level) {
   const r = await fetch(`${catalogDir()}${entry.file}?v=${encodeURIComponent(index.catalog_version)}`)
   if (!r.ok) throw new Error(`catalog level ${level}: HTTP ${r.status}`)
   const data = await r.json()
-  const playable = data.instances.filter(isPlayable)
+  const playable = data.instances.filter(isPlayable).sort((a, b) => (a.seq ?? 0) - (b.seq ?? 0))
   levelCache.set(level, playable)
   return playable
 }
@@ -57,14 +60,25 @@ export async function pickRandom(level) {
   const fresh = pool.filter((i) => !recentlyPlayed.includes(i.id))
   const from = fresh.length ? fresh : pool
   const inst = from[Math.floor(Math.random() * from.length)]
-  recentlyPlayed.push(inst.id)
-  if (recentlyPlayed.length > Math.min(50, Math.floor(pool.length / 2))) recentlyPlayed.shift()
+  markPlayed(inst, pool.length)
   return inst
 }
 
-/** For testing/sharing a specific puzzle: ?instance=loc_... */
-export async function findById(id) {
+/** Remember a played puzzle (also one chosen in the grid), so "random" doesn't repeat it soon. */
+export function markPlayed(inst, poolSize = 100) {
+  if (!recentlyPlayed.includes(inst.id)) recentlyPlayed.push(inst.id)
+  while (recentlyPlayed.length > Math.min(50, Math.floor(poolSize / 2))) recentlyPlayed.shift()
+}
+
+/** Same rule as the factory's instance_names.normalize_name: lower case, letters and digits only. */
+export function normalizeName(name) {
+  return String(name).toLowerCase().replace(/[^a-z0-9]/g, '')
+}
+
+/** For testing/sharing a specific puzzle: ?instance=<name or id>, e.g. ?instance=crimson-delta */
+export async function findById(ref) {
   const index = await loadIndex()
+  const id = index.instances?.[ref] !== undefined ? ref : index.names?.[normalizeName(ref)]
   const level = index.instances?.[id]
   if (level === undefined) return null
   const pool = await loadLevel(level)

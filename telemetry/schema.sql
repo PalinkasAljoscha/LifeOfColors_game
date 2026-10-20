@@ -27,6 +27,7 @@ create table if not exists public.attempt_segments (
   app_version            text check (length(app_version) <= 40),
   env                    text not null check (env in ('prod', 'dev')),
   outcome                text not null check (outcome in ('won', 'retry', 'home', 'hidden')),
+  pick                   text check (pick in ('random', 'grid', 'link')),
   started_ms_in_session  integer check (started_ms_in_session >= 0),
   duration_ms            integer check (duration_ms >= 0),
   n_clicks               integer check (n_clicks between 0 and 100000),
@@ -35,6 +36,12 @@ create table if not exists public.attempt_segments (
   events                 jsonb not null check (jsonb_typeof(events) = 'array' and pg_column_size(events) < 65536),
   unique (attempt_id, segment)
 );
+
+-- Added 2026-10-20 (how the puzzle was chosen). For a database created before that date, this
+-- adds the column; run it BEFORE deploying an app version that sends `pick`, otherwise the
+-- inserts are rejected. Safe to run again.
+alter table public.attempt_segments
+  add column if not exists pick text check (pick in ('random', 'grid', 'link'));
 
 create index if not exists attempt_segments_instance_idx on public.attempt_segments (instance_id);
 create index if not exists attempt_segments_session_idx  on public.attempt_segments (session_id);
