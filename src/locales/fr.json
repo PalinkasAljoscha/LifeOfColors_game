@@ -7,8 +7,7 @@
     "2": "Level 2",
     "3": "Level 3",
     "4": "Level 4",
-    "5": "Level 5",
-    "note5": "Contient des puzzles non résolus, peut-être insolubles."
+    "5": "Level 5"
   },
   "home": {
     "description": "Peux-tu rendre verte la case au cadre doré ? Touche n'importe quelle case et, selon ses voisines, elle peut changer de couleur. Ces règles sont fixes, mais différentes pour chaque puzzle.",
@@ -21,6 +20,7 @@
   },
   "game": {
     "retry": "Rejouer",
+    "back": "Retour",
     "home": "Accueil",
     "moves_one": "{{count}} coup",
     "moves_other": "{{count}} coups"
