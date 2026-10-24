@@ -7,8 +7,7 @@
     "2": "Level 2",
     "3": "Level 3",
     "4": "Level 4",
-    "5": "Level 5",
-    "note5": "Contains unsolved puzzles, maybe unsolvable ones."
+    "5": "Level 5"
   },
   "home": {
     "description": "Can you turn the golden-framed cell green? Tap any cell and, depending on its neighbors, it might change its color. These rules are fixed, but different for each puzzle.",
@@ -21,6 +20,7 @@
   },
   "game": {
     "retry": "Retry",
+    "back": "Back",
     "home": "Home",
     "moves_one": "{{count}} move",
     "moves_other": "{{count}} moves"

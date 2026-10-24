@@ -80,7 +80,7 @@ export default function GameScreen({ instance, pick, onPickNew, onHome }) {
           className="w-28 h-16 rounded-2xl bg-game-panel border-2 border-white/15 active:scale-95 transition-transform
                      text-lg font-black flex items-center justify-center gap-1.5"
         >
-          <span aria-hidden="true">⌂</span> {t('game.home')}
+          <span aria-hidden="true">←</span> {t('game.back')}
         </button>
       </div>
 
