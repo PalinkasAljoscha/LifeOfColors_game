@@ -3,31 +3,32 @@ import { useTranslation } from 'react-i18next'
 import Board from './Board.jsx'
 import WinDialog from './WinDialog.jsx'
 import * as telemetry from '../telemetry/telemetry.js'
-import { startBoard } from '../game/startBoard.js'
 
-// One instance. Retry remounts the board (fresh start of the same instance); Home goes back to
-// the level's grid. `pick` (how the puzzle was chosen) is passed on to telemetry.
+// One instance. Retry remounts the board (fresh start of the same instance); Back goes to the
+// level's grid. `pick` (how the puzzle was chosen) is passed on to telemetry.
 export default function GameScreen({ instance, pick, onPickNew, onHome }) {
   const { t } = useTranslation()
   const [round, setRound] = useState(0)        // bumped by Retry -> remounts <Board>
   const [moves, setMoves] = useState(0)        // clicks that changed a cell
   const [won, setWon] = useState(false)
-  const boardRef = useRef(null)                // latest board, for telemetry resume
   const winTimer = useRef(null)
 
-  // A new attempt starts on mount and on every Retry.
+  // Telemetry: one play per puzzle opened (Retry stays in the same play).
   useEffect(() => {
-    telemetry.startAttempt(instance, pick)
-    boardRef.current = startBoard(instance)
+    telemetry.startPlay(instance, pick)
+  }, [instance, pick])
+
+  // Fresh board on mount and on every Retry.
+  useEffect(() => {
     setMoves(0)
     setWon(false)
-  }, [instance, pick, round])
+  }, [round])
 
-  // Page hidden -> close the telemetry segment; visible again -> continue in a new segment.
+  // Page hidden -> snapshot and pause the play clock; visible again -> clock runs again.
   useEffect(() => {
     const onVis = () => {
       if (document.visibilityState === 'hidden') telemetry.onHidden()
-      else if (!won) telemetry.resumeAttempt(boardRef.current)
+      else telemetry.onVisible()
     }
     document.addEventListener('visibilitychange', onVis)
     window.addEventListener('pagehide', telemetry.onHidden)
@@ -35,31 +36,29 @@ export default function GameScreen({ instance, pick, onPickNew, onHome }) {
       document.removeEventListener('visibilitychange', onVis)
       window.removeEventListener('pagehide', telemetry.onHidden)
     }
-  }, [won])
+  }, [])
 
   function retry() {
     clearTimeout(winTimer.current)
-    if (!won) telemetry.endAttempt('retry')
+    telemetry.restartPlay()
     setRound((n) => n + 1)
   }
 
-  // Back to the level's puzzle grid (onPickNew) or all the way to the level list (onHome).
-  function leave(to) {
+  // reason: 'back' (the <- button), 'pick_new' or 'home' (win dialog). onPickNew goes back to the
+  // level's puzzle grid, onHome all the way to the level list.
+  function leave(to, reason) {
     clearTimeout(winTimer.current)
-    if (!won) telemetry.endAttempt('home')
+    telemetry.endPlay(reason)
     to()
   }
 
-  function onClick({ r, c, changed, board }) {
-    // Returning to a hidden-then-visible page without an open segment: reopen it first.
-    if (!telemetry.hasOpenAttempt()) telemetry.resumeAttempt(boardRef.current)
-    telemetry.recordClick(r, c, changed)
-    boardRef.current = board
+  function onClick({ r, c, changed, rule, color }) {
+    telemetry.recordClick(r, c, changed, rule, color)
     if (changed) setMoves((m) => m + 1)
   }
 
   function onWon() {
-    telemetry.endAttempt('won')
+    telemetry.recordWin()
     // Short pause so the player sees the goal cell change before the dialog covers it.
     winTimer.current = setTimeout(() => setWon(true), 400)
   }
@@ -76,7 +75,7 @@ export default function GameScreen({ instance, pick, onPickNew, onHome }) {
           <span aria-hidden="true">↻</span> {t('game.retry')}
         </button>
         <button
-          onClick={() => leave(onPickNew)}
+          onClick={() => leave(onPickNew, 'back')}
           className="w-28 h-16 rounded-2xl bg-game-panel border-2 border-white/15 active:scale-95 transition-transform
                      text-lg font-black flex items-center justify-center gap-1.5"
         >
@@ -104,7 +103,7 @@ export default function GameScreen({ instance, pick, onPickNew, onHome }) {
         <Board key={round} instance={instance} onClick={onClick} onWon={onWon} />
       </div>
 
-      {won && <WinDialog moves={moves} onRetry={retry} onPickNew={() => leave(onPickNew)} onHome={() => leave(onHome)} />}
+      {won && <WinDialog moves={moves} onRetry={retry} onPickNew={() => leave(onPickNew, 'pick_new')} onHome={() => leave(onHome, 'home')} />}
     </div>
   )
 }

@@ -77,6 +77,12 @@ export function neighborCounts(board, r, c) {
   return [o, b, g]
 }
 
+/** Index (0..164) of the rule-table entry a click on (r, c) looks up (telemetry). */
+export function clickRule(board, r, c) {
+  const [o, b, g] = neighborCounts(board, r, c)
+  return tableIndex(o, b, g)
+}
+
 /** Returns a NEW board if the click changes the cell, else null. */
 export function applyClick(board, r, c, table) {
   const [o, b, g] = neighborCounts(board, r, c)

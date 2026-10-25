@@ -3,7 +3,7 @@ import HomeScreen from './components/HomeScreen.jsx'
 import LevelScreen from './components/LevelScreen.jsx'
 import GameScreen from './components/GameScreen.jsx'
 import { loadIndex, loadLevel, pickRandom, markPlayed, findById } from './engine/catalog.js'
-import { setCatalogVersion } from './telemetry/telemetry.js'
+import { setCatalogVersion, screenView } from './telemetry/telemetry.js'
 
 // Three screens: Home (description + level buttons) -> Level (Random pick + grid of all puzzles
 // of the level) -> Game (one instance). Home in the game goes back to the level's grid.
@@ -14,6 +14,15 @@ export default function App() {
   const [level, setLevel] = useState(null)       // { level, pool } while a level is open
   const [game, setGame] = useState(null)         // { instance, pick } while playing
   const [loadingLevel, setLoadingLevel] = useState(null)
+
+  // Telemetry: one screen_views row per screen shown (once the catalog is loaded).
+  const screen = game ? 'game' : level ? 'level' : 'home'
+  const viewLevel = game?.instance.level ?? level?.level ?? null
+  const viewId = game?.instance.id ?? null
+  const viewPick = game?.pick ?? null
+  useEffect(() => {
+    if (index) screenView(screen, { level: viewLevel, instanceId: viewId, pick: viewPick })
+  }, [index, screen, viewLevel, viewId, viewPick])
 
   useEffect(() => {
     loadIndex()

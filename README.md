@@ -49,23 +49,36 @@ One-time setup:
 | `schema/instance.schema.json` | The game-instance format shared with the factory. |
 | `src/engine/engine.js` | The rule engine. It must behave like the factory's `instance.py`, and `tests/vectors.json` checks that. |
 | `src/telemetry/telemetry.js` | Anonymous telemetry (see below). |
-| `telemetry/schema.sql` | Supabase tables and insert-only access policies. Run it in the SQL editor once, and again whenever it changes (safe to re-run). The `pick` column (2026-10-20) must exist before an app version that sends it goes live. |
+| `telemetry/schema.sql` | Supabase tables (`screen_views`, `puzzle_plays`) and insert-only access policies. Run it in the SQL editor once, and again whenever it changes (safe to re-run). Run it before deploying an app version that sends new columns, otherwise those inserts are rejected. |
 
 ## Telemetry and privacy
 
-The app records anonymous gameplay data to improve the puzzles:
-- **Session id.** A random id that lives only in the page's memory, so a reload starts a new
-  session.
-- **Versions.** The app version and the puzzle-catalog version.
-- **Per attempt:**
-  - the puzzle id and level
-  - how the puzzle was chosen: Random pick, a tile in the level grid, or a link
-  - the outcome: solved, retry, home, or left
-  - durations
-  - the list of taps (time, row, column, whether the cell changed)
+The app records anonymous usage data to see how much the site is used and how the puzzles are
+played. Two tables:
+
+- **`screen_views`**: one row per screen shown (home, level grid, puzzle), with its level and,
+  on the puzzle screen, the puzzle id and how it was chosen (Random pick, a grid tile, or a link).
+- **`puzzle_plays`**: one *play* runs from opening a puzzle until leaving it; Retry stays in the
+  same play. A play sends a snapshot row at every win, whenever the page is hidden (tab or app
+  switch, screen lock, closing), and when the player leaves with a button. Each snapshot has the
+  running totals: visible play time, time of the last tap, taps, moves (taps that changed a
+  colour), how often each colour was produced, restarts, wins, fewest taps and moves to a win,
+  the rule-table entries that changed a cell, and the reason for the snapshot (`won`, `hidden`,
+  `back`, `pick_new`, `home`). It also carries the taps since the previous snapshot as a compact
+  list (time, cell, changed; Retry marked). The encoding is documented at the top of
+  `src/telemetry/telemetry.js`.
+
+Analysis: take the latest snapshot per `play_id` for the totals and the exit route; join the
+`clicks` of all snapshots in `snapshot` order for the full tap list. Inactivity is decided from
+`last_click_ms` versus `active_ms`.
+
+Every row carries a **visit id**: a random id that lives only in the page's memory, so a reload
+starts a new visit. It only groups what happened during one visit. Rows also carry the app
+version, the puzzle-catalog version and `env` (`prod`, or `dev` for local testing).
 
 The app stores no cookies or other identifiers. It doesn't record IP address, device, browser,
-language or location. The public key can only add rows; it can't read them.
+language, location or the browser's clock time; the only clock time is the database's
+`received_at`. The public key can only add rows; it can't read them.
 
 ## License
 

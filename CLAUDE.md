@@ -24,7 +24,7 @@ src/
   App.jsx                 # screens: Home -> Level (grid) -> Game; ?instance=<name or id> opens one puzzle
   engine/engine.js        # THE rule engine (must match the factory's instance.py exactly)
   engine/catalog.js       # loads public/catalog/{index,level-N}.json, random pick per level
-  telemetry/telemetry.js  # anonymous session/attempt telemetry (see privacy rule below)
+  telemetry/telemetry.js  # anonymous screen-view and puzzle-play telemetry (see privacy rule below)
   game/GameScene.js       # Phaser scene: draws the board, turns taps into engine calls
   hooks/usePhaserGame.js  # Phaser mount/unmount (from Maze Inc., takes width/height/registry/events)
   components/             # HomeScreen, LevelScreen (Random pick + 10-column tile grid in seq order),
@@ -55,9 +55,10 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   colour is `instance.name_color` (data, so not in theme.js). Name lookups use `normalizeName`
   (lower case, letters/digits only), identical to the factory's `instance_names.normalize_name`.
   Telemetry still sends the id.
-- **Telemetry privacy** -- collect nothing personal. Only: random in-memory session id, app/catalog
-  version, env, and per-attempt game data (instance, level, pick = how it was chosen, outcome,
-  durations, click list). No
+- **Telemetry privacy** -- collect nothing personal. Only: random in-memory visit id, app/catalog
+  version, env, screens shown (`screen_views`) and per-play game data (`puzzle_plays` snapshots:
+  instance, level, pick = how it was chosen, counters, rules, visible-time durations, click list).
+  No browser clock times (the database's received_at is the only clock). No
   cookies/localStorage ids, no user agent, screen size, language, location, referrer. Any new field
   must keep this property and must be added to `telemetry/schema.sql` and the factory's `stats_helpers.py`.
 - **Start cell switch** -- `src/config.js` `HIDE_START_CELL_IF_NOT_REQUIRED`: puzzles with

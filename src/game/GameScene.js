@@ -1,12 +1,13 @@
 import Phaser from 'phaser'
 import { phaser as C, CELL_FILL, CELL_BORDER } from '../theme.js'
-import { applyClick, isWon } from '../engine/engine.js'
+import { applyClick, clickRule, isWon } from '../engine/engine.js'
 import { startBoard } from './startBoard.js'
 
 // Board-only scene. All rules live in src/engine/engine.js (shared with the tests and
 // equivalent to the factory's engine); this scene draws the board, turns taps into
 // engine calls and reports what happened through game events:
-//   'boardClick'  { r, c, changed, board, clicks }   every tap on a cell (also no-op taps)
+//   'boardClick'  { r, c, changed, board, clicks, rule, color }   every tap on a cell (also no-op
+//                 taps); rule = rule-table index looked up, color = new colour (null if unchanged)
 //   'won'         { clicks }                          the goal cell reached its goal colour (emitted at once;
 //                                                     the React side delays the dialog briefly)
 //
@@ -140,6 +141,7 @@ export default class GameScene extends Phaser.Scene {
     const r = Math.floor((pointer.y - PAD) / CELL)
     if (r < 0 || r >= this.rows || c < 0 || c >= this.cols) return
 
+    const rule = clickRule(this.board, r, c)
     const next = applyClick(this.board, r, c, this.inst.rule.table)
     const g = this.cells[r][c]
     this.clicks += 1
@@ -151,7 +153,9 @@ export default class GameScene extends Phaser.Scene {
       // No-op tap: tiny wiggle so the player sees the tap registered.
       this.tweens.add({ targets: g, angle: { from: -5, to: 0 }, duration: 160, ease: 'Sine.easeOut' })
     }
-    this.game.events.emit('boardClick', { r, c, changed: Boolean(next), board: this.board, clicks: this.clicks })
+    this.game.events.emit('boardClick', {
+      r, c, changed: Boolean(next), board: this.board, clicks: this.clicks, rule, color: next ? next[r][c] : null,
+    })
 
     if (next && isWon(this.inst, this.board)) {
       this.won = true
