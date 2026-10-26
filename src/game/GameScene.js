@@ -3,6 +3,7 @@ import { phaser as C } from '../theme.js'
 import { activeTheme, CELL_STATES } from '../themes.js'
 import { applyClick, clickRule, isWon } from '../engine/engine.js'
 import { startBoard } from './startBoard.js'
+import { emojiTexture, emojiDisplaySize } from './emojiTexture.js'
 
 // Board-only scene. All rules live in src/engine/engine.js (shared with the tests and
 // equivalent to the factory's engine); this scene draws the board, turns taps into
@@ -23,7 +24,7 @@ export const GAP = 6
 export const PAD = 14
 const RADIUS = 10
 const FRAME = 8            // width (and outer corner radius) of the golden frame on the goal cell
-const EMOJI_SIZE = 54      // font size of a theme's cell emoji (cells are CELL - GAP = 90 px)
+const EMOJI_SIZE = 54      // size of a theme's cell emoji in px (cells are CELL - GAP = 90 px)
 
 export function boardCanvasSize(inst) {
   const { rows, cols } = inst.board
@@ -44,7 +45,10 @@ export default class GameScene extends Phaser.Scene {
     const theme = activeTheme()
     this.cellLook = Object.fromEntries(CELL_STATES.map((v) => {
       const look = theme.cells[v]
-      return [v, { fill: C[look.fill], border: C[look.border], emoji: look.emoji ?? null, alpha: look.emojiAlpha ?? 1 }]
+      return [v, {
+        fill: C[look.fill], border: C[look.border], alpha: look.emojiAlpha ?? 1,
+        emoji: look.emoji ? emojiTexture(this, look.emoji, EMOJI_SIZE, look.emojiHue ?? 0) : null,
+      }]
     }))
     this.clicks = 0
     this.won = false
@@ -59,8 +63,7 @@ export default class GameScene extends Phaser.Scene {
         const { x, y } = this._center(r, c)
         // One container per cell (tap animations move it): background + optional emoji.
         const g = this.add.graphics()
-        const label = this.add.text(0, 0, '', { fontSize: `${EMOJI_SIZE}px`, padding: { y: 6 } })
-          .setOrigin(0.5).setResolution(2)
+        const label = this.add.image(0, 0, '__DEFAULT').setVisible(false)
         const cell = this.add.container(x, y, [g, label])
         cell.g = g
         cell.label = label
@@ -105,9 +108,12 @@ export default class GameScene extends Phaser.Scene {
     g.fillRoundedRect(-h + o, -h + o, s - 2 * o, s - 2 * o, rad)
     g.fillStyle(look.fill)
     g.fillRoundedRect(-h + o + 3, -h + o + 3, s - 2 * o - 6, s - 2 * o - 6, rad - 2)
-    cell.label.setText(look.emoji ?? '').setAlpha(look.alpha)
-    // the goal cell's emoji is a little smaller so it stays inside the golden frame
-    cell.label.setScale(o ? (s - 2 * o) / s : 1)
+    cell.label.setVisible(Boolean(look.emoji))
+    if (look.emoji) {
+      // the goal cell's emoji is a little smaller so it stays inside the golden frame
+      const size = emojiDisplaySize(EMOJI_SIZE) * (o ? (s - 2 * o) / s : 1)
+      cell.label.setTexture(look.emoji).setDisplaySize(size, size).setAlpha(look.alpha)
+    }
   }
 
   // Light reflection sweeping over the goal cell's golden frame, in a random direction,

@@ -1,8 +1,10 @@
 // Homepage decorations of a theme (src/themes.js `decorations`). Purely visual: never clickable,
-// hidden from screen readers, emoji only (so no colours here).
+// hidden from screen readers, emoji only (so no colours here; recoloured emojis via <Emoji>).
 //   slot 'background'  fixed behind the content: only in the free corners and the top bar on
 //                      phones; extra pieces left and right of the content column on wide screens
 //   slot 'footer'      a small row in the page flow, above the privacy note
+
+import { Emoji } from './Emoji.jsx'
 
 const HALLOWEEN = {
   background: () => (
@@ -33,7 +35,7 @@ const HALLOWEEN = {
   ),
   footer: () => (
     <div className="flex justify-center items-end gap-3 mb-3 text-2xl">
-      <span>🎃</span><span className="text-xl opacity-80">🍬</span><span className="text-3xl">🎃</span>
+      <span>🎃</span><Emoji e="🍬" className="text-xl opacity-80" /><span className="text-3xl">🎃</span>
       <span className="text-xl opacity-80">👻</span><span>🎃</span>
     </div>
   ),

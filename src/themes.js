@@ -14,6 +14,9 @@
 //                 fill / border   palette keys from src/theme.js (colours live there)
 //                 emoji           drawn on the cell (optional; omitted = plain colour)
 //                 emojiAlpha      opacity of that emoji, 0-1 (optional, default 1)
+//                 emojiHue        shift of the emoji's colours in degrees, as CSS hue-rotate()
+//                                 (optional, default 0): emojis come in fixed colours, this
+//                                 recolours one everywhere it appears (board, homepage, texts)
 //   cursor      null (browser default) or a function (palette) -> SVG string; used as the mouse
 //               cursor on the whole app (touch screens have no cursor)
 //               with cursorHotspot [x, y] = the pixel that clicks (in a 32 x 32 image)
@@ -46,7 +49,7 @@ export const THEMES = {
       U: { fill: 'hwCellFill', border: 'hwCellBorder', emoji: '🕸️', emojiAlpha: 0.45 },   // spider web, dimmed
       O: { fill: 'hwCellFill', border: 'hwCellBorder', emoji: '🎃' },   // pumpkin
       B: { fill: 'hwCellFill', border: 'hwCellBorder', emoji: '👻' },   // ghost
-      G: { fill: 'hwCellFill', border: 'hwCellBorder', emoji: '🍬' },   // candy
+      G: { fill: 'hwCellFill', border: 'hwCellBorder', emoji: '🍬', emojiHue: 130 },   // candy, turned green
     },
     cursor: witchHandSvg,
     cursorHotspot: [9, 1],
@@ -78,6 +81,18 @@ export function activeTheme() {
 /** themedKey('win.title') -> the key the active theme uses for that text (the same key if none). */
 export function themedKey(key, theme = activeTheme()) {
   return theme.text[key] ?? key
+}
+
+/** Hue shift (degrees) the theme applies to an emoji, 0 if none. */
+export function emojiHue(emoji, theme = activeTheme()) {
+  const cell = Object.values(theme.cells).find((c) => c.emoji === emoji)
+  return cell?.emojiHue ?? 0
+}
+
+/** Inline style that recolours an emoji like the theme does (for HTML), or undefined. */
+export function emojiStyle(emoji, theme = activeTheme()) {
+  const h = emojiHue(emoji, theme)
+  return h ? { filter: `hue-rotate(${h}deg)` } : undefined
 }
 
 /** CSS `cursor` value for a theme, or null. */

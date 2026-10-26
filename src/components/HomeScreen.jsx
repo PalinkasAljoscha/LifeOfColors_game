@@ -3,6 +3,7 @@ import { LANGUAGES } from '../i18n.js'
 import { palette } from '../theme.js'
 import { activeTheme, themedKey } from '../themes.js'
 import ThemeDecorations from './ThemeDecorations.jsx'
+import { Emoji, ThemedText } from './Emoji.jsx'
 
 const theme = activeTheme()
 const look = (v) => ({ background: palette[theme.cells[v].fill], emoji: theme.cells[v].emoji ?? null })
@@ -18,7 +19,7 @@ function Logo() {
         const { background, emoji } = look(c)
         return (
           <div key={i} className="rounded-md flex items-center justify-center text-sm leading-none" style={{ background }}>
-            {emoji}
+            {emoji && <Emoji e={emoji} />}
           </div>
         )
       })}
@@ -33,7 +34,7 @@ function LevelMarks({ level }) {
       <span className="flex shrink-0 text-base leading-none" aria-hidden="true">
         {Array.from({ length: 5 }, (_, i) => (
           <span key={i} className="w-5 text-center" style={{ opacity: i < level ? 1 : 0.18 }}>
-            {i < level ? DOTS[i % 3].emoji : look('U').emoji}
+            <Emoji e={i < level ? DOTS[i % 3].emoji : look('U').emoji} />
           </span>
         ))}
       </span>
@@ -109,7 +110,7 @@ export default function HomeScreen({ levels, error, loadingLevel, onSelectLevel 
         </header>
 
         <section className="rounded-2xl bg-game-header p-4 mb-6 font-sans">
-          <p className="text-base font-semibold leading-snug text-white/90">{t(themedKey('home.description'))}</p>
+          <p className="text-base font-semibold leading-snug text-white/90"><ThemedText text={t(themedKey('home.description'))} /></p>
         </section>
 
         <h2 className="text-sm uppercase tracking-widest text-game-silver mb-3">{t(themedKey('home.chooseLevel'))}</h2>
