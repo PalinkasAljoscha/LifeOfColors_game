@@ -25,7 +25,7 @@
 //   tagline     i18n key of a short line under the title on the homepage, or null
 //   decorations homepage decorations ('halloween' -> components/ThemeDecorations.jsx), or null
 
-export const ACTIVE_THEME = 'classic'
+export const ACTIVE_THEME = 'halloween'
 
 export const THEMES = {
   classic: {

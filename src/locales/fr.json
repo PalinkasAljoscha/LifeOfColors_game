@@ -10,7 +10,7 @@
     "5": "Level 5"
   },
   "home": {
-    "description": "Ton but : rendre verte la case encadrée. Les règles cachées changent à chaque partie.",
+    "description": "Ton but : mettre 🟩 sur la case au cadre doré. Comment ? Touche une case : elle peut se transformer, selon les couleurs qui l'entourent. Les règles cachées changent à chaque puzzle.",
     "chooseLevel": "Choisis un niveau",
     "puzzleCount_one": "{{count}} puzzle",
     "puzzleCount_other": "{{count}} puzzles",
@@ -40,7 +40,7 @@
   "themes": {
     "halloween": {
       "tagline": "Édition Halloween",
-      "description": "Ton but : faire apparaître un bonbon dans la case encadrée. Les règles cachées changent à chaque partie.",
+      "description": "Ton but : mettre 🍬 sur l'objet au cadre doré. Comment ? Touche un objet : il peut se transformer, selon les objets qui l'entourent. Les règles cachées changent à chaque puzzle.",
       "chooseLevel": "Choisis ton niveau de frisson",
       "winTitle": "Douce victoire ! 🍬"
     }

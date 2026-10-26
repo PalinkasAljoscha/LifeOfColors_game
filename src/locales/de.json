@@ -10,7 +10,7 @@
     "5": "Level 5"
   },
   "home": {
-    "description": "Dein Ziel: Färbe das umrandete Feld grün. Die versteckten Regeln sind in jedem Spiel anders.",
+    "description": "Dein Ziel: Bring 🟩 auf das golden umrandete Feld. Wie? Tippe auf ein Feld, und es verwandelt sich vielleicht – je nachdem, welche Farben um es herum sind. Die versteckten Regeln sind bei jedem Rätsel anders.",
     "chooseLevel": "Wähle eine Stufe",
     "puzzleCount_one": "{{count}} Rätsel",
     "puzzleCount_other": "{{count}} Rätsel",
@@ -40,7 +40,7 @@
   "themes": {
     "halloween": {
       "tagline": "Halloween-Edition",
-      "description": "Dein Ziel: Bring eine Süßigkeit in das umrandete Feld. Die versteckten Regeln sind in jedem Spiel anders.",
+      "description": "Dein Ziel: Bring 🍬 auf das golden umrandete Objekt. Wie? Tippe auf ein Objekt, und es verwandelt sich vielleicht – je nachdem, welche Objekte um es herum sind. Die versteckten Regeln sind bei jedem Rätsel anders.",
       "chooseLevel": "Wähle deine Gruselstufe",
       "winTitle": "Süßer Sieg! 🍬"
     }

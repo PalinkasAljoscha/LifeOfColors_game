@@ -36,7 +36,8 @@ The puzzle id is the same either way, so keep the setting fixed once the game is
 `src/themes.js` lists every visual theme and how it is defined. There are two now: `classic`
 (the colour cells) and `halloween`. Halloween shows 🎃 orange, 👻 blue, 🍬 green and a dimmed 🕸️ for
 uncolored cells (the candy recoloured green with `emojiHue`, so it stands apart from the ghost), a witch-hand mouse cursor, its own homepage texts and decorations.
-- `ACTIVE_THEME` picks the theme everyone sees (change it, then redeploy).
+- `ACTIVE_THEME` picks the theme everyone sees (change it, then redeploy). It is `halloween`
+  since 2026-10-26; `?theme=classic` shows the classic look.
 - `?theme=<name>` in the URL previews any theme, e.g. `…/LifeOfColors_game/?theme=halloween`.
 - A theme only changes the look: rules, puzzle ids, the catalog and telemetry are the same in
   every theme. Telemetry doesn't record the theme.

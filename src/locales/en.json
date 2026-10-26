@@ -10,7 +10,7 @@
     "5": "Level 5"
   },
   "home": {
-    "description": "Your goal: turn the framed cell green. The hidden rules are different for every game.",
+    "description": "Your goal: Get 🟩 on the gold framed cell. How? Tap a cell and it might transform, depending on what colors are around it. The hidden rules are different for each puzzle.",
     "chooseLevel": "Choose a level",
     "puzzleCount_one": "{{count}} puzzle",
     "puzzleCount_other": "{{count}} puzzles",
@@ -40,7 +40,7 @@
   "themes": {
     "halloween": {
       "tagline": "Halloween edition",
-      "description": "Your goal: get candy in the framed cell. The hidden rules are different for every game.",
+      "description": "Your goal: Get 🍬 on the gold framed object. How? Tap an object and it might transform, depending on what objects are around it. The hidden rules are different for each puzzle.",
       "chooseLevel": "Choose your level of fright",
       "winTitle": "Sweet victory! 🍬"
     }
