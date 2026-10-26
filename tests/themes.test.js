@@ -57,3 +57,13 @@ test('emoji recolouring follows the theme', () => {
   assert.equal(emojiStyle('🎃', THEMES.halloween), undefined)
   assert.equal(emojiHue('🍬', THEMES.classic), 0)
 })
+
+test('all locale files have the same keys', () => {
+  const keys = (o, pre = '') => Object.entries(o).flatMap(([k, v]) =>
+    (v && typeof v === 'object' ? keys(v, `${pre}${k}.`) : [`${pre}${k}`]))
+  const [ref, ...rest] = Object.entries(LOCALES).map(([l, m]) => [l, new Set(keys(m))])
+  for (const [lang, ks] of rest) {
+    assert.deepEqual([...ks].filter((k) => !ref[1].has(k)), [], `${lang} has keys en lacks`)
+    assert.deepEqual([...ref[1]].filter((k) => !ks.has(k)), [], `${lang} lacks keys of en`)
+  }
+})

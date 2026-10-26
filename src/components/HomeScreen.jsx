@@ -1,9 +1,11 @@
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { LANGUAGES } from '../i18n.js'
 import { palette } from '../theme.js'
 import { activeTheme, themedKey } from '../themes.js'
 import ThemeDecorations from './ThemeDecorations.jsx'
 import { Emoji, ThemedText } from './Emoji.jsx'
+import RulesDialog from './RulesDialog.jsx'
 
 const theme = activeTheme()
 const look = (v) => ({ background: palette[theme.cells[v].fill], emoji: theme.cells[v].emoji ?? null })
@@ -80,6 +82,7 @@ function LevelButton({ level, count, loading, disabled, onPress }) {
 
 export default function HomeScreen({ levels, error, loadingLevel, onSelectLevel }) {
   const { t, i18n } = useTranslation()
+  const [showRules, setShowRules] = useState(false)
 
   return (
     <div className="h-[100dvh] w-full overflow-y-auto bg-game-bg">
@@ -110,7 +113,16 @@ export default function HomeScreen({ levels, error, loadingLevel, onSelectLevel 
         </header>
 
         <section className="rounded-2xl bg-game-header p-4 mb-6 font-sans">
-          <p className="text-base font-semibold leading-snug text-white/90"><ThemedText text={t(themedKey('home.description'))} /></p>
+          <p className="text-base font-semibold leading-snug text-white/90">
+            <ThemedText text={t(themedKey('home.description'))} />{' '}
+            <button
+              onClick={() => setShowRules(true)}
+              className="inline font-black text-game-score underline underline-offset-2 decoration-2 px-0.5"
+              aria-haspopup="dialog"
+            >
+              {t('home.more')} ›
+            </button>
+          </p>
         </section>
 
         <h2 className="text-sm uppercase tracking-widest text-game-silver mb-3">{t(themedKey('home.chooseLevel'))}</h2>
@@ -139,6 +151,7 @@ export default function HomeScreen({ levels, error, loadingLevel, onSelectLevel 
         <footer className="pt-2 text-[11px] leading-snug text-game-hint font-sans">
           {t('home.privacy')}
         </footer>
+        {showRules && <RulesDialog onClose={() => setShowRules(false)} />}
       </div>
     </div>
   )
