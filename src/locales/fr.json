@@ -10,13 +10,14 @@
     "5": "Level 5"
   },
   "home": {
-    "description": "Peux-tu rendre verte la case au cadre doré ? Touche n'importe quelle case et, selon ses voisines, elle peut changer de couleur. Ces règles sont fixes, mais différentes pour chaque puzzle.",
+    "description": "Ton but : mettre 🟩 sur la case au cadre doré. Comment ? Touche une case : elle peut se transformer, selon les couleurs qui l'entourent. Les règles cachées changent à chaque puzzle.",
     "chooseLevel": "Choisis un niveau",
     "puzzleCount_one": "{{count}} puzzle",
     "puzzleCount_other": "{{count}} puzzles",
     "loading": "Chargement des puzzles…",
     "loadError": "Les puzzles n'ont pas pu être chargés. Vérifie ta connexion et recharge la page.",
-    "privacy": "Pas de cookies, aucune donnée d'identification collectée. Les coups et résultats peuvent être collectés pour améliorer le jeu."
+    "privacy": "Pas de cookies, aucune donnée d'identification collectée. Les coups et résultats peuvent être collectés pour améliorer le jeu.",
+    "more": "Plus"
   },
   "game": {
     "retry": "Rejouer",
@@ -35,5 +36,22 @@
     "back": "Accueil",
     "random": "Au hasard",
     "orTap": "ou choisis ton puzzle"
+  },
+  "themes": {
+    "halloween": {
+      "tagline": "Édition Halloween",
+      "description": "Ton but : mettre 🍬 sur l'objet au cadre doré. Comment ? Touche un objet : il peut se transformer, selon les objets qui l'entourent. Les règles cachées changent à chaque puzzle.",
+      "chooseLevel": "Choisis ton niveau de frisson",
+      "winTitle": "Douce victoire ! 🍬"
+    }
+  },
+  "rules": {
+    "title": "Comment ça marche",
+    "p1": "Touche n'importe quelle case. Ce qu'elle devient dépend uniquement de ses voisines : les 8 cases autour d'elle au maximum, diagonales comprises. Les cases au bord en ont moins.",
+    "p2": "Ce qui compte, ce sont les voisines de la case et leur nombre de chaque sorte. Ce que la case touchée affiche en ce moment n'a aucune importance.",
+    "p3": "Parfois, toucher une case ne change rien. Seules les touches qui modifient une case comptent comme coups.",
+    "p4": "Pendant une partie, les règles ne changent jamais : les mêmes voisines donnent toujours le même résultat. À toi de les découvrir !",
+    "p5": "Bloqué ? « {{retry}} » relance la partie depuis le début.",
+    "close": "Compris"
   }
 }

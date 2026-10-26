@@ -10,13 +10,14 @@
     "5": "Level 5"
   },
   "home": {
-    "description": "Kannst du das goldumrandete Feld grün färben? Tippe auf ein beliebiges Feld, und je nach seinen Nachbarn ändert es vielleicht seine Farbe. Diese Regeln sind fest, aber für jedes Rätsel anders.",
+    "description": "Dein Ziel: Bring 🟩 auf das golden umrandete Feld. Wie? Tippe auf ein Feld, und es verwandelt sich vielleicht – je nachdem, welche Farben um es herum sind. Die versteckten Regeln sind bei jedem Rätsel anders.",
     "chooseLevel": "Wähle eine Stufe",
     "puzzleCount_one": "{{count}} Rätsel",
     "puzzleCount_other": "{{count}} Rätsel",
     "loading": "Rätsel werden geladen…",
     "loadError": "Die Rätsel konnten nicht geladen werden. Bitte prüfe deine Verbindung und lade die Seite neu.",
-    "privacy": "Keine Cookies, keine identifizierenden Daten. Züge und Ergebnisse können zur Verbesserung des Spiels erfasst werden."
+    "privacy": "Keine Cookies, keine identifizierenden Daten. Züge und Ergebnisse können zur Verbesserung des Spiels erfasst werden.",
+    "more": "Mehr"
   },
   "game": {
     "retry": "Nochmal",
@@ -35,5 +36,22 @@
     "back": "Start",
     "random": "Zufällig wählen",
     "orTap": "oder wähle dein Rätsel"
+  },
+  "themes": {
+    "halloween": {
+      "tagline": "Halloween-Edition",
+      "description": "Dein Ziel: Bring 🍬 auf das golden umrandete Objekt. Wie? Tippe auf ein Objekt, und es verwandelt sich vielleicht – je nachdem, welche Objekte um es herum sind. Die versteckten Regeln sind bei jedem Rätsel anders.",
+      "chooseLevel": "Wähle deine Gruselstufe",
+      "winTitle": "Süßer Sieg! 🍬"
+    }
+  },
+  "rules": {
+    "title": "So funktioniert es",
+    "p1": "Tippe auf ein beliebiges Feld. Was daraus wird, hängt nur von seinen Nachbarn ab: den bis zu 8 Feldern rundherum, auch diagonal. Felder am Rand haben weniger.",
+    "p2": "Es zählt, welche Nachbarn das Feld hat und wie viele von jeder Sorte. Was das angetippte Feld gerade zeigt, spielt keine Rolle.",
+    "p3": "Manchmal passiert bei einem Tipp nichts. Nur Tipps, die ein Feld verändern, zählen als Züge.",
+    "p4": "Innerhalb eines Spiels ändern sich die Regeln nie: Dieselben Nachbarn führen immer zum selben Ergebnis. Finde heraus, wie sie lauten!",
+    "p5": "Festgefahren? „{{retry}}“ startet das Spiel von vorn.",
+    "close": "Verstanden"
   }
 }

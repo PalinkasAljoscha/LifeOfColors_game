@@ -1,19 +1,57 @@
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { LANGUAGES } from '../i18n.js'
 import { palette } from '../theme.js'
+import { activeTheme, themedKey } from '../themes.js'
+import ThemeDecorations from './ThemeDecorations.jsx'
+import { Emoji, ThemedText } from './Emoji.jsx'
+import RulesDialog from './RulesDialog.jsx'
 
-const DOTS = [palette.cellOrangeFill, palette.cellBlueFill, palette.cellGreenFill]
+const theme = activeTheme()
+const look = (v) => ({ background: palette[theme.cells[v].fill], emoji: theme.cells[v].emoji ?? null })
+const DOTS = ['O', 'B', 'G'].map(look)
 
-// Small decorative board: three colours and an empty cell, like the game itself.
+// Small decorative board: three colours and an empty cell, like the game itself (drawn in the
+// active theme: colours, or emojis).
 function Logo() {
   const cells = ['G', 'O', 'U', 'B', 'U', 'O', 'U', 'B', 'G']
-  const fill = { G: palette.cellGreenFill, O: palette.cellOrangeFill, B: palette.cellBlueFill, U: palette.cellUncolored }
   return (
-    <div className="grid grid-cols-3 gap-1 w-16 h-16" aria-hidden="true">
-      {cells.map((c, i) => (
-        <div key={i} className="rounded-md" style={{ background: fill[c] }} />
-      ))}
+    <div className="grid grid-cols-3 gap-1 w-16 h-16 shrink-0" aria-hidden="true">
+      {cells.map((c, i) => {
+        const { background, emoji } = look(c)
+        return (
+          <div key={i} className="rounded-md flex items-center justify-center text-sm leading-none" style={{ background }}>
+            {emoji && <Emoji e={emoji} />}
+          </div>
+        )
+      })}
     </div>
+  )
+}
+
+// Level-strength marks: five slots, `level` of them filled (colour bars, or the theme's emojis).
+function LevelMarks({ level }) {
+  if (DOTS.some((d) => d.emoji)) {
+    return (
+      <span className="flex shrink-0 text-base leading-none" aria-hidden="true">
+        {Array.from({ length: 5 }, (_, i) => (
+          <span key={i} className="w-5 text-center" style={{ opacity: i < level ? 1 : 0.18 }}>
+            <Emoji e={i < level ? DOTS[i % 3].emoji : look('U').emoji} />
+          </span>
+        ))}
+      </span>
+    )
+  }
+  return (
+    <span className="flex gap-1 shrink-0" aria-hidden="true">
+      {Array.from({ length: 5 }, (_, i) => (
+        <span
+          key={i}
+          className="w-2.5 h-6 rounded-sm"
+          style={{ background: i < level ? DOTS[i % 3].background : 'rgba(255,255,255,0.12)' }}
+        />
+      ))}
+    </span>
   )
 }
 
@@ -27,15 +65,7 @@ function LevelButton({ level, count, loading, disabled, onPress }) {
       className="w-full flex items-center gap-4 rounded-2xl px-5 py-4 bg-game-panel border-2 border-white/10
                  active:scale-[0.98] hover:border-white/30 transition-all disabled:opacity-40 text-left"
     >
-      <span className="flex gap-1 shrink-0" aria-hidden="true">
-        {Array.from({ length: 5 }, (_, i) => (
-          <span
-            key={i}
-            className="w-2.5 h-6 rounded-sm"
-            style={{ background: i < level ? DOTS[i % 3] : 'rgba(255,255,255,0.12)' }}
-          />
-        ))}
-      </span>
+      <LevelMarks level={level} />
       <span className="flex-1 min-w-0">
         <span className="block text-xl font-black text-white leading-tight">{t(`levels.${level}`)}</span>
         <span className="block text-xs text-game-silver font-sans font-semibold">
@@ -52,10 +82,12 @@ function LevelButton({ level, count, loading, disabled, onPress }) {
 
 export default function HomeScreen({ levels, error, loadingLevel, onSelectLevel }) {
   const { t, i18n } = useTranslation()
+  const [showRules, setShowRules] = useState(false)
 
   return (
     <div className="h-[100dvh] w-full overflow-y-auto bg-game-bg">
-      <div className="safe-pad mx-auto max-w-md min-h-full flex flex-col">
+      <ThemeDecorations name={theme.decorations} />
+      <div className="safe-pad relative mx-auto max-w-md min-h-full flex flex-col">
         <div className="flex justify-end gap-3">
           {LANGUAGES.map(({ code, label }) => (
             <button
@@ -72,14 +104,28 @@ export default function HomeScreen({ levels, error, loadingLevel, onSelectLevel 
 
         <header className="flex items-center gap-4 mt-4 mb-5">
           <Logo />
-          <h1 className="text-4xl font-black leading-none">{t('app.title')}</h1>
+          <div>
+            <h1 className="text-4xl font-black leading-none">{t('app.title')}</h1>
+            {theme.tagline && (
+              <p className="mt-1 text-sm font-black uppercase tracking-widest text-game-orange">{t(theme.tagline)}</p>
+            )}
+          </div>
         </header>
 
         <section className="rounded-2xl bg-game-header p-4 mb-6 font-sans">
-          <p className="text-base font-semibold leading-snug text-white/90">{t('home.description')}</p>
+          <p className="text-base font-semibold leading-snug text-white/90">
+            <ThemedText text={t(themedKey('home.description'))} />{' '}
+            <button
+              onClick={() => setShowRules(true)}
+              className="inline font-black text-game-score underline underline-offset-2 decoration-2 px-0.5"
+              aria-haspopup="dialog"
+            >
+              {t('home.more')} ›
+            </button>
+          </p>
         </section>
 
-        <h2 className="text-sm uppercase tracking-widest text-game-silver mb-3">{t('home.chooseLevel')}</h2>
+        <h2 className="text-sm uppercase tracking-widest text-game-silver mb-3">{t(themedKey('home.chooseLevel'))}</h2>
 
         {error && (
           <p className="rounded-xl bg-red-900/60 p-3 text-sm font-sans mb-3">{t('home.loadError')}</p>
@@ -99,9 +145,13 @@ export default function HomeScreen({ levels, error, loadingLevel, onSelectLevel 
           ))}
         </div>
 
-        <footer className="mt-auto pt-2 text-[11px] leading-snug text-game-hint font-sans">
+        <div className="mt-auto">
+          <ThemeDecorations name={theme.decorations} slot="footer" />
+        </div>
+        <footer className="pt-2 text-[11px] leading-snug text-game-hint font-sans">
           {t('home.privacy')}
         </footer>
+        {showRules && <RulesDialog onClose={() => setShowRules(false)} />}
       </div>
     </div>
   )

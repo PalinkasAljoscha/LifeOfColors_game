@@ -10,13 +10,14 @@
     "5": "Level 5"
   },
   "home": {
-    "description": "Can you turn the golden-framed cell green? Tap any cell and, depending on its neighbors, it might change its color. These rules are fixed, but different for each puzzle.",
+    "description": "Your goal: Get 🟩 on the gold framed cell. How? Tap a cell and it might transform, depending on what colors are around it. The hidden rules are different for each puzzle.",
     "chooseLevel": "Choose a level",
     "puzzleCount_one": "{{count}} puzzle",
     "puzzleCount_other": "{{count}} puzzles",
     "loading": "Loading puzzles…",
     "loadError": "The puzzles could not be loaded. Please check your connection and reload the page.",
-    "privacy": "No cookies, no identifying data collected. Moves and results can be collected for improving the game."
+    "privacy": "No cookies, no identifying data collected. Moves and results can be collected for improving the game.",
+    "more": "More"
   },
   "game": {
     "retry": "Retry",
@@ -35,5 +36,22 @@
     "back": "Home",
     "random": "Random pick",
     "orTap": "or choose your puzzle"
+  },
+  "themes": {
+    "halloween": {
+      "tagline": "Halloween edition",
+      "description": "Your goal: Get 🍬 on the gold framed object. How? Tap an object and it might transform, depending on what objects are around it. The hidden rules are different for each puzzle.",
+      "chooseLevel": "Choose your level of fright",
+      "winTitle": "Sweet victory! 🍬"
+    }
+  },
+  "rules": {
+    "title": "How it works",
+    "p1": "Tap any cell. What it turns into depends only on its neighbors: the up to 8 cells around it, diagonals included. Cells at the edge have fewer.",
+    "p2": "What counts is which neighbors the cell has and how many of each. What the tapped cell shows right now does not matter.",
+    "p3": "Sometimes a tap does nothing. Only taps that change a cell count as moves.",
+    "p4": "Within a game the rules never change: the same neighbors always give the same result. Find out what they are!",
+    "p5": "Stuck? {{retry}} starts the game afresh.",
+    "close": "Got it"
   }
 }
