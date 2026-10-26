@@ -1,7 +1,9 @@
 import Phaser from 'phaser'
-import { phaser as C, CELL_FILL, CELL_BORDER } from '../theme.js'
+import { phaser as C } from '../theme.js'
+import { activeTheme, CELL_STATES } from '../themes.js'
 import { applyClick, clickRule, isWon } from '../engine/engine.js'
 import { startBoard } from './startBoard.js'
+import { emojiTexture, emojiDisplaySize } from './emojiTexture.js'
 
 // Board-only scene. All rules live in src/engine/engine.js (shared with the tests and
 // equivalent to the factory's engine); this scene draws the board, turns taps into
@@ -11,6 +13,9 @@ import { startBoard } from './startBoard.js'
 //   'won'         { clicks }                          the goal cell reached its goal colour (emitted at once;
 //                                                     the React side delays the dialog briefly)
 //
+// What a cell shows (colour, or an emoji on a background) comes from the active theme
+// (src/themes.js); the theme never changes what a tap does.
+//
 // The canvas size follows the board's shape (see boardCanvasSize), so any board up to
 // 9 rows x 6 cols fills the available screen area with Phaser.Scale.FIT.
 
@@ -19,6 +24,7 @@ export const GAP = 6
 export const PAD = 14
 const RADIUS = 10
 const FRAME = 8            // width (and outer corner radius) of the golden frame on the goal cell
+const EMOJI_SIZE = 54      // size of a theme's cell emoji in px (cells are CELL - GAP = 90 px)
 
 export function boardCanvasSize(inst) {
   const { rows, cols } = inst.board
@@ -36,6 +42,14 @@ export default class GameScene extends Phaser.Scene {
     this.rows = rows
     this.cols = cols
     this.board = startBoard(this.inst)
+    const theme = activeTheme()
+    this.cellLook = Object.fromEntries(CELL_STATES.map((v) => {
+      const look = theme.cells[v]
+      return [v, {
+        fill: C[look.fill], border: C[look.border], alpha: look.emojiAlpha ?? 1,
+        emoji: look.emoji ? emojiTexture(this, look.emoji, EMOJI_SIZE, look.emojiHue ?? 0) : null,
+      }]
+    }))
     this.clicks = 0
     this.won = false
 
@@ -47,9 +61,14 @@ export default class GameScene extends Phaser.Scene {
       const row = []
       for (let c = 0; c < cols; c++) {
         const { x, y } = this._center(r, c)
-        const g = this.add.graphics({ x, y })
-        row.push(g)
-        this._drawCell(g, r, c)
+        // One container per cell (tap animations move it): background + optional emoji.
+        const g = this.add.graphics()
+        const label = this.add.image(0, 0, '__DEFAULT').setVisible(false)
+        const cell = this.add.container(x, y, [g, label])
+        cell.g = g
+        cell.label = label
+        row.push(cell)
+        this._drawCell(cell, r, c)
       }
       this.cells.push(row)
     }
@@ -68,10 +87,12 @@ export default class GameScene extends Phaser.Scene {
     return r === gr && c === gc
   }
 
-  _drawCell(g, r, c) {
+  _drawCell(cell, r, c) {
     const s = CELL - GAP
     const h = s / 2
     const v = this.board[r][c]
+    const look = this.cellLook[v]
+    const g = cell.g
     g.clear()
     let o = 0  // inset of the coloured cell (FRAME on the goal cell, inside its golden frame)
     let rad = RADIUS
@@ -83,10 +104,16 @@ export default class GameScene extends Phaser.Scene {
       o = FRAME
       rad = RADIUS - 4
     }
-    g.fillStyle(CELL_BORDER[v])
+    g.fillStyle(look.border)
     g.fillRoundedRect(-h + o, -h + o, s - 2 * o, s - 2 * o, rad)
-    g.fillStyle(CELL_FILL[v])
+    g.fillStyle(look.fill)
     g.fillRoundedRect(-h + o + 3, -h + o + 3, s - 2 * o - 6, s - 2 * o - 6, rad - 2)
+    cell.label.setVisible(Boolean(look.emoji))
+    if (look.emoji) {
+      // the goal cell's emoji is a little smaller so it stays inside the golden frame
+      const size = emojiDisplaySize(EMOJI_SIZE) * (o ? (s - 2 * o) / s : 1)
+      cell.label.setTexture(look.emoji).setDisplaySize(size, size).setAlpha(look.alpha)
+    }
   }
 
   // Light reflection sweeping over the goal cell's golden frame, in a random direction,
@@ -143,15 +170,15 @@ export default class GameScene extends Phaser.Scene {
 
     const rule = clickRule(this.board, r, c)
     const next = applyClick(this.board, r, c, this.inst.rule.table)
-    const g = this.cells[r][c]
+    const cell = this.cells[r][c]
     this.clicks += 1
     if (next) {
       this.board = next
-      this._drawCell(g, r, c)
-      this.tweens.add({ targets: g, scale: { from: 0.82, to: 1 }, duration: 160, ease: 'Back.easeOut' })
+      this._drawCell(cell, r, c)
+      this.tweens.add({ targets: cell, scale: { from: 0.82, to: 1 }, duration: 160, ease: 'Back.easeOut' })
     } else {
       // No-op tap: tiny wiggle so the player sees the tap registered.
-      this.tweens.add({ targets: g, angle: { from: -5, to: 0 }, duration: 160, ease: 'Sine.easeOut' })
+      this.tweens.add({ targets: cell, angle: { from: -5, to: 0 }, duration: 160, ease: 'Sine.easeOut' })
     }
     this.game.events.emit('boardClick', {
       r, c, changed: Boolean(next), board: this.board, clicks: this.clicks, rule, color: next ? next[r][c] : null,

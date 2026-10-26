@@ -35,5 +35,13 @@
     "back": "Home",
     "random": "Random pick",
     "orTap": "or choose your puzzle"
+  },
+  "themes": {
+    "halloween": {
+      "tagline": "Halloween edition",
+      "description": "Can you fill the golden-framed cell with candy? 🍬 Tap any cell and, depending on its neighbors, it might transform: into a pumpkin, a ghost, candy, or back into a spider web. These spells are fixed, but different for each puzzle.",
+      "chooseLevel": "Choose your level of fright",
+      "winTitle": "Sweet victory! 🍬"
+    }
   }
 }

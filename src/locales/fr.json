@@ -35,5 +35,13 @@
     "back": "Accueil",
     "random": "Au hasard",
     "orTap": "ou choisis ton puzzle"
+  },
+  "themes": {
+    "halloween": {
+      "tagline": "Édition Halloween",
+      "description": "Peux-tu remplir de bonbons la case au cadre doré ? 🍬 Touche n'importe quelle case et, selon ses voisines, elle peut se transformer : en citrouille, en fantôme, en bonbon, ou redevenir une toile d'araignée. Ces sortilèges sont fixes, mais différents pour chaque puzzle.",
+      "chooseLevel": "Choisis ton niveau de frisson",
+      "winTitle": "Douce victoire ! 🍬"
+    }
   }
 }

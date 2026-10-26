@@ -39,6 +39,14 @@ export const palette = {
   cellGreenBorder:     '#1a7a44',
   cellBlueFill:        '#3498db',
   cellBlueBorder:      '#217dbb',
+
+  // ── Halloween theme (src/themes.js) ──
+  hwCellFill:       '#2a2333',   // one background for every cell; the emoji tells the state
+  hwCellBorder:     '#40344d',
+  hwWitchSkin:      '#7cb342',   // witch-hand cursor
+  hwWitchShade:     '#4f7a26',
+  hwWitchNail:      '#6b2d8f',
+  hwWitchOutline:   '#14111a',
 }
 
 // Phaser uses 0xRRGGBB integers -- derived from the palette strings above.
@@ -46,10 +54,4 @@ export const phaser = Object.fromEntries(
   Object.entries(palette).map(([k, v]) => [k, toHex(v)]),
 )
 
-// Cell colours by engine letter (U/O/B/G).
-export const CELL_FILL = {
-  U: phaser.cellUncolored, O: phaser.cellOrangeFill, G: phaser.cellGreenFill, B: phaser.cellBlueFill,
-}
-export const CELL_BORDER = {
-  U: phaser.cellUncoloredBorder, O: phaser.cellOrangeBorder, G: phaser.cellGreenBorder, B: phaser.cellBlueBorder,
-}
+// Cell colours by engine letter (U/O/B/G) are defined per theme in src/themes.js.
