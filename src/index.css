@@ -35,3 +35,30 @@ body {
   to   { transform: scale(1);    opacity: 1; }
 }
 .pop-in { animation: popIn 220ms ease-out both; }
+
+/* ── Themes (src/themes.js) ── */
+/* The theme's mouse cursor everywhere, also over buttons and the board canvas. */
+.theme-cursor, .theme-cursor * { cursor: var(--theme-cursor) !important; }
+
+/* Halloween homepage decorations (components/ThemeDecorations.jsx) */
+@keyframes batFly {
+  0%   { transform: translate(0, 0) rotate(-6deg); }
+  25%  { transform: translate(-14px, 8px) rotate(4deg); }
+  50%  { transform: translate(-4px, 16px) rotate(-4deg); }
+  75%  { transform: translate(10px, 6px) rotate(6deg); }
+  100% { transform: translate(0, 0) rotate(-6deg); }
+}
+@keyframes spiderBob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(18px); }
+}
+@keyframes moonGlow {
+  0%, 100% { opacity: 0.75; }
+  50%      { opacity: 1; }
+}
+.deco-bat    { animation: batFly 7s ease-in-out infinite; }
+.deco-spider { animation: spiderBob 5s ease-in-out infinite; }
+.deco-moon   { animation: moonGlow 6s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .deco-bat, .deco-spider, .deco-moon { animation: none; }
+}

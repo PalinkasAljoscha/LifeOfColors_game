@@ -35,5 +35,13 @@
     "back": "Start",
     "random": "Zufällig wählen",
     "orTap": "oder wähle dein Rätsel"
+  },
+  "themes": {
+    "halloween": {
+      "tagline": "Halloween-Edition",
+      "description": "Kannst du das goldumrandete Feld mit Süßigkeiten füllen? 🍬 Tippe auf ein beliebiges Feld, und je nach seinen Nachbarn verwandelt es sich vielleicht: in einen Kürbis, ein Gespenst, eine Süßigkeit oder zurück in ein Spinnennetz. Diese Zauber sind fest, aber für jedes Rätsel anders.",
+      "chooseLevel": "Wähle deine Gruselstufe",
+      "winTitle": "Süßer Sieg! 🍬"
+    }
   }
 }

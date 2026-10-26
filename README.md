@@ -31,6 +31,20 @@ local testing are tagged `env='dev'`.
 
 The puzzle id is the same either way, so keep the setting fixed once the game is live.
 
+### Themes
+
+`src/themes.js` lists every visual theme and how it is defined. There are two now: `classic`
+(the colour cells) and `halloween`. Halloween shows 🎃 orange, 👻 blue, 🍬 green and a dimmed 🕸️ for
+uncolored cells, a witch-hand mouse cursor, its own homepage texts and decorations.
+- `ACTIVE_THEME` picks the theme everyone sees (change it, then redeploy).
+- `?theme=<name>` in the URL previews any theme, e.g. `…/LifeOfColors_game/?theme=halloween`.
+- A theme only changes the look: rules, puzzle ids, the catalog and telemetry are the same in
+  every theme. Telemetry doesn't record the theme.
+- Theme colours live in `src/theme.js`; themed texts in the locale files under `themes.<name>`.
+  `tests/themes.test.js` checks that every theme is complete.
+- Emojis are drawn by the player's device, so they look a little different on iPhone, Android and
+  Windows. The cursor only appears with a mouse.
+
 ## Deploy
 
 Every push to `main` runs `.github/workflows/deploy.yml`: it installs, tests, builds and publishes

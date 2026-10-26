@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import { themedKey } from '../themes.js'
 
 export default function WinDialog({ moves, onRetry, onPickNew, onHome }) {
   const { t } = useTranslation()
@@ -6,7 +7,7 @@ export default function WinDialog({ moves, onRetry, onPickNew, onHome }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-6" role="dialog" aria-modal="true">
       <div className="pop-in w-full max-w-xs rounded-3xl bg-game-header border-2 border-white/15 p-6 text-center shadow-2xl">
-        <h2 className="text-3xl font-black text-game-score">{t('win.title')}</h2>
+        <h2 className="text-3xl font-black text-game-score">{t(themedKey('win.title'))}</h2>
         <p className="mt-2 mb-6 font-sans font-semibold text-game-silver">{t('win.moves', { count: moves })}</p>
         <button
           onClick={onPickNew}
