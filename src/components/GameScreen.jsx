@@ -2,7 +2,26 @@ import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import Board from './Board.jsx'
 import WinDialog from './WinDialog.jsx'
+import RulesDialog from './RulesDialog.jsx'
+import { Emoji } from './Emoji.jsx'
+import { markSolved } from '../engine/catalog.js'
+import { palette } from '../theme.js'
+import { activeTheme } from '../themes.js'
 import * as telemetry from '../telemetry/telemetry.js'
+
+// The goal colour as the board draws it in the active theme: its emoji, or a small colour square.
+function GoalLook({ color }) {
+  const look = activeTheme().cells[color]
+  if (!look) return null
+  if (look.emoji) return <Emoji e={look.emoji} className="text-lg leading-none" />
+  return (
+    <span
+      className="inline-block w-4 h-4 rounded ring-1 ring-inset ring-white/25 align-[-2px]"
+      style={{ background: palette[look.fill] }}
+      aria-hidden="true"
+    />
+  )
+}
 
 // One instance. Retry remounts the board (fresh start of the same instance); Back goes to the
 // level's grid. `pick` (how the puzzle was chosen) is passed on to telemetry.
@@ -11,6 +30,7 @@ export default function GameScreen({ instance, pick, onPickNew, onHome }) {
   const [round, setRound] = useState(0)        // bumped by Retry -> remounts <Board>
   const [moves, setMoves] = useState(0)        // clicks that changed a cell
   const [won, setWon] = useState(false)
+  const [showRules, setShowRules] = useState(false)
   const winTimer = useRef(null)
 
   // Telemetry: one play per puzzle opened (Retry stays in the same play).
@@ -59,6 +79,7 @@ export default function GameScreen({ instance, pick, onPickNew, onHome }) {
 
   function onWon() {
     telemetry.recordWin()
+    markSolved(instance)
     // Short pause so the player sees the goal cell change before the dialog covers it.
     winTimer.current = setTimeout(() => setWon(true), 400)
   }
@@ -103,6 +124,23 @@ export default function GameScreen({ instance, pick, onPickNew, onHome }) {
         <Board key={round} instance={instance} onClick={onClick} onWon={onWon} />
       </div>
 
+      {/* Goal reminder (players opening a shared link never saw the homepage) + the rules pop-up. */}
+      <div className="mx-auto w-full max-w-md flex justify-between items-center gap-3 mt-2 px-1 text-sm font-sans font-bold">
+        <span className="min-w-0 flex items-center gap-1.5 text-game-silver">
+          <span className="shrink-0">{t('game.goal')}</span>
+          <GoalLook color={instance.goal.color} />
+          <span className="truncate">{t('game.goalWhere')}</span>
+        </span>
+        <button
+          onClick={() => setShowRules(true)}
+          className="shrink-0 font-black text-game-score underline underline-offset-2 decoration-2 px-1 py-1"
+          aria-haspopup="dialog"
+        >
+          {t('rules.title')} ›
+        </button>
+      </div>
+
+      {showRules && <RulesDialog onClose={() => setShowRules(false)} />}
       {won && <WinDialog moves={moves} onRetry={retry} onPickNew={() => leave(onPickNew, 'pick_new')} onHome={() => leave(onHome, 'home')} />}
     </div>
   )
