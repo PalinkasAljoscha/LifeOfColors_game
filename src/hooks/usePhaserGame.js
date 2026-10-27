@@ -45,7 +45,21 @@ export function usePhaserGame(containerRef, SceneClass, { width, height, registr
     }
     game.scene.add('main', SceneClass, true)
 
+    // Refit whenever the container changes size (phone rotation, address bar, layout changes).
+    // Phaser alone can get stuck here: when it applies a resize it computes the board from the
+    // container size it measured earlier, then re-measures and stores the new size WITHOUT
+    // applying it. If the container was still changing (it is, mid-rotation on a phone), the final
+    // size counts as already handled and the board keeps the landscape size until the next
+    // rotation. So: measure first, then apply -- every time the container settles on a new size.
+    const resizeObserver = new ResizeObserver(() => {
+      if (!game.isBooted) return
+      game.scale.getParentBounds()
+      game.scale.refresh()
+    })
+    resizeObserver.observe(containerRef.current)
+
     return () => {
+      resizeObserver.disconnect()
       game.destroy(true)
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps

@@ -5,6 +5,10 @@ import './i18n.js'
 import './index.css'
 import { activeTheme, cursorCss } from './themes.js'
 import { palette } from './theme.js'
+import { trackViewportHeight } from './viewportHeight.js'
+
+// Full-height screens follow the real window height (see viewportHeight.js).
+trackViewportHeight()
 
 // Theme cursor (src/themes.js): a CSS variable used by .theme-cursor in index.css.
 const cursor = cursorCss(activeTheme(), palette)
