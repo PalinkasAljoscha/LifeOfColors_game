@@ -85,7 +85,7 @@ export default function HomeScreen({ levels, error, loadingLevel, onSelectLevel 
   const [showRules, setShowRules] = useState(false)
 
   return (
-    <div className="h-[100dvh] w-full overflow-y-auto bg-game-bg">
+    <div className="app-h w-full overflow-y-auto bg-game-bg">
       <ThemeDecorations name={theme.decorations} />
       <div className="safe-pad relative mx-auto max-w-md min-h-full flex flex-col">
         <div className="flex justify-end gap-3">

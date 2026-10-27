@@ -12,7 +12,7 @@ export default function LevelScreen({ level, pool, onRandom, onPick, onBack }) {
   const solved = states.filter((s) => s === 'solved').length
 
   return (
-    <div className="h-[100dvh] w-full flex flex-col bg-game-bg safe-pad">
+    <div className="app-h w-full flex flex-col bg-game-bg safe-pad">
       <div className="mx-auto w-full max-w-md">
         <div className="flex items-center gap-3">
           <div className="min-w-0">

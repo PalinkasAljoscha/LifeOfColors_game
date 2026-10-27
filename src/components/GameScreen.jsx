@@ -86,7 +86,7 @@ export default function GameScreen({ instance, pick, onPickNew, onHome }) {
   useEffect(() => () => clearTimeout(winTimer.current), [])
 
   return (
-    <div className="h-[100dvh] w-full flex flex-col bg-game-bg safe-pad">
+    <div className="app-h w-full flex flex-col bg-game-bg safe-pad">
       <div className="mx-auto w-full max-w-md flex gap-3">
         <button
           onClick={retry}
