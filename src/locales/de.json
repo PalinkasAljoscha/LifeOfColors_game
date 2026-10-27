@@ -24,7 +24,9 @@
     "back": "Zurück",
     "home": "Start",
     "moves_one": "{{count}} Zug",
-    "moves_other": "{{count}} Züge"
+    "moves_other": "{{count}} Züge",
+    "goal": "Ziel:",
+    "goalWhere": "auf den Goldrahmen"
   },
   "win": {
     "title": "Geschafft!",
@@ -35,12 +37,14 @@
   "levelScreen": {
     "back": "Start",
     "random": "Zufällig wählen",
-    "orTap": "oder wähle dein Rätsel"
+    "orTap": "oder wähle dein Rätsel",
+    "solved_one": "{{count}} gelöst",
+    "solved_other": "{{count}} gelöst"
   },
   "themes": {
     "halloween": {
       "tagline": "Halloween-Edition",
-      "description": "Dein Ziel: Bring 🍬 auf das golden umrandete Objekt. Wie? Tippe auf ein Objekt, und es verwandelt sich vielleicht – je nachdem, welche Objekte um es herum sind. Die versteckten Regeln sind bei jedem Rätsel anders.",
+      "description": "Dein Ziel: Bring 🍬 auf das golden umrandete Feld. Wie? Tippe auf ein Feld, und es verwandelt sich vielleicht – je nachdem, welche Objekte um es herum sind. Die versteckten Regeln sind bei jedem Rätsel anders.",
       "chooseLevel": "Wähle deine Gruselstufe",
       "winTitle": "Süßer Sieg! 🍬"
     }
