@@ -25,6 +25,7 @@
     "home": "Start",
     "moves_one": "{{count}} Zug",
     "moves_other": "{{count}} Züge",
+    "best": "Bestwert: {{count}}",
     "goal": "Ziel:",
     "goalWhere": "auf den Goldrahmen"
   },
@@ -32,6 +33,8 @@
     "title": "Geschafft!",
     "moves_one": "Gelöst mit {{count}} Zug.",
     "moves_other": "Gelöst mit {{count}} Zügen.",
+    "stars_one": "{{count}} von 5 Sternen",
+    "stars_other": "{{count}} von 5 Sternen",
     "pickNew": "Neues wählen"
   },
   "levelScreen": {

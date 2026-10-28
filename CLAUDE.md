@@ -63,6 +63,12 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   No browser clock times (the database's received_at is the only clock). No
   cookies/localStorage ids, no user agent, screen size, language, location, referrer. Any new field
   must keep this property and must be added to `telemetry/schema.sql` and the factory's `stats_helpers.py`.
+- **Best / stars** -- `instance.moves_to_win_min` (not hashed, exported by the factory: the lowest
+  number of moves it found; proven minimum when `meta.proven_min_moves`) is shown under the moves
+  counter as "Best: X"; a win gets 1-5 stars from `src/engine/stars.js` `starsForWin` (5 at/below
+  the min, 2 at 1.4 x min, linear in between rounded to the nearest star, 1 above), shown in the
+  win dialog. Missing value -> neither is shown. Stars are not sent to telemetry (derivable from
+  moves); `meta` itself is still never read by the app.
 - **Start cell switch** -- `src/config.js` `HIDE_START_CELL_IF_NOT_REQUIRED`: puzzles with
   `start_cell_required: false` start all-uncolored (`src/game/startBoard.js`); same id either way.
 - **Mobile first** -- portrait phones are the main target; boards up to 9 rows x 6 cols must fit.

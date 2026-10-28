@@ -19,6 +19,8 @@ export const palette = {
 
   // ── Feedback ──
   correctGreen: '#2ecc71',
+  starGold:     '#f1c40f',   // won star (win dialog)
+  starEmpty:    '#3d4766',   // star not won
 
   // ── Buttons ──
   btnBlue:      '#3498db',

@@ -5,6 +5,7 @@ import WinDialog from './WinDialog.jsx'
 import RulesDialog from './RulesDialog.jsx'
 import { Emoji } from './Emoji.jsx'
 import { markSolved } from '../engine/catalog.js'
+import { minMovesOf, starsForWin } from '../engine/stars.js'
 import { palette } from '../theme.js'
 import { activeTheme } from '../themes.js'
 import * as telemetry from '../telemetry/telemetry.js'
@@ -32,6 +33,7 @@ export default function GameScreen({ instance, pick, onPickNew, onHome }) {
   const [won, setWon] = useState(false)
   const [showRules, setShowRules] = useState(false)
   const winTimer = useRef(null)
+  const minMoves = minMovesOf(instance)          // null if the catalog has no value for it
 
   // Telemetry: one play per puzzle opened (Retry stays in the same play).
   useEffect(() => {
@@ -117,7 +119,13 @@ export default function GameScreen({ instance, pick, onPickNew, onHome }) {
           )}
           <span className="truncate select-all text-white/90">{instance.name ?? instance.id}</span>
         </span>
-        <span className="text-game-score shrink-0">{t('game.moves', { count: moves })}</span>
+        {/* Moves counter, with the puzzle's best-known move count under it ("Best: X"). */}
+        <span className="shrink-0 flex flex-col items-end leading-tight">
+          <span className="text-game-score">{t('game.moves', { count: moves })}</span>
+          {minMoves !== null && (
+            <span className="text-xs text-game-silver">{t('game.best', { count: minMoves })}</span>
+          )}
+        </span>
       </div>
 
       <div className="flex-1 min-h-0 mt-2 relative">
@@ -141,7 +149,7 @@ export default function GameScreen({ instance, pick, onPickNew, onHome }) {
       </div>
 
       {showRules && <RulesDialog onClose={() => setShowRules(false)} />}
-      {won && <WinDialog moves={moves} onRetry={retry} onPickNew={() => leave(onPickNew, 'pick_new')} onHome={() => leave(onHome, 'home')} />}
+      {won && <WinDialog moves={moves} best={minMoves} stars={starsForWin(moves, minMoves)} onRetry={retry} onPickNew={() => leave(onPickNew, 'pick_new')} onHome={() => leave(onHome, 'home')} />}
     </div>
   )
 }

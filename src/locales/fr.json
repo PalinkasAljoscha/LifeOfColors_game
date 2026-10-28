@@ -25,6 +25,7 @@
     "home": "Accueil",
     "moves_one": "{{count}} coup",
     "moves_other": "{{count}} coups",
+    "best": "Record : {{count}}",
     "goal": "But :",
     "goalWhere": "sur le cadre doré"
   },
@@ -32,6 +33,8 @@
     "title": "Bravo !",
     "moves_one": "Résolu en {{count}} coup.",
     "moves_other": "Résolu en {{count}} coups.",
+    "stars_one": "{{count}} étoile sur 5",
+    "stars_other": "{{count}} étoiles sur 5",
     "pickNew": "Autre puzzle"
   },
   "levelScreen": {

@@ -44,6 +44,8 @@ test('catalog is consistent and every instance is valid', () => {
       assert.equal(inst.id, id, `id hash mismatch for ${inst.id}`)
       assert.match(inst.rule.table, /^[UOBGX]{165}$/)
       assert.ok([undefined, null, true, false].includes(inst.start_cell_required), `${inst.id}: start_cell_required`)
+      const mtw = inst.moves_to_win_min
+      assert.ok(mtw === undefined || mtw === null || (Number.isInteger(mtw) && mtw >= 1), `${inst.id}: moves_to_win_min`)
       const { rows, cols, start } = inst.board
       assert.ok(rows >= 1 && rows <= 9 && cols >= 1 && cols <= 6, `${inst.id}: board ${rows}x${cols} exceeds 9x6`)
       for (const s of start) assert.ok(s.at[0] < rows && s.at[1] < cols)

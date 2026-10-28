@@ -12,6 +12,8 @@ export default {
           panel:    palette.panel,
           divider:  palette.divider,
           score:    palette.scoreYellow,
+          star:     palette.starGold,
+          'star-empty': palette.starEmpty,
           silver:   palette.silverGray,
           hint:     palette.hintGray,
           btn:      palette.btnBlue,

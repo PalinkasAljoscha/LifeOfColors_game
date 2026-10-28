@@ -36,6 +36,15 @@ body {
 }
 .pop-in { animation: popIn 220ms ease-out both; }
 
+/* Won stars in the win dialog (components/WinDialog.jsx): one after the other. */
+@keyframes starPop {
+  0%   { transform: scale(0.2); opacity: 0; }
+  70%  { transform: scale(1.25); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.star-pop { display: inline-block; animation: starPop 320ms ease-out both; }
+@media (prefers-reduced-motion: reduce) { .star-pop { animation: none; } }
+
 /* ── Themes (src/themes.js) ── */
 /* The theme's mouse cursor everywhere, also over buttons and the board canvas. */
 .theme-cursor, .theme-cursor * { cursor: var(--theme-cursor) !important; }

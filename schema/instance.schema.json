@@ -137,6 +137,14 @@
       ],
       "description": "Not hashed, optional. false = the factory's recorded solution also wins from an all-uncolored board; with the app's HIDE_START_CELL_IF_NOT_REQUIRED switch on, such puzzles are shown without their start cell(s). true / null / absent = the start cell is always shown."
     },
+    "moves_to_win_min": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 1,
+      "description": "Not hashed, optional. The lowest number of moves to win the factory found (its tested CSVs' moves_to_win_min; the proven minimum when meta.proven_min_moves is true). The app shows it under the moves counter as 'Best: X' and rates a win with 1-5 stars: 5 at or below it, 2 at 1.4 x it, linear in between (rounded), 1 above. null / absent = unknown: no 'Best' and no stars."
+    },
     "name": {
       "type": "string",
       "maxLength": 60,
