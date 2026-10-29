@@ -33,7 +33,7 @@ src/
                           # GameScreen (Retry/Back -> back to the level grid; shows the puzzle name), Board, WinDialog,
                           # ConsentBanner (opt-in for saved progress + the setting on the home page)
   theme.js                # all colours
-  themes.js               # visual themes (classic, halloween): cell looks, cursor, texts, decorations;
+  themes.js               # visual themes (classic, halloween, sorcerer): cell looks, cursor, texts, decorations;
                           # ACTIVE_THEME or ?theme=<name>. Appearance only, never rules/ids/telemetry
                           # Per-game variation: emoji / emojiColor may be lists; drawLook() picks one
                           # each when GameScreen mounts (Retry keeps it), passed to Board as `look`

@@ -111,3 +111,17 @@ test('all locale files have the same keys', () => {
     assert.deepEqual([...ref[1]].filter((k) => !ks.has(k)), [], `${lang} lacks keys of en`)
   }
 })
+
+test('sorcerer: crown goal, stone on uncoloured, every object drawn, two different objects', () => {
+  const t = THEMES.sorcerer
+  const seen = new Set()
+  for (let i = 0; i < 2000; i++) {
+    const l = drawLook(t)
+    assert.notEqual(l.O.emoji, l.B.emoji)
+    assert.equal(l.G.emoji, '👑')
+    assert.equal(l.U.emoji, '🪨')
+    seen.add(l.O.emoji); seen.add(l.B.emoji)
+  }
+  assert.equal(seen.size, 7)
+  assert.equal(activeThemeName('?theme=sorcerer'), 'sorcerer')
+})

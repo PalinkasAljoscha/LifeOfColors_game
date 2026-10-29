@@ -50,6 +50,10 @@ const CANDY_COLOURS = [
   { name: 'yellow', hue: 50, sat: 1, light: 0 },
 ]
 
+// Sorcerer's apprentice objects for the orange / blue cells (first two = the default look:
+// toadstool, potion). There is no gnome emoji in Unicode: the elf stands in for it.
+const SORCERER_OBJECTS = ['🍄', '🧪', '🗡️', '🐸', '🐉', '💎', '🧝']
+
 export const THEMES = {
   classic: {
     label: 'Classic',
@@ -85,6 +89,27 @@ export const THEMES = {
     },
     tagline: 'themes.halloween.tagline',
     decorations: 'halloween',
+  },
+
+  sorcerer: {
+    label: "Sorcerer's apprentice",
+    cells: {
+      U: { fill: 'scCellFill', border: 'scCellBorder', emoji: '🪨', emojiAlpha: 0.6 },   // grey stone, dimmed
+      // Orange and blue: two different magic objects, drawn per game.
+      O: { fill: 'scCellFill', border: 'scCellBorder', emoji: SORCERER_OBJECTS, emojiGlow: 'scEmojiGlow' },
+      B: { fill: 'scCellFill', border: 'scCellBorder', emoji: SORCERER_OBJECTS, emojiGlow: 'scEmojiGlow' },
+      // Green, the goal: always the crown.
+      G: { fill: 'scCellFill', border: 'scCellBorder', emoji: '👑', emojiGlow: 'scCrownGlow' },
+    },
+    cursor: magicWandSvg,
+    cursorHotspot: [27, 4],
+    text: {
+      'home.description': 'themes.sorcerer.description',
+      'home.chooseLevel': 'themes.sorcerer.chooseLevel',
+      'win.title': 'themes.sorcerer.winTitle',
+    },
+    tagline: 'themes.sorcerer.tagline',
+    decorations: 'sorcerer',
   },
 }
 
@@ -172,5 +197,20 @@ function witchHandSvg(p) {
 <path d="M13 15.8 h1.4"/><path d="M16.8 16.6 h1.4"/><path d="M20.3 17.6 h1.3"/>
 </g>
 <circle cx="18" cy="22.5" r="0.9" fill="${p.hwWitchShade}"/>
+</svg>`
+}
+
+// Magic wand, 32 x 32, pointing up-right; the hotspot is the centre of the star at its tip.
+function magicWandSvg(p) {
+  const o = p.scWandOutline
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+<g stroke="${o}" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round">
+<path d="M3.5 30.5 L1.5 28.5 L19 11 L21 13 Z" fill="${p.scWandWood}"/>
+<path d="M19 11 L23 7 L25 9 L21 13 Z" fill="${p.scWandTip}"/>
+<path d="M27 0.8 L28.4 3.1 L31 3.4 L29.1 5.2 L29.6 7.8 L27 6.6 L24.4 7.8 L24.9 5.2 L23 3.4 L25.6 3.1 Z" fill="${p.scWandStar}"/>
+</g>
+<g fill="${p.scWandStar}" stroke="none">
+<circle cx="20.5" cy="2.5" r="1"/><circle cx="30" cy="11" r="0.9"/><circle cx="16.5" cy="6" r="0.7"/>
+</g>
 </svg>`
 }

@@ -41,7 +41,40 @@ const HALLOWEEN = {
   ),
 }
 
-const DECORATIONS = { halloween: HALLOWEEN }
+const SORCERER = {
+  background: () => (
+    <>
+      {/* content column (all screens): moon, sparkles and an owl in the top bar, stars in two corners */}
+      <div className="relative mx-auto h-full max-w-md">
+        <span className="deco-moon absolute top-2 left-[30%] text-3xl md:hidden">🌙</span>
+        <span className="deco-twinkle absolute top-3 left-[46%] text-lg">✨</span>
+        <span className="deco-twinkle absolute top-1 left-[58%] text-sm opacity-70" style={{ animationDelay: '-1.5s' }}>✨</span>
+        <span className="absolute -top-2 -left-2 text-6xl opacity-20 -rotate-12">⭐</span>
+        <span className="absolute -bottom-3 -right-3 text-7xl opacity-15 rotate-12">🔮</span>
+      </div>
+      {/* wide screens only: left and right of the content column */}
+      <div className="hidden md:block">
+        <span className="deco-moon absolute top-16 left-[9%] text-8xl">🌙</span>
+        <span className="deco-bat absolute top-52 left-[17%] text-4xl opacity-80">🦉</span>
+        <span className="deco-twinkle absolute top-24 right-[12%] text-4xl">✨</span>
+        <span className="deco-twinkle absolute top-72 right-[20%] text-2xl opacity-70" style={{ animationDelay: '-2s' }}>✨</span>
+        <span className="deco-twinkle absolute top-40 left-[24%] text-xl opacity-60" style={{ animationDelay: '-3.2s' }}>⭐</span>
+        <span className="absolute bottom-8 left-[10%] text-7xl opacity-80">📜</span>
+        <span className="absolute bottom-6 left-[19%] text-4xl opacity-70">🍄</span>
+        <span className="absolute bottom-10 right-[11%] text-6xl opacity-80">🔮</span>
+        <span className="absolute bottom-6 right-[20%] text-4xl opacity-70">🧪</span>
+      </div>
+    </>
+  ),
+  footer: () => (
+    <div className="flex justify-center items-end gap-3 mb-3 text-2xl">
+      <span>🪄</span><span className="text-xl opacity-80">✨</span><span className="text-3xl">👑</span>
+      <span className="text-xl opacity-80">✨</span><span>🪄</span>
+    </div>
+  ),
+}
+
+const DECORATIONS = { halloween: HALLOWEEN, sorcerer: SORCERER }
 
 export default function ThemeDecorations({ name, slot = 'background' }) {
   const Deco = DECORATIONS[name]?.[slot]

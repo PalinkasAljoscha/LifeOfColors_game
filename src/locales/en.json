@@ -62,8 +62,14 @@
     "halloween": {
       "tagline": "Halloween edition",
       "description": "Your goal: Get 🍬 on the gold framed field. How? Tap a field and it might transform, depending on what objects are around it. The hidden rules are different for each puzzle.",
-        "chooseLevel": "Choose your level of fright",
+      "chooseLevel": "Choose your level of fright",
       "winTitle": "Sweet victory! 🍬"
+    },
+    "sorcerer": {
+      "tagline": "Sorcerer's apprentice edition",
+      "description": "Your goal: Get 👑 on the gold framed field. How? Tap a field and it might transform, depending on what objects are around it. The hidden spells are different for each puzzle.",
+      "chooseLevel": "Choose your level of magic",
+      "winTitle": "Crowned! 👑"
     }
   },
   "rules": {

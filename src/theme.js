@@ -50,6 +50,16 @@ export const palette = {
   hwWitchShade:     '#4f7a26',
   hwWitchNail:      '#6b2d8f',
   hwWitchOutline:   '#14111a',
+
+  // ── Sorcerer's apprentice theme (src/themes.js) ──
+  scCellFill:       '#1f2347',   // one background for every cell (night-blue spell book page)
+  scCellBorder:     '#3a4178',
+  scEmojiGlow:      '#bcd2ff',   // soft moonlight halo behind the objects (sword, frog on dark cells)
+  scCrownGlow:      '#ffe08a',   // warm golden halo behind the crown (the goal)
+  scWandWood:       '#5d3a1a',   // magic-wand cursor
+  scWandTip:        '#f5f0e6',
+  scWandStar:       '#ffd23f',
+  scWandOutline:    '#14111a',
 }
 
 // Phaser uses 0xRRGGBB integers -- derived from the palette strings above.
