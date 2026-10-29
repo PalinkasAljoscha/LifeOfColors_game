@@ -6,6 +6,9 @@ import { activeTheme, themedKey } from '../themes.js'
 import ThemeDecorations from './ThemeDecorations.jsx'
 import { Emoji, ThemedText } from './Emoji.jsx'
 import RulesDialog from './RulesDialog.jsx'
+import { ConsentBannerSpacer, ConsentDialog, ProgressSetting } from './ConsentBanner.jsx'
+import { progressTotals } from '../engine/progress.js'
+import { useProgress } from '../hooks/useProgress.js'
 
 const theme = activeTheme()
 const look = (v) => ({ background: palette[theme.cells[v].fill], emoji: theme.cells[v].emoji ?? null })
@@ -55,7 +58,27 @@ function LevelMarks({ level }) {
   )
 }
 
-function LevelButton({ level, count, loading, disabled, onPress }) {
+// The player's totals (engine/progress.js): stars = sum of each puzzle's best rating, max 5 each.
+function ProgressSummary() {
+  const { t } = useTranslation()
+  const { solved, stars } = progressTotals()
+  if (solved === 0) return null
+  return (
+    <section className="rounded-2xl bg-game-panel border-2 border-white/10 px-4 py-3 mb-6 flex items-center gap-4">
+      <span className="text-sm uppercase tracking-widest text-game-silver">{t('progress.title')}</span>
+      <span className="ml-auto flex items-baseline gap-4 font-black">
+        <span className="text-2xl text-game-star" aria-label={t('progress.stars', { count: stars })}>
+          <span aria-hidden="true">★ {stars}</span>
+        </span>
+        <span className="text-2xl text-game-green" aria-label={t('levelScreen.solved', { count: solved })}>
+          <span aria-hidden="true">✓ {solved}</span>
+        </span>
+      </span>
+    </section>
+  )
+}
+
+function LevelButton({ level, count, solved = 0, stars = 0, loading, disabled, onPress }) {
   const { t, i18n } = useTranslation()
   const noteKey = `levels.note${level}`
   return (
@@ -70,6 +93,12 @@ function LevelButton({ level, count, loading, disabled, onPress }) {
         <span className="block text-xl font-black text-white leading-tight">{t(`levels.${level}`)}</span>
         <span className="block text-xs text-game-silver font-sans font-semibold">
           {t('home.puzzleCount', { count })}
+          {solved > 0 && (
+            <>
+              <span className="text-game-green"> · ✓ {solved}</span>
+              <span className="text-game-star"> · ★ {stars}</span>
+            </>
+          )}
         </span>
         {i18n.exists(noteKey) && (
           <span className="block text-xs text-game-hint font-sans font-semibold leading-snug">{t(noteKey)}</span>
@@ -80,9 +109,13 @@ function LevelButton({ level, count, loading, disabled, onPress }) {
   )
 }
 
-export default function HomeScreen({ levels, error, loadingLevel, onSelectLevel }) {
+// levelIds: { level: [instance ids of that level] } from the catalog index (for the per-level
+// progress), or null while loading.
+export default function HomeScreen({ levels, levelIds, error, loadingLevel, onSelectLevel }) {
   const { t, i18n } = useTranslation()
   const [showRules, setShowRules] = useState(false)
+  const [showConsent, setShowConsent] = useState(false)
+  useProgress()   // re-render when progress or the storage choice changes
 
   return (
     <div className="h-[100dvh] w-full overflow-y-auto bg-game-bg">
@@ -125,6 +158,8 @@ export default function HomeScreen({ levels, error, loadingLevel, onSelectLevel 
           </p>
         </section>
 
+        <ProgressSummary />
+
         <h2 className="text-sm uppercase tracking-widest text-game-silver mb-3">{t(themedKey('home.chooseLevel'))}</h2>
 
         {error && (
@@ -138,6 +173,7 @@ export default function HomeScreen({ levels, error, loadingLevel, onSelectLevel 
               key={l.level}
               level={l.level}
               count={l.count}
+              {...progressTotals(levelIds?.[l.level] ?? [])}
               loading={loadingLevel === l.level}
               disabled={loadingLevel !== null || l.count === 0}
               onPress={() => onSelectLevel(l.level)}
@@ -150,8 +186,11 @@ export default function HomeScreen({ levels, error, loadingLevel, onSelectLevel 
         </div>
         <footer className="pt-2 text-[11px] leading-snug text-game-hint font-sans">
           {t('home.privacy')}
+          <ProgressSetting onOpen={() => setShowConsent(true)} />
         </footer>
         {showRules && <RulesDialog onClose={() => setShowRules(false)} />}
+        {showConsent && <ConsentDialog onClose={() => setShowConsent(false)} />}
+        <ConsentBannerSpacer />
       </div>
     </div>
   )

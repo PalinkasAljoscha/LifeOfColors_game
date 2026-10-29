@@ -16,7 +16,7 @@
     "puzzleCount_other": "{{count}} Rätsel",
     "loading": "Rätsel werden geladen…",
     "loadError": "Die Rätsel konnten nicht geladen werden. Bitte prüfe deine Verbindung und lade die Seite neu.",
-    "privacy": "Keine Cookies, keine identifizierenden Daten. Züge und Ergebnisse können zur Verbesserung des Spiels erfasst werden.",
+    "privacy": "Keine Cookies, kein Tracking, keine identifizierenden Daten. Züge und Ergebnisse können anonym zur Verbesserung des Spiels erfasst werden. Gespeicherter Fortschritt (nur wenn du es erlaubst) bleibt in diesem Browser und wird nie gesendet.",
     "more": "Mehr"
   },
   "game": {
@@ -35,6 +35,8 @@
     "moves_other": "Gelöst mit {{count}} Zügen.",
     "stars_one": "{{count}} von 5 Sternen",
     "stars_other": "{{count}} von 5 Sternen",
+    "newBest": "Neuer Bestwert!",
+    "yourBest": "Dein Bestwert: {{count}} ★",
     "pickNew": "Neues wählen"
   },
   "levelScreen": {
@@ -42,7 +44,23 @@
     "random": "Zufällig wählen",
     "orTap": "oder wähle dein Rätsel",
     "solved_one": "{{count}} gelöst",
-    "solved_other": "{{count}} gelöst"
+    "solved_other": "{{count}} gelöst",
+    "stars": "{{count}} von {{max}}"
+  },
+  "progress": {
+    "title": "Dein Fortschritt",
+    "stars_one": "{{count}} Stern",
+    "stars_other": "{{count}} Sterne"
+  },
+  "consent": {
+    "title": "Fortschritt speichern?",
+    "body": "Das Spiel kann sich auf diesem Gerät merken, welche Rätsel du gelöst hast und deine besten Sterne – so bleiben sie beim nächsten Mal erhalten. Gespeichert wird nur in diesem Browser, nichts wird gesendet.",
+    "accept": "Ja, speichern",
+    "decline": "Nein, danke",
+    "statusOn": "Fortschritt wird auf diesem Gerät gespeichert",
+    "statusOff": "Fortschritt wird nicht gespeichert (nur dieser Besuch)",
+    "declineDeletes": "„Nein, danke“ löscht den gespeicherten Fortschritt aus diesem Browser.",
+    "change": "Ändern"
   },
   "themes": {
     "halloween": {

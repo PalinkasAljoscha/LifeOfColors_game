@@ -7,6 +7,7 @@
 // In `npm run dev`, ?catalog=dev loads public/catalog-dev/ instead (factory --dev export).
 
 import { isPlayable } from './engine.js'
+import { recordSolved, recordTried, puzzleState } from './progress.js'
 
 function catalogDir() {
   const params = new URLSearchParams(window.location.search)
@@ -64,25 +65,22 @@ export async function pickRandom(level) {
   return inst
 }
 
-// Puzzles opened / solved in this page session, for the marks on the level grid. In memory only
-// (gone on reload): nothing is stored in the browser, as the privacy rule requires.
-const playedIds = new Set()
-const solvedIds = new Set()
+// Puzzles opened / solved, for the marks on the level grid: engine/progress.js (in memory for
+// this page session; also saved in this browser only if the player opted in).
 
-/** Mark a puzzle as solved in this session (the grid shows a check on its tile). */
-export function markSolved(inst) {
-  playedIds.add(inst.id)
-  solvedIds.add(inst.id)
+/** Mark a puzzle as solved with `stars` (1-5 or null); returns recordSolved's result. */
+export function markSolved(inst, stars = null) {
+  return recordSolved(inst.id, stars)
 }
 
-/** 'solved' | 'played' | null -- what happened to this puzzle in this page session. */
+/** 'solved' | 'played' | null -- what happened to this puzzle so far. */
 export function playState(inst) {
-  return solvedIds.has(inst.id) ? 'solved' : playedIds.has(inst.id) ? 'played' : null
+  return puzzleState(inst.id)
 }
 
 /** Remember a played puzzle (also one chosen in the grid), so "random" doesn't repeat it soon. */
 export function markPlayed(inst, poolSize = 100) {
-  playedIds.add(inst.id)
+  recordTried(inst.id)
   if (!recentlyPlayed.includes(inst.id)) recentlyPlayed.push(inst.id)
   while (recentlyPlayed.length > Math.min(50, Math.floor(poolSize / 2))) recentlyPlayed.shift()
 }

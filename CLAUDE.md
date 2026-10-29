@@ -24,11 +24,14 @@ src/
   App.jsx                 # screens: Home -> Level (grid) -> Game; ?instance=<name or id> opens one puzzle
   engine/engine.js        # THE rule engine (must match the factory's instance.py exactly)
   engine/catalog.js       # loads public/catalog/{index,level-N}.json, random pick per level
+  engine/progress.js      # tried/solved puzzles + best stars; saved in localStorage only after opt-in
+  engine/stars.js         # star rating of a win (1-5) from moves and moves_to_win_min
   telemetry/telemetry.js  # anonymous screen-view and puzzle-play telemetry (see privacy rule below)
   game/GameScene.js       # Phaser scene: draws the board, turns taps into engine calls
   hooks/usePhaserGame.js  # Phaser mount/unmount (from Maze Inc., takes width/height/registry/events)
   components/             # HomeScreen, LevelScreen (Random pick + 10-column tile grid in seq order),
-                          # GameScreen (Retry/Back -> back to the level grid; shows the puzzle name), Board, WinDialog
+                          # GameScreen (Retry/Back -> back to the level grid; shows the puzzle name), Board, WinDialog,
+                          # ConsentBanner (opt-in for saved progress + the setting on the home page)
   theme.js                # all colours
   themes.js               # visual themes (classic, halloween): cell looks, cursor, texts, decorations;
                           # ACTIVE_THEME or ?theme=<name>. Appearance only, never rules/ids/telemetry
@@ -69,6 +72,13 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   the min, 2 at 1.4 x min, linear in between rounded to the nearest star, 1 above), shown in the
   win dialog. Missing value -> neither is shown. Stars are not sent to telemetry (derivable from
   moves); `meta` itself is still never read by the app.
+- **Saved progress** -- `src/engine/progress.js` is the ONLY code that touches browser storage:
+  `loc-storage-consent` (the opt-in answer) and, only while that is 'granted', `loc-progress-v1`
+  ({v:1, p:{id: 't' | 0..5}}: tried, or solved with the best stars). Nothing is persisted before the
+  player says yes (ConsentBanner); "No thanks" deletes saved progress. Without consent progress
+  lives in memory for the visit. Total stars = sum of each puzzle's best rating (max 5 each).
+  Progress is never sent anywhere (not in telemetry). Every storage access is try/catch: blocked
+  storage must never break the game. A new stored field needs the same opt-in.
 - **Start cell switch** -- `src/config.js` `HIDE_START_CELL_IF_NOT_REQUIRED`: puzzles with
   `start_cell_required: false` start all-uncolored (`src/game/startBoard.js`); same id either way.
 - **Mobile first** -- portrait phones are the main target; boards up to 9 rows x 6 cols must fit.

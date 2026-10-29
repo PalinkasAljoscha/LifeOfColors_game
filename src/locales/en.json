@@ -16,7 +16,7 @@
     "puzzleCount_other": "{{count}} puzzles",
     "loading": "Loading puzzles…",
     "loadError": "The puzzles could not be loaded. Please check your connection and reload the page.",
-    "privacy": "No cookies, no identifying data collected. Moves and results can be collected for improving the game.",
+    "privacy": "No cookies, no tracking, no identifying data. Moves and results can be collected anonymously to improve the game. Saved progress (only if you allow it) stays in this browser and is never sent anywhere.",
     "more": "More"
   },
   "game": {
@@ -35,6 +35,8 @@
     "moves_other": "Solved in {{count}} moves.",
     "stars_one": "{{count}} of 5 stars",
     "stars_other": "{{count}} of 5 stars",
+    "newBest": "New best!",
+    "yourBest": "Your best: {{count}} ★",
     "pickNew": "Pick new"
   },
   "levelScreen": {
@@ -42,7 +44,23 @@
     "random": "Random pick",
     "orTap": "or choose your puzzle",
     "solved_one": "{{count}} solved",
-    "solved_other": "{{count}} solved"
+    "solved_other": "{{count}} solved",
+    "stars": "{{count}} of {{max}}"
+  },
+  "progress": {
+    "title": "Your progress",
+    "stars_one": "{{count}} star",
+    "stars_other": "{{count}} stars"
+  },
+  "consent": {
+    "title": "Save your progress?",
+    "body": "The game can remember on this device which puzzles you solved and your best stars, so you keep them next time. It is stored in this browser only and never sent anywhere.",
+    "accept": "Yes, save",
+    "decline": "No thanks",
+    "statusOn": "Progress is saved on this device",
+    "statusOff": "Progress is not saved (this visit only)",
+    "declineDeletes": "Choosing “No thanks” deletes the saved progress from this browser.",
+    "change": "Change"
   },
   "themes": {
     "halloween": {

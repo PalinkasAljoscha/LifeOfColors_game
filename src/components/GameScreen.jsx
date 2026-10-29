@@ -31,6 +31,8 @@ export default function GameScreen({ instance, pick, onPickNew, onHome }) {
   const [round, setRound] = useState(0)        // bumped by Retry -> remounts <Board>
   const [moves, setMoves] = useState(0)        // clicks that changed a cell
   const [won, setWon] = useState(false)
+  const [result, setResult] = useState(null)   // { stars, newBest, previousBest } of the win
+  const movesRef = useRef(0)                   // moves at the time of the win (state may lag)
   const [showRules, setShowRules] = useState(false)
   const winTimer = useRef(null)
   const minMoves = minMovesOf(instance)          // null if the catalog has no value for it
@@ -43,7 +45,9 @@ export default function GameScreen({ instance, pick, onPickNew, onHome }) {
   // Fresh board on mount and on every Retry.
   useEffect(() => {
     setMoves(0)
+    movesRef.current = 0
     setWon(false)
+    setResult(null)
   }, [round])
 
   // Page hidden -> snapshot and pause the play clock; visible again -> clock runs again.
@@ -76,12 +80,16 @@ export default function GameScreen({ instance, pick, onPickNew, onHome }) {
 
   function onClick({ r, c, changed, rule, color }) {
     telemetry.recordClick(r, c, changed, rule, color)
-    if (changed) setMoves((m) => m + 1)
+    if (changed) {
+      movesRef.current += 1
+      setMoves(movesRef.current)
+    }
   }
 
   function onWon() {
     telemetry.recordWin()
-    markSolved(instance)
+    const stars = starsForWin(movesRef.current, minMoves)
+    setResult({ stars, ...markSolved(instance, stars) })   // best rating per puzzle (engine/progress.js)
     // Short pause so the player sees the goal cell change before the dialog covers it.
     winTimer.current = setTimeout(() => setWon(true), 400)
   }
@@ -149,7 +157,7 @@ export default function GameScreen({ instance, pick, onPickNew, onHome }) {
       </div>
 
       {showRules && <RulesDialog onClose={() => setShowRules(false)} />}
-      {won && <WinDialog moves={moves} best={minMoves} stars={starsForWin(moves, minMoves)} onRetry={retry} onPickNew={() => leave(onPickNew, 'pick_new')} onHome={() => leave(onHome, 'home')} />}
+      {won && <WinDialog moves={moves} best={minMoves} stars={result?.stars ?? null} newBest={result?.newBest ?? false} previousBest={result?.previousBest ?? null} onRetry={retry} onPickNew={() => leave(onPickNew, 'pick_new')} onHome={() => leave(onHome, 'home')} />}
     </div>
   )
 }
