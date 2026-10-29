@@ -60,11 +60,11 @@ function LevelMarks({ level }) {
   )
 }
 
-// The player's totals (engine/progress.js): stars = sum of each puzzle's best rating, max 5 each.
+// Stars collected (engine/progress.js): stars = sum of each puzzle's best rating, max 5 each.
 function ProgressSummary() {
   const { t } = useTranslation()
-  const { solved, stars } = progressTotals()
-  if (solved === 0) return null
+  const { stars } = progressTotals()
+  if (stars === 0) return null
   return (
     <section className="rounded-2xl bg-game-panel border-2 border-white/10 px-4 py-3 mb-6 flex items-center gap-4">
       <span className="text-sm uppercase tracking-widest text-game-silver">{t('progress.title')}</span>
@@ -72,15 +72,12 @@ function ProgressSummary() {
         <span className="text-2xl text-game-star" aria-label={t('progress.stars', { count: stars })}>
           <span aria-hidden="true">★ {stars}</span>
         </span>
-        <span className="text-2xl text-game-green" aria-label={t('levelScreen.solved', { count: solved })}>
-          <span aria-hidden="true">✓ {solved}</span>
-        </span>
       </span>
     </section>
   )
 }
 
-function LevelButton({ level, count, solved = 0, stars = 0, loading, disabled, onPress }) {
+function LevelButton({ level, count, stars = 0, loading, disabled, onPress }) {
   const { t, i18n } = useTranslation()
   const noteKey = `levels.note${level}`
   return (
@@ -95,12 +92,7 @@ function LevelButton({ level, count, solved = 0, stars = 0, loading, disabled, o
         <span className="block text-xl font-black text-white leading-tight">{t(`levels.${level}`)}</span>
         <span className="block text-xs text-game-silver font-sans font-semibold">
           {t('home.puzzleCount', { count })}
-          {solved > 0 && (
-            <>
-              <span className="text-game-green"> · ✓ {solved}</span>
-              <span className="text-game-star"> · ★ {stars}</span>
-            </>
-          )}
+          {stars > 0 && <span className="text-game-star"> · ★ {stars}</span>}
         </span>
         {i18n.exists(noteKey) && (
           <span className="block text-xs text-game-hint font-sans font-semibold leading-snug">{t(noteKey)}</span>

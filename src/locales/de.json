@@ -41,14 +41,10 @@
   },
   "levelScreen": {
     "back": "Start",
-    "random": "Zufällig wählen",
-    "orTap": "oder wähle dein Rätsel",
-    "solved_one": "{{count}} gelöst",
-    "solved_other": "{{count}} gelöst",
-    "stars": "{{count}} von {{max}}"
+    "choose": "Wähle dein Rätsel"
   },
   "progress": {
-    "title": "Dein Fortschritt",
+    "title": "Gesammelte Sterne",
     "stars_one": "{{count}} Stern",
     "stars_other": "{{count}} Sterne"
   },

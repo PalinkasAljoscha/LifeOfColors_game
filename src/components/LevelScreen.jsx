@@ -1,21 +1,20 @@
 import { useTranslation } from 'react-i18next'
 import { playState } from '../engine/catalog.js'
 import { bestStars, progressTotals } from '../engine/progress.js'
-import { MAX_STARS } from '../engine/stars.js'
 import { useProgress } from '../hooks/useProgress.js'
 import { ConsentBannerSpacer } from './ConsentBanner.jsx'
 
-// One level: "Random pick" on top, then every puzzle of the level as a tile in its name's
+// One level: every puzzle of the level as a tile in its name's
 // colour (10 columns, publication order, so new puzzles appear at the end). Tapping a tile
 // starts that puzzle. Tiles carry no label; the name is shown on the game screen.
 // Solved puzzles show their best star rating (a check mark if the puzzle has no rating),
 // puzzles only opened a small dot (engine/progress.js: this visit, or saved if the player
 // opted in).
-export default function LevelScreen({ level, pool, onRandom, onPick, onBack }) {
+export default function LevelScreen({ level, pool, onPick, onBack }) {
   const { t } = useTranslation()
   useProgress()
   const states = pool.map(playState)
-  const { solved, stars } = progressTotals(pool.map((i) => i.id))
+  const { stars } = progressTotals(pool.map((i) => i.id))
 
   return (
     <div className="h-[100dvh] w-full flex flex-col bg-game-bg safe-pad">
@@ -25,9 +24,8 @@ export default function LevelScreen({ level, pool, onRandom, onPick, onBack }) {
             <h1 className="text-2xl font-black leading-tight">{t(`levels.${level}`)}</h1>
             <p className="text-xs text-game-silver font-sans font-semibold">
               {t('home.puzzleCount', { count: pool.length })}
-              {solved > 0 && <span className="text-game-green"> · ✓ {t('levelScreen.solved', { count: solved })}</span>}
-              {solved > 0 && (
-                <span className="text-game-star"> · ★ {t('levelScreen.stars', { count: stars, max: pool.length * MAX_STARS })}</span>
+              {stars > 0 && (
+                <span className="text-game-star" aria-label={t('progress.stars', { count: stars })}> · ★ {stars}</span>
               )}
             </p>
           </div>
@@ -40,15 +38,8 @@ export default function LevelScreen({ level, pool, onRandom, onPick, onBack }) {
           </button>
         </div>
 
-        <button
-          onClick={onRandom}
-          className="mt-4 w-full h-16 rounded-2xl bg-game-btn hover:bg-game-btn-hover active:scale-95 transition-transform
-                     text-2xl font-black shadow-lg flex items-center justify-center gap-2"
-        >
-          <span aria-hidden="true">🎲</span> {t('levelScreen.random')}
-        </button>
-        <p className="mt-3 mb-2 text-sm text-game-silver font-sans font-semibold text-center">
-          {t('levelScreen.orTap')}
+        <p className="mt-4 mb-2 text-sm text-game-silver font-sans font-semibold text-center">
+          {t('levelScreen.choose')}
         </p>
       </div>
 

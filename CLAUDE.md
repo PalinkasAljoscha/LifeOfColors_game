@@ -29,7 +29,7 @@ src/
   telemetry/telemetry.js  # anonymous screen-view and puzzle-play telemetry (see privacy rule below)
   game/GameScene.js       # Phaser scene: draws the board, turns taps into engine calls
   hooks/usePhaserGame.js  # Phaser mount/unmount (from Maze Inc., takes width/height/registry/events)
-  components/             # HomeScreen, LevelScreen (Random pick + 10-column tile grid in seq order),
+  components/             # HomeScreen, LevelScreen (10-column tile grid in seq order),
                           # GameScreen (Retry/Back -> back to the level grid; shows the puzzle name), Board, WinDialog,
                           # ConsentBanner (opt-in for saved progress + the setting on the home page)
   theme.js                # all colours
