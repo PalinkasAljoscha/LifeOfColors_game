@@ -12,11 +12,23 @@
 // A theme entry:
 //   cells       for each engine state U (uncolored), O (orange), B (blue), G (green):
 //                 fill / border   palette keys from src/theme.js (colours live there)
-//                 emoji           drawn on the cell (optional; omitted = plain colour)
+//                 emoji           drawn on the cell (optional; omitted = plain colour). Either one
+//                                 emoji, or an ARRAY of choices: one is drawn at random for every
+//                                 game (see drawLook). Cells that share choices never get the same
+//                                 emoji in one game. The first choice is the "default look" used
+//                                 outside a game (homepage logo and texts).
 //                 emojiAlpha      opacity of that emoji, 0-1 (optional, default 1)
-//                 emojiHue        shift of the emoji's colours in degrees, as CSS hue-rotate()
-//                                 (optional, default 0): emojis come in fixed colours, this
-//                                 recolours one everywhere it appears (board, homepage, texts)
+//                 emojiColor      recolours the emoji (optional): { hue, sat, light } -- coloured
+//                                 pixels get that hue (degrees), saturation x sat, lightness + light;
+//                                 whites / greys / outlines stay (src/game/emojiTexture.js). Or an
+//                                 ARRAY of such colours ({ name, hue, ... }), one drawn per game.
+//                                 Applied everywhere the emoji appears (board, goal reminder, texts).
+//                 emojiGlow       palette key: soft halo of that colour behind the emoji (optional;
+//                                 lifts dark emojis such as a spider off a dark cell)
+//
+// The per-game draw ("look") happens when a game screen opens: Retry keeps it, going back and
+// opening any game (also the same one again) draws a new one. New themes get this for free by
+// listing choices.
 //   cursor      null (browser default) or a function (palette) -> SVG string; used as the mouse
 //               cursor on the whole app (touch screens have no cursor)
 //               with cursorHotspot [x, y] = the pixel that clicks (in a 32 x 32 image)
@@ -26,6 +38,17 @@
 //   decorations homepage decorations ('halloween' -> components/ThemeDecorations.jsx), or null
 
 export const ACTIVE_THEME = 'halloween'
+
+// Halloween objects for the orange / blue cells (first two = the default look: pumpkin, ghost).
+// All light enough to read on the dark cell, helped by the glow (bat / black cat were too dark).
+const HALLOWEEN_OBJECTS = ['🎃', '👻', '🕷️', '🧙‍♀️', '💀', '🧛']
+// Candy colours (first = the default look, green); tuned on the candy emoji's pink-red stripes.
+const CANDY_COLOURS = [
+  { name: 'green', hue: 125, sat: 1, light: -0.03 },
+  { name: 'blue', hue: 220, sat: 1, light: -0.08 },
+  { name: 'red', hue: 355, sat: 1.1, light: -0.05 },
+  { name: 'yellow', hue: 50, sat: 1, light: 0 },
+]
 
 export const THEMES = {
   classic: {
@@ -47,9 +70,11 @@ export const THEMES = {
     label: 'Halloween',
     cells: {
       U: { fill: 'hwCellFill', border: 'hwCellBorder', emoji: '🕸️', emojiAlpha: 0.45 },   // spider web, dimmed
-      O: { fill: 'hwCellFill', border: 'hwCellBorder', emoji: '🎃' },   // pumpkin
-      B: { fill: 'hwCellFill', border: 'hwCellBorder', emoji: '👻' },   // ghost
-      G: { fill: 'hwCellFill', border: 'hwCellBorder', emoji: '🍬', emojiHue: 130 },   // candy, turned green
+      // Orange and blue: two different spooky objects, drawn per game.
+      O: { fill: 'hwCellFill', border: 'hwCellBorder', emoji: HALLOWEEN_OBJECTS, emojiGlow: 'hwEmojiGlow' },
+      B: { fill: 'hwCellFill', border: 'hwCellBorder', emoji: HALLOWEEN_OBJECTS, emojiGlow: 'hwEmojiGlow' },
+      // Green, the goal: always the candy, in a colour drawn per game.
+      G: { fill: 'hwCellFill', border: 'hwCellBorder', emoji: '🍬', emojiColor: CANDY_COLOURS },
     },
     cursor: witchHandSvg,
     cursorHotspot: [9, 1],
@@ -83,16 +108,41 @@ export function themedKey(key, theme = activeTheme()) {
   return theme.text[key] ?? key
 }
 
-/** Hue shift (degrees) the theme applies to an emoji, 0 if none. */
-export function emojiHue(emoji, theme = activeTheme()) {
-  const cell = Object.values(theme.cells).find((c) => c.emoji === emoji)
-  return cell?.emojiHue ?? 0
+const asList = (v) => (Array.isArray(v) ? v : v == null ? [] : [v])
+const pickOne = (list, random) => list[Math.min(list.length - 1, Math.floor(random() * list.length))]
+
+/** A concrete look of the theme: { U|O|B|G: { fill, border, emoji, emojiAlpha, emojiColor,
+ *  emojiGlow } } with every choice resolved. random = a () -> [0, 1) function, or null for the
+ *  default look (first choice everywhere). Cells sharing choices get distinct emojis. */
+export function drawLook(theme = activeTheme(), random = Math.random) {
+  const used = new Set()
+  const look = {}
+  for (const v of CELL_STATES) {
+    const cell = theme.cells[v]
+    const options = asList(cell.emoji)
+    const free = options.filter((e) => !used.has(e))
+    const pool = free.length ? free : options
+    const emoji = pool.length ? (random ? pickOne(pool, random) : pool[0]) : null
+    if (emoji) used.add(emoji)
+    const colours = asList(cell.emojiColor)
+    const colour = colours.length ? (random ? pickOne(colours, random) : colours[0]) : null
+    look[v] = { fill: cell.fill, border: cell.border, emoji, emojiAlpha: cell.emojiAlpha ?? 1,
+      emojiColor: colour, emojiGlow: cell.emojiGlow ?? null }
+  }
+  return look
 }
 
-/** Inline style that recolours an emoji like the theme does (for HTML), or undefined. */
-export function emojiStyle(emoji, theme = activeTheme()) {
-  const h = emojiHue(emoji, theme)
-  return h ? { filter: `hue-rotate(${h}deg)` } : undefined
+/** The look outside a game (homepage, rules): the first choice of everything. */
+export function defaultLook(theme = activeTheme()) {
+  return drawLook(theme, null)
+}
+
+/** How a look draws `emoji` ({ color, glow } for emojiTexture / Emoji), or null if it neither
+ *  recolours nor glows it. glow is resolved to a CSS colour with `palette`. */
+export function emojiStyleIn(look, emoji, palette) {
+  const cell = Object.values(look).find((c) => c.emoji === emoji)
+  if (!cell || (!cell.emojiColor && !cell.emojiGlow)) return null
+  return { color: cell.emojiColor, glow: cell.emojiGlow ? palette[cell.emojiGlow] : null }
 }
 
 /** CSS `cursor` value for a theme, or null. */

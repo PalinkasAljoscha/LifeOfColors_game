@@ -7,14 +7,14 @@ import { Emoji } from './Emoji.jsx'
 import { markSolved } from '../engine/catalog.js'
 import { minMovesOf, starsForWin } from '../engine/stars.js'
 import { palette } from '../theme.js'
-import { activeTheme } from '../themes.js'
+import { drawLook } from '../themes.js'
 import * as telemetry from '../telemetry/telemetry.js'
 
-// The goal colour as the board draws it in the active theme: its emoji, or a small colour square.
-function GoalLook({ color }) {
-  const look = activeTheme().cells[color]
+// The goal colour as the board draws it in this game's look: its emoji, or a small colour square.
+function GoalLook({ color, look: looks }) {
+  const look = looks[color]
   if (!look) return null
-  if (look.emoji) return <Emoji e={look.emoji} className="text-lg leading-none" />
+  if (look.emoji) return <Emoji e={look.emoji} look={looks} className="text-lg leading-none" />
   return (
     <span
       className="inline-block w-4 h-4 rounded ring-1 ring-inset ring-white/25 align-[-2px]"
@@ -36,6 +36,9 @@ export default function GameScreen({ instance, pick, onPickNew, onHome }) {
   const [showRules, setShowRules] = useState(false)
   const winTimer = useRef(null)
   const minMoves = minMovesOf(instance)          // null if the catalog has no value for it
+  // The theme's per-game choices (objects, candy colour), drawn when this screen opens: Retry
+  // keeps them; leaving and opening a game again (even the same one) draws anew.
+  const [look] = useState(() => drawLook())
 
   // Telemetry: one play per puzzle opened (Retry stays in the same play).
   useEffect(() => {
@@ -137,14 +140,14 @@ export default function GameScreen({ instance, pick, onPickNew, onHome }) {
       </div>
 
       <div className="flex-1 min-h-0 mt-2 relative">
-        <Board key={round} instance={instance} onClick={onClick} onWon={onWon} />
+        <Board key={round} instance={instance} look={look} onClick={onClick} onWon={onWon} />
       </div>
 
       {/* Goal reminder (players opening a shared link never saw the homepage) + the rules pop-up. */}
       <div className="mx-auto w-full max-w-md flex justify-between items-center gap-3 mt-2 px-1 text-sm font-sans font-bold">
         <span className="min-w-0 flex items-center gap-1.5 text-game-silver">
           <span className="shrink-0">{t('game.goal')}</span>
-          <GoalLook color={instance.goal.color} />
+          <GoalLook color={instance.goal.color} look={look} />
           <span className="truncate">{t('game.goalWhere')}</span>
         </span>
         <button
@@ -157,7 +160,7 @@ export default function GameScreen({ instance, pick, onPickNew, onHome }) {
       </div>
 
       {showRules && <RulesDialog onClose={() => setShowRules(false)} />}
-      {won && <WinDialog moves={moves} best={minMoves} stars={result?.stars ?? null} newBest={result?.newBest ?? false} previousBest={result?.previousBest ?? null} onRetry={retry} onPickNew={() => leave(onPickNew, 'pick_new')} onHome={() => leave(onHome, 'home')} />}
+      {won && <WinDialog look={look} moves={moves} best={minMoves} stars={result?.stars ?? null} newBest={result?.newBest ?? false} previousBest={result?.previousBest ?? null} onRetry={retry} onPickNew={() => leave(onPickNew, 'pick_new')} onHome={() => leave(onHome, 'home')} />}
     </div>
   )
 }
