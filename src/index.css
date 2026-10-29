@@ -65,9 +65,14 @@ body {
   0%, 100% { opacity: 0.75; }
   50%      { opacity: 1; }
 }
+@keyframes twinkle {
+  0%, 100% { opacity: 0.35; transform: scale(0.85); }
+  50%      { opacity: 1;    transform: scale(1.1); }
+}
+.deco-twinkle { animation: twinkle 3.5s ease-in-out infinite; }
 .deco-bat    { animation: batFly 7s ease-in-out infinite; }
 .deco-spider { animation: spiderBob 5s ease-in-out infinite; }
 .deco-moon   { animation: moonGlow 6s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) {
-  .deco-bat, .deco-spider, .deco-moon { animation: none; }
+  .deco-bat, .deco-spider, .deco-moon, .deco-twinkle { animation: none; }
 }
