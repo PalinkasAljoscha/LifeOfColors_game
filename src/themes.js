@@ -12,7 +12,8 @@
 // A theme entry:
 //   cells       for each engine state U (uncolored), O (orange), B (blue), G (green):
 //                 fill / border   palette keys from src/theme.js (colours live there)
-//                 emoji           drawn on the cell (optional; omitted = plain colour). Either one
+//                 emoji           drawn on the cell (optional; omitted = plain colour). An emoji or the
+//                                 key of a drawn object (src/game/drawnObjects.js). Either one
 //                                 emoji, or an ARRAY of choices: one is drawn at random for every
 //                                 game (see drawLook). Cells that share choices never get the same
 //                                 emoji in one game. The first choice is the "default look" used
@@ -51,8 +52,9 @@ const CANDY_COLOURS = [
 ]
 
 // Sorcerer's apprentice objects for the orange / blue cells (first two = the default look:
-// toadstool, potion). There is no gnome emoji in Unicode: the elf stands in for it.
-const SORCERER_OBJECTS = ['🍄', '🧪', '🗡️', '🐸', '🐉', '💎', '🧝']
+// toadstool, potion). The potion is a drawn round flask with vapour (src/game/drawnObjects.js),
+// more medieval than the 🧪 test tube.
+const SORCERER_OBJECTS = ['🍄', 'drawn:potion', '🗡️', '🐸', '🐉', '💎', '🧙', '🧌']
 
 export const THEMES = {
   classic: {
