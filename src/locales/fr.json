@@ -16,7 +16,7 @@
     "puzzleCount_other": "{{count}} puzzles",
     "loading": "Chargement des puzzles…",
     "loadError": "Les puzzles n'ont pas pu être chargés. Vérifie ta connexion et recharge la page.",
-    "privacy": "Pas de cookies, pas de pistage, aucune donnée d'identification. Les coups et résultats peuvent être collectés anonymement pour améliorer le jeu. La progression sauvegardée (seulement si tu l'autorises) reste dans ce navigateur et n'est jamais envoyée.",
+    "privacy": "Pas de cookies, pas de pistage, aucune donnée d'identification. Les coups et résultats sont collectés anonymement pour améliorer le jeu. La progression sauvegardée (seulement si tu l'autorises) reste dans ce navigateur et n'est jamais envoyée.",
     "more": "Plus"
   },
   "game": {
@@ -68,11 +68,10 @@
   },
   "rules": {
     "title": "Comment ça marche",
-    "p1": "Touche n'importe quelle case. Ce qu'elle devient dépend uniquement de ses voisines : les 8 cases autour d'elle au maximum, diagonales comprises. Les cases au bord en ont moins.",
-    "p2": "Ce qui compte, ce sont les voisines de la case et leur nombre de chaque sorte. Ce que la case touchée affiche en ce moment n'a aucune importance.",
-    "p3": "Parfois, toucher une case ne change rien. Seules les touches qui modifient une case comptent comme coups.",
-    "p4": "Pendant une partie, les règles ne changent jamais : les mêmes voisines donnent toujours le même résultat. À toi de les découvrir !",
-    "p5": "Bloqué ? « {{retry}} » relance la partie depuis le début.",
+    "p1": "Chaque puzzle a une règle cachée qui détermine comment une case se transforme quand on la touche. La règle tient compte des couleurs des cases voisines.",
+    "p2": "Comprends les règles et fais un plan pour amener l'objet gagnant sur la case au cadre doré.",
+    "p3": "Peux-tu y arriver en un minimum de coups ? Moins tu as besoin de coups, plus tu gagnes d'étoiles.",
+    "p4": "Utilise « {{retry}} » à tout moment pour recommencer le puzzle depuis le début. Expérimente pour découvrir les règles cachées. Après une victoire, tu peux rejouer pour gagner plus d'étoiles avec moins de coups.",
     "close": "Compris"
   }
 }

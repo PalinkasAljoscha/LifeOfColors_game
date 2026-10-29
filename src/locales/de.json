@@ -10,13 +10,13 @@
     "5": "Level 5"
   },
   "home": {
-    "description": "Dein Ziel: Bring 🟩 auf das golden umrandete Feld. Wie? Tippe auf ein Feld, und es verwandelt sich vielleicht – je nachdem, welche Farben um es herum sind. Die versteckten Regeln sind bei jedem Rätsel anders.",
+    "description": "Das Ziel: 🟩 auf dem gold umrandeten Feld. Tippe auf ein Feld um es zu verwandeln - oder auch nicht - je nachdem, welche Farben drumherum sind. Die versteckten Regeln sind bei jedem Puzzle anders.",
     "chooseLevel": "Wähle eine Stufe",
-    "puzzleCount_one": "{{count}} Rätsel",
-    "puzzleCount_other": "{{count}} Rätsel",
-    "loading": "Rätsel werden geladen…",
-    "loadError": "Die Rätsel konnten nicht geladen werden. Bitte prüfe deine Verbindung und lade die Seite neu.",
-    "privacy": "Keine Cookies, kein Tracking, keine identifizierenden Daten. Züge und Ergebnisse können anonym zur Verbesserung des Spiels erfasst werden. Gespeicherter Fortschritt (nur wenn du es erlaubst) bleibt in diesem Browser und wird nie gesendet.",
+    "puzzleCount_one": "{{count}} Puzzle",
+    "puzzleCount_other": "{{count}} Puzzles",
+    "loading": "Puzzles werden geladen…",
+    "loadError": "Die Puzzles konnten nicht geladen werden. Bitte prüfe deine Verbindung und lade die Seite neu.",
+    "privacy": "Keine Cookies, kein Tracking, keine identifizierenden Daten. Züge und Ergebnisse werden anonym zur Verbesserung des Spiels erfasst. Gespeicherter Fortschritt (nur wenn du es erlaubst) bleibt in diesem Browser und wird nie gesendet.",
     "more": "Mehr"
   },
   "game": {
@@ -41,7 +41,7 @@
   },
   "levelScreen": {
     "back": "Start",
-    "choose": "Wähle dein Rätsel"
+    "choose": "Wähle dein Puzzle"
   },
   "progress": {
     "title": "Gesammelte Sterne",
@@ -50,7 +50,7 @@
   },
   "consent": {
     "title": "Fortschritt speichern?",
-    "body": "Das Spiel kann sich auf diesem Gerät merken, welche Rätsel du gelöst hast und deine besten Sterne – so bleiben sie beim nächsten Mal erhalten. Gespeichert wird nur in diesem Browser, nichts wird gesendet.",
+    "body": "Das Spiel kann sich auf diesem Gerät merken, welche Puzzles du gelöst hast und deine besten Sterne – so bleiben sie beim nächsten Mal erhalten. Gespeichert wird nur in diesem Browser, nichts wird gesendet.",
     "accept": "Ja, speichern",
     "decline": "Nein, danke",
     "statusOn": "Fortschritt wird auf diesem Gerät gespeichert",
@@ -61,18 +61,17 @@
   "themes": {
     "halloween": {
       "tagline": "Halloween-Edition",
-      "description": "Dein Ziel: Bring 🍬 auf das golden umrandete Feld. Wie? Tippe auf ein Feld, und es verwandelt sich vielleicht – je nachdem, welche Objekte um es herum sind. Die versteckten Regeln sind bei jedem Rätsel anders.",
+      "description": "Das Ziel: 🍬 auf dem gold umrandeten Feld. Tippe auf ein Feld um es zu verwandeln - oder auch nicht - je nachdem, welche Farben drumherum sind. Die versteckten Regeln sind bei jedem Puzzle anders.",
       "chooseLevel": "Wähle deine Gruselstufe",
-      "winTitle": "Süßer Sieg! 🍬"
+      "winTitle": "Gewonnen! 🍬"
     }
   },
   "rules": {
     "title": "So funktioniert es",
-    "p1": "Tippe auf ein beliebiges Feld. Was daraus wird, hängt nur von seinen Nachbarn ab: den bis zu 8 Feldern rundherum, auch diagonal. Felder am Rand haben weniger.",
-    "p2": "Es zählt, welche Nachbarn das Feld hat und wie viele von jeder Sorte. Was das angetippte Feld gerade zeigt, spielt keine Rolle.",
-    "p3": "Manchmal passiert bei einem Tipp nichts. Nur Tipps, die ein Feld verändern, zählen als Züge.",
-    "p4": "Innerhalb eines Spiels ändern sich die Regeln nie: Dieselben Nachbarn führen immer zum selben Ergebnis. Finde heraus, wie sie lauten!",
-    "p5": "Festgefahren? „{{retry}}“ startet das Spiel von vorn.",
-    "close": "Verstanden"
+    "p1": "Jedes Puzzle hat eine versteckte Regel, wie sich ein Feld beim Antippen verwandelt. Die Regel beruht auf den Farben der Nachbarfelder.",
+    "p2": "Verstehe die Regeln und schmiede einen Plan, wie du das  gold umrandete Feld mit der richtigen Objekt versiehst.",
+    "p3": "Schaffst du es mit kleinst möglichen Zahl an Zügen? Je weniger Züge du brauchst, desto mehr Sterne gibt es.",
+    "p4": "Experimentiere einfach und starte jederzeit neu mit „{{retry}}“. Auch nach einem Sieg kannst du es nochmal versuchen um mit weniger Zügen mehr Sterne zu holen.",
+    "close": "Los geht's"
   }
 }

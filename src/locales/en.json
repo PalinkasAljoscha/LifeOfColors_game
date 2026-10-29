@@ -16,7 +16,7 @@
     "puzzleCount_other": "{{count}} puzzles",
     "loading": "Loading puzzles…",
     "loadError": "The puzzles could not be loaded. Please check your connection and reload the page.",
-    "privacy": "No cookies, no tracking, no identifying data. Moves and results can be collected anonymously to improve the game. Saved progress (only if you allow it) stays in this browser and is never sent anywhere.",
+    "privacy": "No cookies, no tracking, no identifying data. Moves and results are collected anonymously to improve the game. Saved progress (only if you allow it) stays in this browser and is never sent anywhere.",
     "more": "More"
   },
   "game": {
@@ -62,17 +62,16 @@
     "halloween": {
       "tagline": "Halloween edition",
       "description": "Your goal: Get 🍬 on the gold framed field. How? Tap a field and it might transform, depending on what objects are around it. The hidden rules are different for each puzzle.",
-      "chooseLevel": "Choose your level of fright",
+        "chooseLevel": "Choose your level of fright",
       "winTitle": "Sweet victory! 🍬"
     }
   },
   "rules": {
     "title": "How it works",
-    "p1": "Tap any field. What it turns into depends only on its neighbors: the up to 8 fields around it, diagonals included. Fields at the edge have fewer.",
-    "p2": "What counts is which neighbors the field has and how many of each. What the tapped field shows right now does not matter.",
-    "p3": "Sometimes a tap does nothing. Only taps that change a field count as moves.",
-    "p4": "Within a game the rules never change: the same neighbors always give the same result. Find out what they are!",
-    "p5": "Stuck? {{retry}} starts the game afresh.",
+    "p1": "Each puzzle has a hidden rule that determines how a field transforms when tapped. The rule considers the colors of the neighboring fields.",
+    "p2": "Understand the rules and make a plan how to get the winning object on the gold framed field.",
+    "p3": "Can you achieve the least number of moves possible? The fewer moves you need, the more stars you get.",
+    "p4": "Use {{retry}} anytime to start the puzzle from the beginning. Experiment to find out the hidden rules. After a win you can retry to get more stars by using less moves.",
     "close": "Got it"
   }
 }

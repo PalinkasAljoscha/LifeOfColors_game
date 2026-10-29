@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 // "More" pop-up of the homepage: how a tap works (the neighbour concept). It deliberately never
 // names the colours or symbols that can appear -- discovering them is part of the game -- so it
 // is the same text in every theme. Closes on the button, a tap outside, or Escape.
-const POINTS = ['rules.p1', 'rules.p2', 'rules.p3', 'rules.p4', 'rules.p5']
+const POINTS = ['rules.p1', 'rules.p2', 'rules.p3', 'rules.p4']
 
 export default function RulesDialog({ onClose }) {
   const { t } = useTranslation()

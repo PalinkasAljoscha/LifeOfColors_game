@@ -10,10 +10,10 @@ export const LANGUAGES = [
   { code: 'fr', label: 'Français' },
 ]
 
-// Start in the browser's language if we have it. Read locally only: the language is
+// Start in the browser's language if we have it, otherwise German (the default). Read locally only: the language is
 // never sent anywhere (see src/telemetry/telemetry.js for what is collected).
 const browser = (typeof navigator !== 'undefined' && navigator.language || 'en').slice(0, 2).toLowerCase()
-const initial = LANGUAGES.some((l) => l.code === browser) ? browser : 'en'
+const initial = LANGUAGES.some((l) => l.code === browser) ? browser : 'de'
 
 i18n
   .use(initReactI18next)
