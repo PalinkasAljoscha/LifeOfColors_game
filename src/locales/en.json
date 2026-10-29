@@ -41,14 +41,10 @@
   },
   "levelScreen": {
     "back": "Home",
-    "random": "Random pick",
-    "orTap": "or choose your puzzle",
-    "solved_one": "{{count}} solved",
-    "solved_other": "{{count}} solved",
-    "stars": "{{count}} of {{max}}"
+    "choose": "Choose your puzzle"
   },
   "progress": {
-    "title": "Your progress",
+    "title": "Stars collected",
     "stars_one": "{{count}} star",
     "stars_other": "{{count}} stars"
   },

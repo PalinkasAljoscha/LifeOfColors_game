@@ -3,10 +3,10 @@ import HomeScreen from './components/HomeScreen.jsx'
 import LevelScreen from './components/LevelScreen.jsx'
 import GameScreen from './components/GameScreen.jsx'
 import ConsentBanner from './components/ConsentBanner.jsx'
-import { loadIndex, loadLevel, pickRandom, markPlayed, findById } from './engine/catalog.js'
+import { loadIndex, loadLevel, markPlayed, findById } from './engine/catalog.js'
 import { setCatalogVersion, screenView } from './telemetry/telemetry.js'
 
-// Three screens: Home (description + level buttons) -> Level (Random pick + grid of all puzzles
+// Three screens: Home (description + level buttons) -> Level (grid of all puzzles
 // of the level) -> Game (one instance). Home in the game goes back to the level's grid.
 // `pick` records how the puzzle was chosen (telemetry): 'random' | 'grid' | 'link' (?instance=).
 export default function App() {
@@ -61,15 +61,6 @@ export default function App() {
     }
   }
 
-  async function playRandom() {
-    try {
-      setGame({ instance: await pickRandom(level.level), pick: 'random' })
-    } catch (e) {
-      setError(String(e))
-      setLevel(null)
-    }
-  }
-
   function playPicked(inst) {
     markPlayed(inst, level.pool.length)
     setGame({ instance: inst, pick: 'grid' })
@@ -102,7 +93,6 @@ export default function App() {
       <LevelScreen
         level={level.level}
         pool={level.pool}
-        onRandom={playRandom}
         onPick={playPicked}
         onBack={() => setLevel(null)}
       />

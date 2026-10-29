@@ -41,14 +41,10 @@
   },
   "levelScreen": {
     "back": "Accueil",
-    "random": "Au hasard",
-    "orTap": "ou choisis ton puzzle",
-    "solved_one": "{{count}} résolu",
-    "solved_other": "{{count}} résolus",
-    "stars": "{{count}} sur {{max}}"
+    "choose": "Choisis ton puzzle"
   },
   "progress": {
-    "title": "Ta progression",
+    "title": "Étoiles récoltées",
     "stars_one": "{{count}} étoile",
     "stars_other": "{{count}} étoiles"
   },
