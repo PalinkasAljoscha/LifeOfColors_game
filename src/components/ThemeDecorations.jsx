@@ -62,7 +62,7 @@ const SORCERER = {
         <span className="absolute bottom-8 left-[10%] text-7xl opacity-80">📜</span>
         <span className="absolute bottom-6 left-[19%] text-4xl opacity-70">🍄</span>
         <span className="absolute bottom-10 right-[11%] text-6xl opacity-80">🔮</span>
-        <span className="absolute bottom-6 right-[20%] text-4xl opacity-70">🧪</span>
+        <Emoji e="drawn:potion" className="absolute bottom-6 right-[20%] text-4xl opacity-70" />
       </div>
     </>
   ),

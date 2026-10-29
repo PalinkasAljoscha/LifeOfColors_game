@@ -1,4 +1,4 @@
-// Emoji drawn on a 2D canvas, optionally recoloured and/or with a soft glow (a theme's
+// Emoji (or a drawn object, src/game/drawnObjects.js) drawn on a 2D canvas, optionally recoloured and/or with a soft glow (a theme's
 // `emojiColor` / `emojiGlow`, src/themes.js). The same drawing is used on the board (as a Phaser
 // texture) and on the HTML screens (as an image, components/Emoji.jsx), so a recoloured emoji looks
 // identical everywhere. Pixel maths instead of ctx.filter, which older Safari versions ignore.
@@ -7,6 +7,8 @@
 // 0.25) gets the hue `hue` (degrees), its saturation times `sat` and its lightness plus `light`;
 // whites, greys and black outlines stay as they are. So the candy's stripes change colour while
 // its white wrapper and its shading stay.
+
+import { drawObject, isDrawn } from './drawnObjects.js'
 
 const FONT = '"Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Twemoji Mozilla", sans-serif'
 const SCALE = 2   // texture resolution relative to the display size (sharp on high-DPI screens)
@@ -26,7 +28,8 @@ export function drawEmojiCanvas(emoji, px, { color = null, glow = null } = {}) {
   ctx.font = `${px}px ${FONT}`
   ctx.textAlign = 'center'
   ctx.textBaseline = 'middle'
-  ctx.fillText(emoji, dim / 2, dim / 2 + px * 0.06)
+  if (isDrawn(emoji)) drawObject(ctx, emoji, dim / 2, dim / 2, px)   // no emoji for it: paths
+  else ctx.fillText(emoji, dim / 2, dim / 2 + px * 0.06)
   if (color) recolour(ctx, dim, color)
   if (glow) {
     // Soft halo behind the emoji (lifts dark emojis off dark cells): draw it again with a

@@ -60,6 +60,12 @@ export const palette = {
   scWandTip:        '#f5f0e6',
   scWandStar:       '#ffd23f',
   scWandOutline:    '#14111a',
+  scPotionGlass:    '#9cc0d6',   // drawn potion flask (src/game/drawnObjects.js)
+  scPotionLiquid:   '#8e44ad',
+  scPotionSurface:  '#c89be0',
+  scPotionVapour:   '#e2dcf5',
+  scPotionShine:    '#ffffff',
+  scPotionOutline:  '#141428',
 }
 
 // Phaser uses 0xRRGGBB integers -- derived from the palette strings above.

@@ -122,6 +122,7 @@ test('sorcerer: crown goal, stone on uncoloured, every object drawn, two differe
     assert.equal(l.U.emoji, '🪨')
     seen.add(l.O.emoji); seen.add(l.B.emoji)
   }
-  assert.equal(seen.size, 7)
+  assert.equal(seen.size, 8)
+  assert.ok(seen.has('drawn:potion') && seen.has('🧙') && seen.has('🧌'))
   assert.equal(activeThemeName('?theme=sorcerer'), 'sorcerer')
 })
