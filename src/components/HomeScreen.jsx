@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { LANGUAGES } from '../i18n.js'
 import { palette } from '../theme.js'
-import { activeTheme, themedKey } from '../themes.js'
+import { activeTheme, defaultLook, themedKey } from '../themes.js'
 import ThemeDecorations from './ThemeDecorations.jsx'
 import { Emoji, ThemedText } from './Emoji.jsx'
 import RulesDialog from './RulesDialog.jsx'
@@ -11,7 +11,9 @@ import { progressTotals } from '../engine/progress.js'
 import { useProgress } from '../hooks/useProgress.js'
 
 const theme = activeTheme()
-const look = (v) => ({ background: palette[theme.cells[v].fill], emoji: theme.cells[v].emoji ?? null })
+// The theme's default look (first choice of every per-game choice: pumpkin, ghost, green candy).
+const LOOK = defaultLook(theme)
+const look = (v) => ({ background: palette[LOOK[v].fill], emoji: LOOK[v].emoji ?? null })
 const DOTS = ['O', 'B', 'G'].map(look)
 
 // Small decorative board: three colours and an empty cell, like the game itself (drawn in the

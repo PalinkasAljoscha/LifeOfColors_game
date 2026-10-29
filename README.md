@@ -35,7 +35,14 @@ The puzzle id is the same either way, so keep the setting fixed once the game is
 
 `src/themes.js` lists every visual theme and how it is defined. There are two now: `classic`
 (the colour cells) and `halloween`. Halloween shows 🎃 orange, 👻 blue, 🍬 green and a dimmed 🕸️ for
-uncolored cells (the candy recoloured green with `emojiHue`, so it stands apart from the ghost), a witch-hand mouse cursor, its own homepage texts and decorations.
+uncolored cells, a witch-hand mouse cursor, its own homepage texts and decorations.
+- **Variation per game.** A cell's `emoji` can be a list of choices and `emojiColor` a list of
+  colours; one of each is drawn at random whenever a game screen opens. Retry keeps the draw;
+  going back and opening any game (also the same one again) draws anew. In `halloween`, orange
+  and blue cells get two different objects out of 🎃 👻 🕷️ 🧙‍♀️ 💀 🧛, and the goal candy 🍬 is
+  green, blue, red or yellow. The goal reminder and the win title show this game's candy.
+  Outside a game (homepage) the first choice of everything is used. A new theme gets this by
+  listing choices.
 - `ACTIVE_THEME` picks the theme everyone sees (change it, then redeploy). It is `halloween`
   since 2026-10-26; `?theme=classic` shows the classic look.
 - `?theme=<name>` in the URL previews any theme, e.g. `…/LifeOfColors_game/?theme=halloween`.

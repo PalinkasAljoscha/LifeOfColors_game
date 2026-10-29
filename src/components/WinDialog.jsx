@@ -25,14 +25,14 @@ function Stars({ count }) {
 // stars / best: null when the puzzle has no moves_to_win_min in the catalog (then not shown).
 // newBest: this solve beat the puzzle's earlier best rating; previousBest: that earlier rating
 // (from engine/progress.js -- shown when this solve did not reach it).
-export default function WinDialog({ moves, best = null, stars = null, newBest = false, previousBest = null,
+export default function WinDialog({ look = undefined, moves, best = null, stars = null, newBest = false, previousBest = null,
                                     onRetry, onPickNew, onHome }) {
   const { t } = useTranslation()
   const secondary = 'flex-1 h-14 rounded-2xl bg-game-panel border-2 border-white/15 active:scale-95 transition-transform text-base font-black'
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-6" role="dialog" aria-modal="true">
       <div className="pop-in w-full max-w-xs rounded-3xl bg-game-header border-2 border-white/15 p-6 text-center shadow-2xl">
-        <h2 className="text-3xl font-black text-game-score"><ThemedText text={t(themedKey('win.title'))} /></h2>
+        <h2 className="text-3xl font-black text-game-score"><ThemedText text={t(themedKey('win.title'))} look={look} /></h2>
         {stars !== null && <Stars count={stars} />}
         {stars !== null && newBest && (
           <p className="mt-2 text-sm font-black uppercase tracking-widest text-game-score">{t('win.newBest')}</p>

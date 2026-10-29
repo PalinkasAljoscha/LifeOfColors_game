@@ -45,6 +45,7 @@ export const palette = {
   // ── Halloween theme (src/themes.js) ──
   hwCellFill:       '#2a2333',   // one background for every cell; the emoji tells the state
   hwCellBorder:     '#40344d',
+  hwEmojiGlow:      '#cbb8f0',   // soft halo behind the cell objects (spider etc. on the dark cell)
   hwWitchSkin:      '#7cb342',   // witch-hand cursor
   hwWitchShade:     '#4f7a26',
   hwWitchNail:      '#6b2d8f',

@@ -2,7 +2,8 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
-import { THEMES, ACTIVE_THEME, CELL_STATES, activeThemeName, themedKey, cursorCss, emojiHue, emojiStyle } from '../src/themes.js'
+import { THEMES, ACTIVE_THEME, CELL_STATES, activeThemeName, themedKey, cursorCss, drawLook, defaultLook, emojiStyleIn } from '../src/themes.js'
+import { recolourPixel, rgbToHsl } from '../src/game/emojiTexture.js'
 import { palette } from '../src/theme.js'
 
 const locale = (l) => JSON.parse(readFileSync(new URL(`../src/locales/${l}.json`, import.meta.url)))
@@ -21,11 +22,27 @@ for (const [name, theme] of Object.entries(THEMES)) {
       assert.ok(cell, `${name}: no look for state ${v}`)
       assert.ok(palette[cell.fill], `${name}.${v}.fill ${cell.fill} not in palette`)
       assert.ok(palette[cell.border], `${name}.${v}.border ${cell.border} not in palette`)
-      if (cell.emojiHue !== undefined) assert.ok(cell.emoji && Number.isFinite(cell.emojiHue), `${name}.${v}.emojiHue`)
+      const emojis = Array.isArray(cell.emoji) ? cell.emoji : cell.emoji ? [cell.emoji] : []
+      for (const e of emojis) assert.ok(typeof e === 'string' && e.length > 0, `${name}.${v}.emoji`)
+      if (Array.isArray(cell.emoji)) assert.equal(new Set(cell.emoji).size, cell.emoji.length, `${name}.${v}: duplicate choice`)
+      const colours = Array.isArray(cell.emojiColor) ? cell.emojiColor : cell.emojiColor ? [cell.emojiColor] : []
+      for (const c of colours) {
+        assert.ok(emojis.length, `${name}.${v}.emojiColor without an emoji`)
+        assert.ok(Number.isFinite(c.hue), `${name}.${v}.emojiColor.hue`)
+      }
+      if (cell.emojiGlow !== undefined) assert.ok(palette[cell.emojiGlow], `${name}.${v}.emojiGlow ${cell.emojiGlow} not in palette`)
       if (cell.emojiAlpha !== undefined) assert.ok(cell.emojiAlpha > 0 && cell.emojiAlpha <= 1, `${name}.${v}.emojiAlpha`)
-      return cell.emoji ?? palette[cell.fill]
+      return cell
     })
-    assert.equal(new Set(looks).size, CELL_STATES.length, `${name}: two states look the same`)
+    // In every drawn look (and the default look) the four states must look different.
+    const lookKey = (l) => CELL_STATES.map((v) => l[v].emoji ?? palette[l[v].fill])
+    assert.equal(new Set(lookKey(defaultLook(theme))).size, CELL_STATES.length, `${name}: default look repeats a state`)
+    let seed = 1
+    const random = () => ((seed = (seed * 16807) % 2147483647) / 2147483647)
+    for (let i = 0; i < 300; i++) {
+      assert.equal(new Set(lookKey(drawLook(theme, random))).size, CELL_STATES.length, `${name}: drawn look repeats a state`)
+    }
+    assert.ok(looks.length === CELL_STATES.length)
   })
 
   test(`theme ${name}: themed texts exist in every locale`, () => {
@@ -51,11 +68,38 @@ test('?theme= picks a theme, unknown names fall back', () => {
   assert.equal(themedKey('win.title', THEMES.classic), 'win.title')
 })
 
-test('emoji recolouring follows the theme', () => {
-  assert.equal(emojiHue('🍬', THEMES.halloween), 130)
-  assert.deepEqual(emojiStyle('🍬', THEMES.halloween), { filter: 'hue-rotate(130deg)' })
-  assert.equal(emojiStyle('🎃', THEMES.halloween), undefined)
-  assert.equal(emojiHue('🍬', THEMES.classic), 0)
+test('halloween: every object and candy colour gets drawn, Retry-stable look, default look', () => {
+  const t = THEMES.halloween
+  const seen = { O: new Set(), B: new Set(), colour: new Set() }
+  for (let i = 0; i < 2000; i++) {
+    const l = drawLook(t)
+    assert.notEqual(l.O.emoji, l.B.emoji)
+    assert.equal(l.G.emoji, '🍬')
+    assert.equal(l.U.emoji, '🕸️')
+    seen.O.add(l.O.emoji); seen.B.add(l.B.emoji); seen.colour.add(l.G.emojiColor.name)
+  }
+  assert.equal(seen.O.size, t.cells.O.emoji.length)
+  assert.equal(seen.B.size, t.cells.B.emoji.length)
+  assert.deepEqual([...seen.colour].sort(), ['blue', 'green', 'red', 'yellow'])
+  for (const o of ['🕷️', '🧙‍♀️']) assert.ok(t.cells.O.emoji.includes(o), `missing ${o}`)
+
+  const d = defaultLook(t)
+  assert.deepEqual([d.O.emoji, d.B.emoji, d.G.emojiColor.name], ['🎃', '👻', 'green'])
+  assert.deepEqual(emojiStyleIn(d, '🍬', palette).color.name, 'green')
+  assert.equal(emojiStyleIn(d, '🕸️', palette), null)
+  assert.equal(emojiStyleIn(d, '🎃', palette).glow, palette.hwEmojiGlow)
+  assert.equal(emojiStyleIn(defaultLook(THEMES.classic), '🍬', palette), null)
+})
+
+test('recolouring keeps whites and greys, sets the hue of coloured pixels', () => {
+  const opts = { hue: 125, sat: 1, light: 0 }
+  assert.equal(recolourPixel(255, 255, 255, opts), null)     // white wrapper
+  assert.equal(recolourPixel(120, 118, 122, opts), null)     // grey shading
+  const [r, g, b] = recolourPixel(240, 80, 110, opts)        // pink-red stripe -> green
+  const [h, s, l] = rgbToHsl(r, g, b)
+  assert.ok(Math.abs(h * 360 - 125) < 2, `hue ${h * 360}`)
+  const [, s0, l0] = rgbToHsl(240, 80, 110)
+  assert.ok(Math.abs(s - s0) < 0.02 && Math.abs(l - l0) < 0.02)
 })
 
 test('all locale files have the same keys', () => {

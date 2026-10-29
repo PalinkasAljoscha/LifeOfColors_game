@@ -1,6 +1,6 @@
 import Phaser from 'phaser'
-import { phaser as C } from '../theme.js'
-import { activeTheme, CELL_STATES } from '../themes.js'
+import { phaser as C, palette } from '../theme.js'
+import { CELL_STATES, defaultLook } from '../themes.js'
 import { applyClick, clickRule, isWon } from '../engine/engine.js'
 import { startBoard } from './startBoard.js'
 import { emojiTexture, emojiDisplaySize } from './emojiTexture.js'
@@ -13,8 +13,9 @@ import { emojiTexture, emojiDisplaySize } from './emojiTexture.js'
 //   'won'         { clicks }                          the goal cell reached its goal colour (emitted at once;
 //                                                     the React side delays the dialog briefly)
 //
-// What a cell shows (colour, or an emoji on a background) comes from the active theme
-// (src/themes.js); the theme never changes what a tap does.
+// What a cell shows (colour, or an emoji on a background) comes from the game's look: the
+// active theme with its per-game choices drawn (src/themes.js drawLook, registry 'look'); the
+// theme never changes what a tap does.
 //
 // The canvas size follows the board's shape (see boardCanvasSize), so any board up to
 // 9 rows x 6 cols fills the available screen area with Phaser.Scale.FIT.
@@ -42,12 +43,13 @@ export default class GameScene extends Phaser.Scene {
     this.rows = rows
     this.cols = cols
     this.board = startBoard(this.inst)
-    const theme = activeTheme()
+    const looks = this.registry.get('look') ?? defaultLook()
     this.cellLook = Object.fromEntries(CELL_STATES.map((v) => {
-      const look = theme.cells[v]
+      const look = looks[v]
+      const style = { color: look.emojiColor, glow: look.emojiGlow ? palette[look.emojiGlow] : null }
       return [v, {
         fill: C[look.fill], border: C[look.border], alpha: look.emojiAlpha ?? 1,
-        emoji: look.emoji ? emojiTexture(this, look.emoji, EMOJI_SIZE, look.emojiHue ?? 0) : null,
+        emoji: look.emoji ? emojiTexture(this, look.emoji, EMOJI_SIZE, style) : null,
       }]
     }))
     this.clicks = 0
