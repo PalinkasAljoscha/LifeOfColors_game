@@ -56,7 +56,9 @@
     "statusOn": "Progress is saved on this device",
     "statusOff": "Progress is not saved (this visit only)",
     "declineDeletes": "Choosing “No thanks” deletes the saved progress from this browser.",
-    "change": "Change"
+    "change": "Change",
+    "nudgeNews": "🏰 {{name}} is open!",
+    "nudgeBody": "Your progress is not saved yet, so the opened castles would be gone next time. Save it in this browser? It is never sent anywhere."
   },
   "themes": {
     "halloween": {
@@ -79,5 +81,13 @@
     "p3": "Can you achieve the least number of moves possible? The fewer moves you need, the more stars you get.",
     "p4": "Use {{retry}} anytime to start the puzzle from the beginning. Experiment to find out the hidden rules. After a win you can retry to get more stars by using less moves.",
     "close": "Got it"
+  },
+  "castles": {
+    "name": "Castle {{n}}",
+    "tutorial": "Training castle",
+    "progress": "{{stars}} of {{required}} stars",
+    "locked": "locked",
+    "toOpen": "to open {{name}}",
+    "nextOpen": "{{name}} is open!"
   }
 }

@@ -26,7 +26,8 @@ function GoalLook({ color, look: looks }) {
 
 // One instance. Retry remounts the board (fresh start of the same instance); Back goes to the
 // level's grid. `pick` (how the puzzle was chosen) is passed on to telemetry.
-export default function GameScreen({ instance, pick, onPickNew, onHome }) {
+// `place`: the label in front of the puzzle name (the castle it belongs to).
+export default function GameScreen({ instance, place, pick, onPickNew, onHome }) {
   const { t } = useTranslation()
   const [round, setRound] = useState(0)        // bumped by Retry -> remounts <Board>
   const [moves, setMoves] = useState(0)        // clicks that changed a cell
@@ -119,7 +120,7 @@ export default function GameScreen({ instance, pick, onPickNew, onHome }) {
 
       <div className="mx-auto w-full max-w-md flex justify-between items-baseline gap-3 mt-3 px-1 text-sm font-sans font-bold">
         <span className="min-w-0 flex items-center gap-1.5">
-          <span className="text-game-silver shrink-0">{t(`levels.${instance.level}`)}:</span>
+          {place && <span className="text-game-silver shrink-0">{place}:</span>}
           {/* Puzzle name (the factory finds the puzzle by it), with its tile colour from the level grid. */}
           {instance.name_color && (
             <span

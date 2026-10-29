@@ -46,6 +46,13 @@ export async function loadLevel(level) {
   return playable
 }
 
+/** Every playable instance of every level (for the castle map, engine/castles.js). */
+export async function loadAll() {
+  const index = await loadIndex()
+  const pools = await Promise.all(index.levels.filter((l) => l.count > 0).map((l) => loadLevel(l.level)))
+  return pools.flat()
+}
+
 /** Levels that have at least one instance this build can play. */
 export async function playableLevels() {
   const index = await loadIndex()

@@ -42,6 +42,28 @@ export const palette = {
   cellBlueFill:        '#3498db',
   cellBlueBorder:      '#217dbb',
 
+  // ── Castle map (home screen, components/CastleMap.jsx) ──
+  mapGrass:          '#3f6b3a',
+  mapFieldGreen:     '#5b8a3c',
+  mapFieldWheat:     '#b59a4a',
+  mapFieldEarth:     '#7a5a3a',
+  mapFurrow:         '#2f4f2b',
+  mapTreeTop:        '#24502b',
+  mapTreeTopLight:   '#2f6334',
+  mapTreeTrunk:      '#5a3d22',
+  mapPath:           '#d8bf8a',
+  mapPathEdge:       '#a88d5c',
+  mapPathLocked:     '#8a8f9c',
+  castleWall:        '#e3dccb',
+  castleShade:       '#b9b09c',
+  castleRoof:        '#b0413e',
+  castleGate:        '#4a3628',
+  castleLockedWall:  '#8d919c',
+  castleLockedShade: '#6c707a',
+  castleLockedRoof:  '#5c606a',
+  castleBadge:       '#16213e',
+  progressTrack:     '#3d4766',
+
   // ── Halloween theme (src/themes.js) ──
   hwCellFill:       '#2a2333',   // one background for every cell; the emoji tells the state
   hwCellBorder:     '#40344d',

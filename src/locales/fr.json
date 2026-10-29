@@ -56,7 +56,9 @@
     "statusOn": "Progression sauvegardée sur cet appareil",
     "statusOff": "Progression non sauvegardée (cette visite seulement)",
     "declineDeletes": "« Non merci » supprime la progression sauvegardée de ce navigateur.",
-    "change": "Modifier"
+    "change": "Modifier",
+    "nudgeNews": "🏰 Le {{name}} est ouvert !",
+    "nudgeBody": "Ta progression n’est pas encore enregistrée : les châteaux ouverts disparaîtraient la prochaine fois. L’enregistrer dans ce navigateur ? Elle n’est jamais envoyée nulle part."
   },
   "themes": {
     "halloween": {
@@ -79,5 +81,13 @@
     "p3": "Peux-tu y arriver en un minimum de coups ? Moins tu as besoin de coups, plus tu gagnes d'étoiles.",
     "p4": "Utilise « {{retry}} » à tout moment pour recommencer le puzzle depuis le début. Expérimente pour découvrir les règles cachées. Après une victoire, tu peux rejouer pour gagner plus d'étoiles avec moins de coups.",
     "close": "Compris"
+  },
+  "castles": {
+    "name": "Château {{n}}",
+    "tutorial": "Château d’entraînement",
+    "progress": "{{stars}} sur {{required}} étoiles",
+    "locked": "verrouillé",
+    "toOpen": "pour ouvrir le {{name}}",
+    "nextOpen": "Le {{name}} est ouvert !"
   }
 }

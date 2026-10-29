@@ -1,30 +1,57 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import HomeScreen from './components/HomeScreen.jsx'
 import LevelScreen from './components/LevelScreen.jsx'
 import GameScreen from './components/GameScreen.jsx'
 import ConsentBanner from './components/ConsentBanner.jsx'
-import { loadIndex, loadLevel, markPlayed, findById } from './engine/catalog.js'
+import { loadIndex, loadAll, markPlayed, findById } from './engine/catalog.js'
+import {
+  assignCastles, castleStates as computeStates, catalogHasCastles, earnedUnlocks, highestUnlocked, TUTORIAL_CASTLE,
+} from './engine/castles.js'
+import { progressTotals, storageConsent, CONSENT_GRANTED } from './engine/progress.js'
+import { useProgress } from './hooks/useProgress.js'
 import { setCatalogVersion, screenView } from './telemetry/telemetry.js'
 
-// Three screens: Home (description + level buttons) -> Level (grid of all puzzles
-// of the level) -> Game (one instance). Home in the game goes back to the level's grid.
-// `pick` records how the puzzle was chosen (telemetry): 'random' | 'grid' | 'link' (?instance=).
+// Three screens: Home (castle map, engine/castles.js) -> Castle (grid of its puzzles; the
+// LevelScreen component) -> Game (one instance). Back in the game returns to the castle's grid.
+// `pick` records how the puzzle was chosen (telemetry): 'grid' | 'link' (?instance=).
+// Telemetry `level`: the castle number on the castle screen, the instance's catalog level in a game.
 export default function App() {
+  const { t } = useTranslation()
   const [index, setIndex] = useState(null)
+  const [castles, setCastles] = useState(null)   // [{ castle, pool }] once the catalog is loaded
   const [error, setError] = useState(null)
-  const [level, setLevel] = useState(null)       // { level, pool } while a level is open
+  const [castle, setCastle] = useState(null)     // number of the open castle, or null on the map
   const [game, setGame] = useState(null)         // { instance, pick } while playing
-  const [loadingLevel, setLoadingLevel] = useState(null)
-  // { level: [ids] } from the catalog index, for the per-level progress on the home screen.
-  const levelIds = useMemo(() => {
-    const out = {}
-    for (const [id, lvl] of Object.entries(index?.instances ?? {})) (out[lvl] ??= []).push(id)
-    return out
-  }, [index])
+  const progressVersion = useProgress()          // castle states follow the stars
+
+  const states = useMemo(
+    () => castles && computeStates(castles, (pool) => progressTotals(pool.map((i) => i.id)).stars),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [castles, progressVersion],
+  )
+
+  // Nudge the opt-in once per visit when play opens a new castle and progress is not being saved
+  // (otherwise the opened castles are gone next time).
+  const [nudge, setNudge] = useState(null)       // castle number just opened, while nudging
+  const baseline = useRef(null)
+  const nudged = useRef(false)
+  const unlocks = states ? earnedUnlocks(states) : null
+  useEffect(() => {
+    if (unlocks === null) return
+    if (baseline.current === null || unlocks < baseline.current) { baseline.current = unlocks; return }
+    if (unlocks > baseline.current) {
+      baseline.current = unlocks
+      if (!nudged.current && storageConsent() !== CONSENT_GRANTED) {
+        nudged.current = true
+        setNudge(highestUnlocked(states))
+      }
+    }
+  }, [unlocks, states])
 
   // Telemetry: one screen_views row per screen shown (once the catalog is loaded).
-  const screen = game ? 'game' : level ? 'level' : 'home'
-  const viewLevel = game?.instance.level ?? level?.level ?? null
+  const screen = game ? 'game' : castle !== null ? 'level' : 'home'
+  const viewLevel = game?.instance.level ?? castle
   const viewId = game?.instance.id ?? null
   const viewPick = game?.pick ?? null
   useEffect(() => {
@@ -36,13 +63,16 @@ export default function App() {
       .then(async (idx) => {
         setIndex(idx)
         setCatalogVersion(idx.catalog_version)
-        // ?instance=<name or id> opens one specific puzzle (testing, sharing).
+        const all = assignCastles(await loadAll(), catalogHasCastles(idx))
+        setCastles(all)
+        // ?instance=<name or id> opens one specific puzzle (testing, sharing), even in a locked castle.
         const ref = new URLSearchParams(window.location.search).get('instance')
         if (ref) {
           const inst = await findById(ref)
           if (inst) {
             markPlayed(inst)
-            setLevel({ level: inst.level, pool: await loadLevel(inst.level) })
+            const home = all.find((c) => c.pool.some((i) => i.id === inst.id))
+            setCastle(home ? home.castle : null)
             setGame({ instance: inst, pick: 'link' })
           }
         }
@@ -50,19 +80,11 @@ export default function App() {
       .catch((e) => setError(String(e)))
   }, [])
 
-  async function openLevel(lvl) {
-    setLoadingLevel(lvl)
-    try {
-      setLevel({ level: lvl, pool: await loadLevel(lvl) })
-    } catch (e) {
-      setError(String(e))
-    } finally {
-      setLoadingLevel(null)
-    }
-  }
+  const castleName = (c) => (c === TUTORIAL_CASTLE ? t('castles.tutorial') : t('castles.name', { n: c }))
+  const pool = castle !== null ? castles?.[castle]?.pool ?? [] : []
 
   function playPicked(inst) {
-    markPlayed(inst, level.pool.length)
+    markPlayed(inst, pool.length)
     setGame({ instance: inst, pick: 'grid' })
   }
 
@@ -75,40 +97,46 @@ export default function App() {
     }
   }
 
+  const banner = <ConsentBanner nudge={nudge === null ? null : castleName(nudge)} onNudgeDone={() => setNudge(null)} />
+
   if (game) {
     return (
       <GameScreen
         key={game.instance.id}
         instance={game.instance}
+        place={castle !== null ? castleName(castle) : null}
         pick={game.pick}
         onPickNew={leaveGame}
-        onHome={() => { leaveGame(); setLevel(null) }}
+        onHome={() => { leaveGame(); setCastle(null) }}
       />
     )
   }
-  if (level) {
+  if (castle !== null && states) {
     return (
       <>
-      <ConsentBanner />
+      {banner}
       <LevelScreen
-        level={level.level}
-        pool={level.pool}
+        title={castleName(castle)}
+        nextTitle={castle + 1 < states.length ? castleName(castle + 1) : null}
+        state={states[castle]}
+        pool={pool}
         onPick={playPicked}
-        onBack={() => setLevel(null)}
+        onBack={() => setCastle(null)}
+        nudging={nudge !== null}
       />
       </>
     )
   }
-  // The opt-in banner shows on the home and level screens until answered (never over a game).
+  // The opt-in banner shows on the home and castle screens until answered (never over a game).
   return (
     <>
-    <ConsentBanner />
+    {banner}
     <HomeScreen
-      levels={index?.levels ?? null}
-      levelIds={index ? levelIds : null}
+      castleStates={states}
       error={error}
-      loadingLevel={loadingLevel}
-      onSelectLevel={openLevel}
+      loadingCastle={null}
+      onSelectCastle={setCastle}
+      nudging={nudge !== null}
     />
     </>
   )

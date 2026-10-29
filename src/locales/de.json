@@ -56,7 +56,9 @@
     "statusOn": "Fortschritt wird auf diesem Gerät gespeichert",
     "statusOff": "Fortschritt wird nicht gespeichert (nur dieser Besuch)",
     "declineDeletes": "„Nein, danke“ löscht den gespeicherten Fortschritt aus diesem Browser.",
-    "change": "Ändern"
+    "change": "Ändern",
+    "nudgeNews": "🏰 {{name}} ist offen!",
+    "nudgeBody": "Dein Fortschritt wird noch nicht gespeichert – die geöffneten Burgen wären beim nächsten Mal weg. In diesem Browser speichern? Er wird nirgendwohin gesendet."
   },
   "themes": {
     "halloween": {
@@ -79,5 +81,13 @@
     "p3": "Schaffst du es mit kleinst möglichen Zahl an Zügen? Je weniger Züge du brauchst, desto mehr Sterne gibt es.",
     "p4": "Experimentiere einfach und starte jederzeit neu mit „{{retry}}“. Auch nach einem Sieg kannst du es nochmal versuchen um mit weniger Zügen mehr Sterne zu holen.",
     "close": "Los geht's"
+  },
+  "castles": {
+    "name": "Burg {{n}}",
+    "tutorial": "Übungsburg",
+    "progress": "{{stars}} von {{required}} Sternen",
+    "locked": "gesperrt",
+    "toOpen": "um {{name}} zu öffnen",
+    "nextOpen": "{{name}} ist offen!"
   }
 }

@@ -26,18 +26,22 @@ function Choice({ onDone }) {
 }
 
 /** First-visit banner at the bottom of the screen (not blocking: the game can be played without
- *  answering -- progress then stays for this visit only). Renders nothing once answered. */
-export default function ConsentBanner() {
+ *  answering -- progress then stays for this visit only). Renders nothing once answered.
+ *  `nudge` (a castle name): play just opened that castle and progress is not saved -- the banner
+ *  (re)appears with that news, also after an earlier "No thanks"; any answer ends it (onNudgeDone). */
+export default function ConsentBanner({ nudge = null, onNudgeDone }) {
   const { t } = useTranslation()
   useProgress()
-  if (storageConsent() !== null) return null
+  if (storageConsent() !== null && !nudge) return null
   return (
     <div className="fixed inset-x-0 bottom-0 z-40 px-3 pb-3 pointer-events-none" role="region" aria-label={t('consent.title')}>
-      <div className="pop-in pointer-events-auto mx-auto w-full max-w-md rounded-3xl bg-game-header border-2 border-white/15
-                      p-4 shadow-2xl font-sans">
+      <div key={nudge ?? 'first'}
+           className={`pop-in pointer-events-auto mx-auto w-full max-w-md rounded-3xl bg-game-header border-2 p-4 shadow-2xl font-sans
+                       ${nudge ? 'border-game-star' : 'border-white/15'}`}>
+        {nudge && <p className="text-sm font-black font-game text-game-star">{t('consent.nudgeNews', { name: nudge })}</p>}
         <h2 className="text-lg font-black font-game text-white">{t('consent.title')}</h2>
-        <p className="mt-1 text-sm font-semibold leading-snug text-game-silver">{t('consent.body')}</p>
-        <Choice />
+        <p className="mt-1 text-sm font-semibold leading-snug text-game-silver">{t(nudge ? 'consent.nudgeBody' : 'consent.body')}</p>
+        <Choice onDone={onNudgeDone} />
       </div>
     </div>
   )
@@ -45,9 +49,9 @@ export default function ConsentBanner() {
 
 /** Empty space at the end of a scrolling screen while the banner is open, so the banner never
  *  hides the last level button or puzzle tiles. */
-export function ConsentBannerSpacer() {
+export function ConsentBannerSpacer({ nudge = false }) {
   useProgress()
-  return storageConsent() === null ? <div className="h-52 shrink-0" aria-hidden="true" /> : null
+  return storageConsent() === null || nudge ? <div className="h-52 shrink-0" aria-hidden="true" /> : null
 }
 
 /** Dialog to change the choice later (opened from ProgressSetting). */

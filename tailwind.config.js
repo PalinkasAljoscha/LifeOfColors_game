@@ -22,6 +22,8 @@ export default {
           green:    palette.cellGreenFill,
           blue:     palette.cellBlueFill,
           cell:     palette.cellUncolored,
+          badge:    palette.castleBadge,
+          track:    palette.progressTrack,
         },
       },
       fontFamily: {

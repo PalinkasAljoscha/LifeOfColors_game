@@ -1,8 +1,9 @@
 import { useTranslation } from 'react-i18next'
 import { playState } from '../engine/catalog.js'
-import { bestStars, progressTotals } from '../engine/progress.js'
+import { bestStars } from '../engine/progress.js'
 import { useProgress } from '../hooks/useProgress.js'
 import { ConsentBannerSpacer } from './ConsentBanner.jsx'
+import { palette } from '../theme.js'
 
 // One level: every puzzle of the level as a tile in its name's
 // colour (10 columns, publication order, so new puzzles appear at the end). Tapping a tile
@@ -10,23 +11,23 @@ import { ConsentBannerSpacer } from './ConsentBanner.jsx'
 // Solved puzzles show their best star rating (a check mark if the puzzle has no rating),
 // puzzles only opened a small dot (engine/progress.js: this visit, or saved if the player
 // opted in).
-export default function LevelScreen({ level, pool, onPick, onBack }) {
+// Used for one castle (engine/castles.js): `state` = { stars, required, done }, shown as a bar
+// towards opening `nextTitle` (the castle above; null for the last one).
+export default function LevelScreen({ title, nextTitle, state, pool, onPick, onBack, nudging = false }) {
   const { t } = useTranslation()
   useProgress()
   const states = pool.map(playState)
-  const { stars } = progressTotals(pool.map((i) => i.id))
+  const { stars, required, done } = state
+  const share = Math.min(1, stars / required)
 
   return (
     <div className="h-[100dvh] w-full flex flex-col bg-game-bg safe-pad">
       <div className="mx-auto w-full max-w-md">
         <div className="flex items-center gap-3">
           <div className="min-w-0">
-            <h1 className="text-2xl font-black leading-tight">{t(`levels.${level}`)}</h1>
+            <h1 className="text-2xl font-black leading-tight">{title}</h1>
             <p className="text-xs text-game-silver font-sans font-semibold">
               {t('home.puzzleCount', { count: pool.length })}
-              {stars > 0 && (
-                <span className="text-game-star" aria-label={t('progress.stars', { count: stars })}> · ★ {stars}</span>
-              )}
             </p>
           </div>
           <button
@@ -37,6 +38,22 @@ export default function LevelScreen({ level, pool, onPick, onBack }) {
             {t('levelScreen.back')}
           </button>
         </div>
+
+        {nextTitle && (
+          <div className="mt-3">
+            <p className="text-sm font-sans font-bold">
+              <span className="text-game-star">★ {stars}</span>
+              <span className="text-game-silver"> / {required} · </span>
+              <span className={done ? 'text-white' : 'text-game-silver'}>
+                {t(done ? 'castles.nextOpen' : 'castles.toOpen', { name: nextTitle })}
+              </span>
+            </p>
+            <div className="mt-1.5 h-2.5 rounded-full bg-game-track overflow-hidden"
+                 role="progressbar" aria-valuemin={0} aria-valuemax={required} aria-valuenow={Math.min(stars, required)}>
+              <div className="h-full rounded-full" style={{ width: `${share * 100}%`, background: done ? palette.correctGreen : palette.starGold }} />
+            </div>
+          </div>
+        )}
 
         <p className="mt-4 mb-2 text-sm text-game-silver font-sans font-semibold text-center">
           {t('levelScreen.choose')}
@@ -74,7 +91,7 @@ export default function LevelScreen({ level, pool, onPick, onBack }) {
             )
           })}
         </div>
-        <ConsentBannerSpacer />
+        <ConsentBannerSpacer nudge={nudging} />
       </div>
     </div>
   )
