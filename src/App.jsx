@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import HomeScreen from './components/HomeScreen.jsx'
 import LevelScreen from './components/LevelScreen.jsx'
 import GameScreen from './components/GameScreen.jsx'
+import ConsentBanner from './components/ConsentBanner.jsx'
 import { loadIndex, loadLevel, pickRandom, markPlayed, findById } from './engine/catalog.js'
 import { setCatalogVersion, screenView } from './telemetry/telemetry.js'
 
@@ -14,6 +15,12 @@ export default function App() {
   const [level, setLevel] = useState(null)       // { level, pool } while a level is open
   const [game, setGame] = useState(null)         // { instance, pick } while playing
   const [loadingLevel, setLoadingLevel] = useState(null)
+  // { level: [ids] } from the catalog index, for the per-level progress on the home screen.
+  const levelIds = useMemo(() => {
+    const out = {}
+    for (const [id, lvl] of Object.entries(index?.instances ?? {})) (out[lvl] ??= []).push(id)
+    return out
+  }, [index])
 
   // Telemetry: one screen_views row per screen shown (once the catalog is loaded).
   const screen = game ? 'game' : level ? 'level' : 'home'
@@ -90,6 +97,8 @@ export default function App() {
   }
   if (level) {
     return (
+      <>
+      <ConsentBanner />
       <LevelScreen
         level={level.level}
         pool={level.pool}
@@ -97,14 +106,20 @@ export default function App() {
         onPick={playPicked}
         onBack={() => setLevel(null)}
       />
+      </>
     )
   }
+  // The opt-in banner shows on the home and level screens until answered (never over a game).
   return (
+    <>
+    <ConsentBanner />
     <HomeScreen
       levels={index?.levels ?? null}
+      levelIds={index ? levelIds : null}
       error={error}
       loadingLevel={loadingLevel}
       onSelectLevel={openLevel}
     />
+    </>
   )
 }

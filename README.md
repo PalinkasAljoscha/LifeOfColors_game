@@ -96,6 +96,28 @@ The app stores no cookies or other identifiers. It doesn't record IP address, de
 language, location or the browser's clock time; the only clock time is the database's
 `received_at`. The public key can only add rows; it can't read them.
 
+## Saved progress (opt-in)
+
+The app remembers which puzzles a player tried and solved, and each puzzle's best star rating
+(`src/engine/progress.js`). Totals: solved puzzles, and stars = the sum of each puzzle's best
+rating (at most 5 per puzzle). They are shown on the home page (totals and per level), in the
+level header, on the puzzle tiles (best stars), and in the win dialog ("New best!").
+
+- Without consent this lives in memory only and is gone when the page is closed.
+- On the first visit a banner asks "Save your progress?" ("Yes, save" / "No thanks", equally
+  prominent; it never covers a game). Only after "Yes" is the progress kept in this browser's
+  `localStorage` (key `loc-progress-v1`). The answer itself is stored under `loc-storage-consent`.
+  The choice can be changed at any time at the bottom of the home page; "No thanks" deletes the
+  saved progress.
+- Nothing of it is ever sent: it is not part of the telemetry, and no cookies are used.
+
+Why opt-in: under the EU ePrivacy rules, storing anything on the player's device needs consent
+unless it is strictly necessary for a service the player explicitly asked for. That applies to
+`localStorage` as much as to cookies, and whether or not the data is personal. The game works
+without saved progress, so remembering it across visits is a convenience that needs consent.
+Swiss law only requires information and an opt-out; the stricter EU rule is followed because the
+game is public. Storing the consent answer itself needs no consent.
+
 ## License
 
 CC BY-NC-SA 4.0 (see `LICENSE`).

@@ -16,7 +16,7 @@
     "puzzleCount_other": "{{count}} puzzles",
     "loading": "Chargement des puzzles…",
     "loadError": "Les puzzles n'ont pas pu être chargés. Vérifie ta connexion et recharge la page.",
-    "privacy": "Pas de cookies, aucune donnée d'identification collectée. Les coups et résultats peuvent être collectés pour améliorer le jeu.",
+    "privacy": "Pas de cookies, pas de pistage, aucune donnée d'identification. Les coups et résultats peuvent être collectés anonymement pour améliorer le jeu. La progression sauvegardée (seulement si tu l'autorises) reste dans ce navigateur et n'est jamais envoyée.",
     "more": "Plus"
   },
   "game": {
@@ -35,6 +35,8 @@
     "moves_other": "Résolu en {{count}} coups.",
     "stars_one": "{{count}} étoile sur 5",
     "stars_other": "{{count}} étoiles sur 5",
+    "newBest": "Nouveau record !",
+    "yourBest": "Ton record : {{count}} ★",
     "pickNew": "Autre puzzle"
   },
   "levelScreen": {
@@ -42,7 +44,23 @@
     "random": "Au hasard",
     "orTap": "ou choisis ton puzzle",
     "solved_one": "{{count}} résolu",
-    "solved_other": "{{count}} résolus"
+    "solved_other": "{{count}} résolus",
+    "stars": "{{count}} sur {{max}}"
+  },
+  "progress": {
+    "title": "Ta progression",
+    "stars_one": "{{count}} étoile",
+    "stars_other": "{{count}} étoiles"
+  },
+  "consent": {
+    "title": "Sauvegarder ta progression ?",
+    "body": "Le jeu peut retenir sur cet appareil les puzzles que tu as résolus et tes meilleures étoiles, pour les retrouver la prochaine fois. Tout reste dans ce navigateur, rien n'est envoyé.",
+    "accept": "Oui, sauvegarder",
+    "decline": "Non merci",
+    "statusOn": "Progression sauvegardée sur cet appareil",
+    "statusOff": "Progression non sauvegardée (cette visite seulement)",
+    "declineDeletes": "« Non merci » supprime la progression sauvegardée de ce navigateur.",
+    "change": "Modifier"
   },
   "themes": {
     "halloween": {

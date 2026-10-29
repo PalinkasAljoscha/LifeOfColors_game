@@ -5,6 +5,10 @@ import './i18n.js'
 import './index.css'
 import { activeTheme, cursorCss } from './themes.js'
 import { palette } from './theme.js'
+import { initProgress } from './engine/progress.js'
+
+// Saved progress (only if the player opted in earlier) -- before the first render.
+initProgress()
 
 // Theme cursor (src/themes.js): a CSS variable used by .theme-cursor in index.css.
 const cursor = cursorCss(activeTheme(), palette)
