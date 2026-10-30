@@ -82,6 +82,10 @@
     "p4": "Experimentiere einfach und starte jederzeit neu mit „{{retry}}“. Auch nach einem Sieg kannst du es nochmal versuchen um mit weniger Zügen mehr Sterne zu holen.",
     "close": "Los geht's"
   },
+  "training": {
+    "notes": "Meine Notizen",
+    "nothing": "keine farbigen Nachbarn"
+  },
   "castles": {
     "name": "Burg {{n}}",
     "tutorial": "Übungsburg",

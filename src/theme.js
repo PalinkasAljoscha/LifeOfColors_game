@@ -32,6 +32,13 @@ export const palette = {
   goalGoldDark:  '#b7950b',
   goalShine:     '#ffffff',
 
+  // ── Training castle note of observed transformations (components/TrainingNotes.jsx) ──
+  notePaper:     '#fbf3d5',
+  noteLine:      '#e3d6a6',
+  noteInk:       '#4a3b2a',
+  noteMargin:    '#e8a5a5',
+  noteHighlight: '#f1c40f',
+
   // ── Life of Colors cells ──
   cellUncolored:       '#2e2e3a',
   cellUncoloredBorder: '#44445a',

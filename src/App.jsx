@@ -105,6 +105,7 @@ export default function App() {
         key={game.instance.id}
         instance={game.instance}
         place={castle !== null ? castleName(castle) : null}
+        training={castle === TUTORIAL_CASTLE}
         pick={game.pick}
         onPickNew={leaveGame}
         onHome={() => { leaveGame(); setCastle(null) }}

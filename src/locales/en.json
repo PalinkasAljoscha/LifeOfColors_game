@@ -82,6 +82,10 @@
     "p4": "Use {{retry}} anytime to start the puzzle from the beginning. Experiment to find out the hidden rules. After a win you can retry to get more stars by using less moves.",
     "close": "Got it"
   },
+  "training": {
+    "notes": "My notes",
+    "nothing": "no coloured neighbours"
+  },
   "castles": {
     "name": "Castle {{n}}",
     "tutorial": "Training castle",

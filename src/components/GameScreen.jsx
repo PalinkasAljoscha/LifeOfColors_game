@@ -3,31 +3,22 @@ import { useTranslation } from 'react-i18next'
 import Board from './Board.jsx'
 import WinDialog from './WinDialog.jsx'
 import RulesDialog from './RulesDialog.jsx'
-import { Emoji } from './Emoji.jsx'
+import TrainingNotes, { CellToken } from './TrainingNotes.jsx'
 import { markSolved } from '../engine/catalog.js'
 import { minMovesOf, starsForWin } from '../engine/stars.js'
-import { palette } from '../theme.js'
 import { drawLook } from '../themes.js'
+import { addObservation, observation } from '../engine/training.js'
 import * as telemetry from '../telemetry/telemetry.js'
 
 // The goal colour as the board draws it in this game's look: its emoji, or a small colour square.
-function GoalLook({ color, look: looks }) {
-  const look = looks[color]
-  if (!look) return null
-  if (look.emoji) return <Emoji e={look.emoji} look={looks} className="text-lg leading-none" />
-  return (
-    <span
-      className="inline-block w-4 h-4 rounded ring-1 ring-inset ring-white/25 align-[-2px]"
-      style={{ background: palette[look.fill] }}
-      aria-hidden="true"
-    />
-  )
-}
+const GoalLook = ({ color, look }) => <CellToken state={color} look={look} className="text-lg leading-none" />
 
 // One instance. Retry remounts the board (fresh start of the same instance); Back goes to the
 // level's grid. `pick` (how the puzzle was chosen) is passed on to telemetry.
 // `place`: the label in front of the puzzle name (the castle it belongs to).
-export default function GameScreen({ instance, place, pick, onPickNew, onHome }) {
+// `training`: the training castle -- board helps and the note of observed transformations
+// (src/engine/training.js). The note survives Retry (the rules stay the same).
+export default function GameScreen({ instance, place, training = false, pick, onPickNew, onHome }) {
   const { t } = useTranslation()
   const [round, setRound] = useState(0)        // bumped by Retry -> remounts <Board>
   const [moves, setMoves] = useState(0)        // clicks that changed a cell
@@ -40,6 +31,8 @@ export default function GameScreen({ instance, place, pick, onPickNew, onHome })
   // The theme's per-game choices (objects, candy colour), drawn when this screen opens: Retry
   // keeps them; leaving and opening a game again (even the same one) draws anew.
   const [look] = useState(() => drawLook())
+  const [notes, setNotes] = useState([])         // training: observed transformations, in order
+  const [lastNote, setLastNote] = useState(null) // training: { key, n } of the latest move (n re-triggers the highlight)
 
   // Telemetry: one play per puzzle opened (Retry stays in the same play).
   useEffect(() => {
@@ -87,6 +80,11 @@ export default function GameScreen({ instance, place, pick, onPickNew, onHome })
     if (changed) {
       movesRef.current += 1
       setMoves(movesRef.current)
+      if (training) {
+        const obs = observation(rule, color)
+        setNotes((prev) => addObservation(prev, obs).notes)
+        setLastNote((prev) => ({ key: obs.key, n: (prev?.n ?? 0) + 1 }))
+      }
     }
   }
 
@@ -141,8 +139,10 @@ export default function GameScreen({ instance, place, pick, onPickNew, onHome })
       </div>
 
       <div className="flex-1 min-h-0 mt-2 relative">
-        <Board key={round} instance={instance} look={look} onClick={onClick} onWon={onWon} />
+        <Board key={round} instance={instance} look={look} training={training} onClick={onClick} onWon={onWon} />
       </div>
+
+      {training && notes.length > 0 && <TrainingNotes notes={notes} last={lastNote} look={look} />}
 
       {/* Goal reminder (players opening a shared link never saw the homepage) + the rules pop-up. */}
       <div className="mx-auto w-full max-w-md flex justify-between items-center gap-3 mt-2 px-1 text-sm font-sans font-bold">

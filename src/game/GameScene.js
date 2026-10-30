@@ -3,6 +3,7 @@ import { phaser as C, palette } from '../theme.js'
 import { CELL_STATES, defaultLook } from '../themes.js'
 import { applyClick, clickRule, isWon } from '../engine/engine.js'
 import { startBoard } from './startBoard.js'
+import { INTRO_MS, neighbourCells } from '../engine/training.js'
 import { emojiTexture, emojiDisplaySize } from './emojiTexture.js'
 
 // Board-only scene. All rules live in src/engine/engine.js (shared with the tests and
@@ -17,6 +18,10 @@ import { emojiTexture, emojiDisplaySize } from './emojiTexture.js'
 // active theme with its per-game choices drawn (src/themes.js drawLook, registry 'look'); the
 // theme never changes what a tap does.
 //
+// Training castle (registry 'training' true, src/engine/training.js): the goal object blinks in the
+// goal cell with a pointing hand for INTRO_MS at the start, and hovering a cell brightens its
+// neighbours.
+//
 // The canvas size follows the board's shape (see boardCanvasSize), so any board up to
 // 9 rows x 6 cols fills the available screen area with Phaser.Scale.FIT.
 
@@ -26,6 +31,8 @@ export const PAD = 14
 const RADIUS = 10
 const FRAME = 8            // width (and outer corner radius) of the golden frame on the goal cell
 const EMOJI_SIZE = 54      // size of a theme's cell emoji in px (cells are CELL - GAP = 90 px)
+const HOVER_ALPHA = 0.18   // training: white wash over the hovered cell's neighbours
+const BLINK_MS = 250       // training intro: one fade of the blinking goal object
 
 export function boardCanvasSize(inst) {
   const { rows, cols } = inst.board
@@ -75,6 +82,12 @@ export default class GameScene extends Phaser.Scene {
       this.cells.push(row)
     }
     this._addGoalShine()
+
+    this.training = Boolean(this.registry.get('training'))
+    if (this.training) {
+      this._addHover()
+      this._showGoalIntro()
+    }
 
     this.input.on('pointerdown', this._onPointerDown, this)
     this.game.events.emit('sceneReady', this)
@@ -164,11 +177,76 @@ export default class GameScene extends Phaser.Scene {
     schedule()
   }
 
-  _onPointerDown(pointer) {
-    if (this.won) return
+  // Cell [r, c] under a pointer, or null off the board.
+  _cellAt(pointer) {
     const c = Math.floor((pointer.x - PAD) / CELL)
     const r = Math.floor((pointer.y - PAD) / CELL)
-    if (r < 0 || r >= this.rows || c < 0 || c >= this.cols) return
+    return r < 0 || r >= this.rows || c < 0 || c >= this.cols ? null : [r, c]
+  }
+
+  // Training: the neighbours of the hovered cell get a light wash (drawn above the cells).
+  _addHover() {
+    this.hover = this.add.graphics().setDepth(10)
+    this.hoverAt = null
+    const s = CELL - GAP
+    const h = s / 2
+    const draw = (at) => {
+      const key = at ? at.join(',') : null
+      if (key === this.hoverAt) return
+      this.hoverAt = key
+      this.hover.clear()
+      if (!at || this.won) return
+      this.hover.fillStyle(C.white, HOVER_ALPHA)
+      for (const [nr, nc] of neighbourCells(at[0], at[1], this.rows, this.cols)) {
+        const { x, y } = this._center(nr, nc)
+        this.hover.fillRoundedRect(x - h, y - h, s, s, RADIUS)
+      }
+    }
+    this.input.on('pointermove', (pointer) => draw(this._cellAt(pointer)))
+    this.input.on('gameout', () => draw(null))
+  }
+
+  // Training: the goal object blinks in the goal cell for INTRO_MS, a hand points at it.
+  _showGoalIntro() {
+    const [gr, gc] = this.inst.goal.at
+    const { x, y } = this._center(gr, gc)
+    const look = this.cellLook[this.inst.goal.color]
+    const inner = CELL - GAP - 2 * FRAME
+    const parts = []
+    if (look.emoji) {
+      const size = emojiDisplaySize(EMOJI_SIZE) * inner / (CELL - GAP)
+      parts.push(this.add.image(0, 0, look.emoji).setDisplaySize(size, size))
+    } else {
+      const g = this.add.graphics()
+      g.fillStyle(look.border)
+      g.fillRoundedRect(-inner / 2, -inner / 2, inner, inner, RADIUS - 4)
+      g.fillStyle(look.fill)
+      g.fillRoundedRect(-inner / 2 + 3, -inner / 2 + 3, inner - 6, inner - 6, RADIUS - 6)
+      parts.push(g)
+    }
+    const goal = this.add.container(x, y, parts).setDepth(11).setAlpha(0)
+    this.tweens.add({
+      targets: goal, alpha: { from: 0, to: 1 }, duration: BLINK_MS, yoyo: true,
+      repeat: Math.max(0, Math.round(INTRO_MS / (2 * BLINK_MS)) - 1),
+      onComplete: () => goal.destroy(),
+    })
+    // The hand sits in the neighbouring column, pointing at the goal (left of it if possible).
+    const fromLeft = gc > 0 || this.cols === 1
+    const hx = fromLeft ? x - CELL * 0.78 : x + CELL * 0.78
+    const hand = this.add.image(hx, y, emojiTexture(this, fromLeft ? '👉' : '👈', EMOJI_SIZE))
+      .setDisplaySize(emojiDisplaySize(EMOJI_SIZE), emojiDisplaySize(EMOJI_SIZE)).setDepth(12)
+    const bob = this.tweens.add({ targets: hand, x: hx + (fromLeft ? 10 : -10), duration: 300, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' })
+    this.time.delayedCall(INTRO_MS, () => {
+      bob.stop()
+      this.tweens.add({ targets: hand, alpha: 0, duration: 200, onComplete: () => hand.destroy() })
+    })
+  }
+
+  _onPointerDown(pointer) {
+    if (this.won) return
+    const at = this._cellAt(pointer)
+    if (!at) return
+    const [r, c] = at
 
     const rule = clickRule(this.board, r, c)
     const next = applyClick(this.board, r, c, this.inst.rule.table)
@@ -188,6 +266,7 @@ export default class GameScene extends Phaser.Scene {
 
     if (next && isWon(this.inst, this.board)) {
       this.won = true
+      this.hover?.clear()
       this.game.events.emit('won', { clicks: this.clicks })
     }
   }

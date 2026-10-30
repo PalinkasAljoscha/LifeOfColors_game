@@ -82,6 +82,10 @@
     "p4": "Utilise « {{retry}} » à tout moment pour recommencer le puzzle depuis le début. Expérimente pour découvrir les règles cachées. Après une victoire, tu peux rejouer pour gagner plus d'étoiles avec moins de coups.",
     "close": "Compris"
   },
+  "training": {
+    "notes": "Mes notes",
+    "nothing": "aucun voisin coloré"
+  },
   "castles": {
     "name": "Château {{n}}",
     "tutorial": "Château d’entraînement",
