@@ -37,11 +37,18 @@
     "stars_other": "{{count}} of 5 stars",
     "newBest": "New best!",
     "yourBest": "Your best: {{count}} ★",
-    "pickNew": "Pick new"
+    "pickNew": "Pick new",
+    "trainingDay": "Passed training day {{n}}",
+    "trainingPlan": "Training plan",
+    "trainingComplete": "Training Complete",
+    "trainingReady": "You are ready for the journey now.",
+    "trainingNext": "{{castle}} is waiting.",
+    "startJourney": "Start journey"
   },
   "levelScreen": {
     "back": "Home",
-    "choose": "Choose your puzzle"
+    "choose": "Choose your puzzle",
+    "trainingHint": "Win all training puzzles one by one"
   },
   "progress": {
     "title": "Stars collected",
@@ -83,13 +90,15 @@
     "close": "Got it"
   },
   "training": {
-    "notes": "My notes",
-    "nothing": "no coloured neighbours"
+    "notes": "Rule Observations",
+    "nothing": "no coloured neighbours",
+    "empty": "Nothing noted yet. Make a move!"
   },
   "castles": {
     "name": "Castle {{n}}",
     "tutorial": "Training castle",
     "progress": "{{stars}} of {{required}} stars",
+    "progressTraining": "{{solved}} of {{required}} puzzles won",
     "locked": "locked",
     "toOpen": "to open {{name}}",
     "nextOpen": "{{name}} is open!"

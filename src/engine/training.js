@@ -4,13 +4,16 @@
 //   * at the start, the goal object blinking in the gold-framed goal cell for INTRO_MS, with a
 //     pointing hand next to it;
 //   * on hover, the neighbours of the cell under the pointer slightly brighter (neighbourCells).
-// The game screen (components/GameScreen.jsx, components/TrainingNotes.jsx) keeps a note of every
+// The game screen (components/GameScreen.jsx, components/TrainingNotes.jsx) keeps a scroll of every
 // transformation the player has observed: the coloured neighbours of a changed cell -> its new
-// state (observation). A transformation already on the note is highlighted instead of added.
+// state (observation). It lies rolled up below the board and unrolls over the board after a move
+// that shows a NEW transformation (rolling up again after NOTES_AUTO_CLOSE_MS) or when tapped. A
+// move that repeats a noted transformation does not open it.
 
 import { TABLE_ORDER } from './engine.js'
 
 export const INTRO_MS = 2000
+export const NOTES_AUTO_CLOSE_MS = 4000   // the scroll unrolled by a move rolls up again after this
 
 /** [[r, c], ...] of the up-to-8 Moore neighbours of (r, c) that lie on a rows x cols board. */
 export function neighbourCells(r, c, rows, cols) {

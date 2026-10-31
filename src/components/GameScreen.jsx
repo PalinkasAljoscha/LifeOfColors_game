@@ -3,11 +3,12 @@ import { useTranslation } from 'react-i18next'
 import Board from './Board.jsx'
 import WinDialog from './WinDialog.jsx'
 import RulesDialog from './RulesDialog.jsx'
-import TrainingNotes, { CellToken } from './TrainingNotes.jsx'
+import NotesScroll, { CellToken, RolledNotes } from './TrainingNotes.jsx'
 import { markSolved } from '../engine/catalog.js'
+import { progressTotals } from '../engine/progress.js'
 import { minMovesOf, starsForWin } from '../engine/stars.js'
 import { drawLook } from '../themes.js'
-import { addObservation, observation } from '../engine/training.js'
+import { NOTES_AUTO_CLOSE_MS, addObservation, observation } from '../engine/training.js'
 import * as telemetry from '../telemetry/telemetry.js'
 
 // The goal colour as the board draws it in this game's look: its emoji, or a small colour square.
@@ -16,9 +17,12 @@ const GoalLook = ({ color, look }) => <CellToken state={color} look={look} class
 // One instance. Retry remounts the board (fresh start of the same instance); Back goes to the
 // level's grid. `pick` (how the puzzle was chosen) is passed on to telemetry.
 // `place`: the label in front of the puzzle name (the castle it belongs to).
-// `training`: the training castle -- board helps and the note of observed transformations
-// (src/engine/training.js). The note survives Retry (the rules stay the same).
-export default function GameScreen({ instance, place, training = false, pick, onPickNew, onHome }) {
+// `training`: null, or in the training castle { day (the puzzle's place in the plan, 1-based),
+// ids (every training puzzle), next (name of the castle it opens) } -- board helps, the scroll of
+// observed transformations (src/engine/training.js; the notes survive Retry, the rules stay the
+// same) and the training win dialog ("Passed training day X"; "Training complete" for the win
+// that completes the plan).
+export default function GameScreen({ instance, place, training = null, pick, onPickNew, onHome }) {
   const { t } = useTranslation()
   const [round, setRound] = useState(0)        // bumped by Retry -> remounts <Board>
   const [moves, setMoves] = useState(0)        // clicks that changed a cell
@@ -33,6 +37,23 @@ export default function GameScreen({ instance, place, training = false, pick, on
   const [look] = useState(() => drawLook())
   const [notes, setNotes] = useState([])         // training: observed transformations, in order
   const [lastNote, setLastNote] = useState(null) // training: { key, n } of the latest move (n re-triggers the highlight)
+  const [notesOpen, setNotesOpen] = useState(null) // training: null (rolled up) | 'move' (after a move) | 'tap'
+  const [rollHidden, setRollHidden] = useState(false) // training: the rolled scroll is up over the board
+  const notesTimer = useRef(null)
+  const boardBoxRef = useRef(null)
+  const rollRef = useRef(null)
+
+  function openNotes(how) {
+    clearTimeout(notesTimer.current)
+    setNotesOpen(how)
+    setRollHidden(true)
+    if (how === 'move') notesTimer.current = setTimeout(() => setNotesOpen(null), NOTES_AUTO_CLOSE_MS)
+  }
+  function closeNotes() {
+    clearTimeout(notesTimer.current)
+    setNotesOpen(null)
+  }
+  useEffect(() => () => clearTimeout(notesTimer.current), [])
 
   // Telemetry: one play per puzzle opened (Retry stays in the same play).
   useEffect(() => {
@@ -63,6 +84,7 @@ export default function GameScreen({ instance, place, training = false, pick, on
 
   function retry() {
     clearTimeout(winTimer.current)
+    closeNotes()
     telemetry.restartPlay()
     setRound((n) => n + 1)
   }
@@ -81,17 +103,28 @@ export default function GameScreen({ instance, place, training = false, pick, on
       movesRef.current += 1
       setMoves(movesRef.current)
       if (training) {
+        // Only a NEW transformation is added and unrolls the scroll; a known one changes nothing
+        // (the scroll stays as it is -- if open, its entry is highlighted).
         const obs = observation(rule, color)
-        setNotes((prev) => addObservation(prev, obs).notes)
-        setLastNote((prev) => ({ key: obs.key, n: (prev?.n ?? 0) + 1 }))
+        if (addObservation(notes, obs).isNew) {
+          setNotes((prev) => addObservation(prev, obs).notes)
+          setLastNote((prev) => ({ key: obs.key, n: (prev?.n ?? 0) + 1 }))
+          openNotes('move')
+        } else if (notesOpen !== null) {
+          setLastNote((prev) => ({ key: obs.key, n: (prev?.n ?? 0) + 1 }))
+        }
       }
     }
   }
 
   function onWon() {
     telemetry.recordWin()
+    closeNotes()   // the winning move is noted, but the win dialog follows: no scroll over the board
     const stars = starsForWin(movesRef.current, minMoves)
-    setResult({ stars, ...markSolved(instance, stars) })   // best rating per puzzle (engine/progress.js)
+    const allWon = () => training !== null && progressTotals(training.ids).solved === training.ids.length
+    const wasComplete = allWon()
+    const saved = markSolved(instance, stars)              // best rating per puzzle (engine/progress.js)
+    setResult({ stars, ...saved, trainingComplete: !wasComplete && allWon() })
     // Short pause so the player sees the goal cell change before the dialog covers it.
     winTimer.current = setTimeout(() => setWon(true), 400)
   }
@@ -138,11 +171,16 @@ export default function GameScreen({ instance, place, training = false, pick, on
         </span>
       </div>
 
-      <div className="flex-1 min-h-0 mt-2 relative">
-        <Board key={round} instance={instance} look={look} training={training} onClick={onClick} onWon={onWon} />
+      <div ref={boardBoxRef} className="flex-1 min-h-0 mt-2 relative">
+        <Board key={round} instance={instance} look={look} training={training !== null} onClick={onClick} onWon={onWon} />
+        {training && (
+          <NotesScroll open={notesOpen !== null} notes={notes} last={lastNote} highlight={notesOpen === 'move'}
+                       look={look} onClose={closeNotes} onClosed={() => setRollHidden(false)}
+                       boardRef={boardBoxRef} rollRef={rollRef} />
+        )}
       </div>
 
-      {training && notes.length > 0 && <TrainingNotes notes={notes} last={lastNote} look={look} />}
+      {training && <RolledNotes ref={rollRef} hidden={rollHidden} onOpen={() => openNotes('tap')} />}
 
       {/* Goal reminder (players opening a shared link never saw the homepage) + the rules pop-up. */}
       <div className="mx-auto w-full max-w-md flex justify-between items-center gap-3 mt-2 px-1 text-sm font-sans font-bold">
@@ -161,7 +199,7 @@ export default function GameScreen({ instance, place, training = false, pick, on
       </div>
 
       {showRules && <RulesDialog onClose={() => setShowRules(false)} />}
-      {won && <WinDialog look={look} moves={moves} best={minMoves} stars={result?.stars ?? null} newBest={result?.newBest ?? false} previousBest={result?.previousBest ?? null} onRetry={retry} onPickNew={() => leave(onPickNew, 'pick_new')} onHome={() => leave(onHome, 'home')} />}
+      {won && <WinDialog look={look} training={training && { day: training.day, next: training.next, complete: result?.trainingComplete === true }} moves={moves} best={minMoves} stars={result?.stars ?? null} newBest={result?.newBest ?? false} previousBest={result?.previousBest ?? null} onRetry={retry} onPickNew={() => leave(onPickNew, 'pick_new')} onHome={() => leave(onHome, 'home')} />}
     </div>
   )
 }

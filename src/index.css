@@ -36,6 +36,11 @@ body {
 }
 .pop-in { animation: popIn 220ms ease-out both; }
 
+/* Scrollable area without a visible scroll bar (home-screen castle map; wheel, touch and keys
+   still scroll it). */
+.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
 /* Won stars in the win dialog (components/WinDialog.jsx): one after the other. */
 @keyframes starPop {
   0%   { transform: scale(0.2); opacity: 0; }
@@ -45,20 +50,15 @@ body {
 .star-pop { display: inline-block; animation: starPop 320ms ease-out both; }
 @media (prefers-reduced-motion: reduce) { .star-pop { animation: none; } }
 
-/* Training castle note (components/TrainingNotes.jsx): the paper slides in, a new entry pops in,
-   a repeated one flashes. */
-@keyframes noteIn {
-  from { transform: translateY(12px) rotate(-1deg); opacity: 0; }
-  to   { transform: translateY(0) rotate(-1deg);    opacity: 1; }
-}
-.note-in { animation: noteIn 260ms ease-out both; }
+/* Training castle scroll (components/TrainingNotes.jsx; flight and unrolling are animated there):
+   the entry of the latest move flashes. */
 @keyframes noteFlash {
   0%   { transform: scale(1); }
   35%  { transform: scale(1.12); }
   100% { transform: scale(1); }
 }
 .note-flash { animation: noteFlash 520ms ease-out; }
-@media (prefers-reduced-motion: reduce) { .note-in, .note-flash { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .note-flash { animation: none; } }
 
 /* ── Themes (src/themes.js) ── */
 /* The theme's mouse cursor everywhere, also over buttons and the board canvas. */

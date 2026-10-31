@@ -32,12 +32,17 @@ export const palette = {
   goalGoldDark:  '#b7950b',
   goalShine:     '#ffffff',
 
-  // ── Training castle note of observed transformations (components/TrainingNotes.jsx) ──
+  // ── Training castle scroll of observed transformations (components/TrainingNotes.jsx) ──
   notePaper:     '#fbf3d5',
   noteLine:      '#e3d6a6',
   noteInk:       '#4a3b2a',
-  noteMargin:    '#e8a5a5',
   noteHighlight: '#f1c40f',
+  noteFrame:     '#a8946a',    // thin frame around each noted transformation
+  notePaperShade: '#d9c78f',   // shading of the rolled-up paper
+  noteRod:       '#9a6a3a',    // wooden rods and knobs of the scroll
+  noteRodDark:   '#5e3a17',
+  noteSeal:      '#b03a2e',    // ribbon and wax seal on the rolled-up scroll
+  noteSealDark:  '#7a2219',
 
   // ── Life of Colors cells ──
   cellUncolored:       '#2e2e3a',

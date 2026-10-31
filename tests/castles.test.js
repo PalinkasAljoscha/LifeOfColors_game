@@ -4,7 +4,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import {
   CASTLE_COUNT, PUZZLES_PER_CASTLE, assignCastles, catalogHasCastles, requiredStars, castleStates,
-  highestUnlocked, earnedUnlocks,
+  highestUnlocked, earnedUnlocks, playableUpTo,
 } from '../src/engine/castles.js'
 import { isPlayable } from '../src/engine/engine.js'
 
@@ -45,7 +45,7 @@ test('castles 0 and 1 are open; each further castle needs the stars of the one b
     castle, pool: Array.from({ length: 50 }, (_, i) => inst(`c${castle}_${i}`, castle, i)),
   }))
   const stars = { 0: 0, 1: 75, 2: 74, 3: 200 }
-  const states = castleStates(castles, (pool) => stars[pool[0].level] ?? 0)
+  const states = castleStates(castles, (pool) => ({ stars: stars[pool[0].level] ?? 0, solved: 0 }))
   assert.deepEqual(states.slice(0, 5).map((s) => s.unlocked), [true, true, true, false, false])
   assert.equal(states[1].done, true)
   assert.equal(states[2].done, false)
@@ -54,7 +54,37 @@ test('castles 0 and 1 are open; each further castle needs the stars of the one b
   assert.equal(highestUnlocked(states), 2)
   assert.equal(earnedUnlocks(states), 1)
   // castle 0 (tutorial) does not gate castle 1
-  assert.equal(castleStates(castles, () => 0)[1].unlocked, true)
+  assert.equal(castleStates(castles, () => ({ stars: 0, solved: 0 }))[1].unlocked, true)
+})
+
+test('training rules: castle 0 needs every puzzle won (no stars), castle 1 waits for it', () => {
+  const castles = Array.from({ length: CASTLE_COUNT }, (_, castle) => ({
+    castle, pool: Array.from({ length: castle === 0 ? 10 : 50 }, (_, i) => inst(`c${castle}_${i}`, castle, i)),
+  }))
+  const totals = (solved0) => (pool) => (pool[0].level === 0 ? { stars: 50, solved: solved0 } : { stars: 0, solved: 0 })
+  let states = castleStates(castles, totals(9), { training: true })
+  assert.equal(states[0].required, 10)
+  assert.equal(states[0].done, false)                   // 50 stars, but one puzzle not won
+  assert.deepEqual(states.slice(0, 2).map((s) => s.unlocked), [true, false])
+  assert.equal(highestUnlocked(states), 0)
+  states = castleStates(castles, totals(10), { training: true })
+  assert.equal(states[0].done, true)
+  assert.equal(states[1].unlocked, true)
+  assert.equal(earnedUnlocks(states), 1)
+})
+
+test('playableUpTo: the first unsolved puzzle, or the last when all are solved', () => {
+  const pool = ['a', 'b', 'c'].map((id, i) => inst(id, 0, i))
+  assert.equal(playableUpTo(pool, () => false), 0)
+  assert.equal(playableUpTo(pool, (p) => p.id === 'a'), 1)
+  assert.equal(playableUpTo(pool, (p) => p.id === 'b'), 0)   // order is enforced: 'a' first
+  assert.equal(playableUpTo(pool, () => true), 2)
+})
+
+test('level_order sorts a castle before seq', () => {
+  const castles = assignCastles([{ ...inst('x', 0, 1), level_order: 2 }, { ...inst('y', 0, 9), level_order: 1 },
+    inst('z', 0, 0)], true)
+  assert.deepEqual(castles[0].pool.map((p) => p.id), ['y', 'x', 'z'])
 })
 
 test('the shipped catalog fills all 30 castles', () => {

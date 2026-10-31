@@ -37,11 +37,18 @@
     "stars_other": "{{count}} étoiles sur 5",
     "newBest": "Nouveau record !",
     "yourBest": "Ton record : {{count}} ★",
-    "pickNew": "Autre puzzle"
+    "pickNew": "Autre puzzle",
+    "trainingDay": "Jour d’entraînement {{n}} réussi",
+    "trainingPlan": "Plan d’entraînement",
+    "trainingComplete": "Entraînement terminé",
+    "trainingReady": "Tu es prêt pour le voyage.",
+    "trainingNext": "Le {{castle}} t’attend.",
+    "startJourney": "Commencer le voyage"
   },
   "levelScreen": {
     "back": "Accueil",
-    "choose": "Choisis ton puzzle"
+    "choose": "Choisis ton puzzle",
+    "trainingHint": "Résous tous les puzzles d’entraînement un par un"
   },
   "progress": {
     "title": "Étoiles récoltées",
@@ -83,13 +90,15 @@
     "close": "Compris"
   },
   "training": {
-    "notes": "Mes notes",
-    "nothing": "aucun voisin coloré"
+    "notes": "Observations des règles",
+    "nothing": "aucun voisin coloré",
+    "empty": "Rien de noté pour l’instant. Joue un coup !"
   },
   "castles": {
     "name": "Château {{n}}",
     "tutorial": "Château d’entraînement",
     "progress": "{{stars}} sur {{required}} étoiles",
+    "progressTraining": "{{solved}} puzzles résolus sur {{required}}",
     "locked": "verrouillé",
     "toOpen": "pour ouvrir le {{name}}",
     "nextOpen": "Le {{name}} est ouvert !"

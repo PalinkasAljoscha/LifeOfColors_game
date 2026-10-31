@@ -26,9 +26,10 @@ export default function App() {
   const progressVersion = useProgress()          // castle states follow the stars
 
   const states = useMemo(
-    () => castles && computeStates(castles, (pool) => progressTotals(pool.map((i) => i.id)).stars),
+    () => castles && computeStates(castles, (pool) => progressTotals(pool.map((i) => i.id)),
+      { training: catalogHasCastles(index) }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [castles, progressVersion],
+    [castles, index, progressVersion],
   )
 
   // Nudge the opt-in once per visit when play opens a new castle and progress is not being saved
@@ -105,7 +106,11 @@ export default function App() {
         key={game.instance.id}
         instance={game.instance}
         place={castle !== null ? castleName(castle) : null}
-        training={castle === TUTORIAL_CASTLE}
+        training={states?.[castle]?.training ? {
+          day: pool.findIndex((i) => i.id === game.instance.id) + 1 || null,   // position in the training plan
+          ids: pool.map((i) => i.id),
+          next: castle + 1 < states.length ? castleName(castle + 1) : null,
+        } : null}
         pick={game.pick}
         onPickNew={leaveGame}
         onHome={() => { leaveGame(); setCastle(null) }}

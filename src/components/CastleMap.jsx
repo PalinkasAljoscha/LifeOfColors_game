@@ -5,8 +5,11 @@ import { CASTLE_COUNT, TUTORIAL_CASTLE, highestUnlocked } from '../engine/castle
 
 // The home-screen map: castles in a landscape of fields and trees, joined by a path, stacked from
 // bottom (castle 0) to top. Shown: every open castle plus the next locked one (grey, dashed path);
-// everything above fades into fog. The map scrolls vertically and one screen holds about three
-// castles. Each castle where stars were collected shows "stars / required".
+// everything above fades into fog. The map scrolls vertically (no visible scroll bar) and one
+// screen holds about three castles; it opens with the player's current castle (the highest open
+// one) in the middle of the screen -- for castle 0 extra landscape below it makes that possible.
+// Each castle where stars were collected shows "stars / required" (the training castle: puzzles
+// won / all of them).
 // Drawing is SVG (decoration only); the castles themselves are HTML buttons laid over it.
 
 const FLAG_COLORS = [palette.cellOrangeFill, palette.cellGreenFill, palette.cellBlueFill]
@@ -21,8 +24,10 @@ function rng(seed) {
   }
 }
 
-// Remembered for this page session, so coming back from a castle keeps the map where it was.
+// Remembered for this page session, so coming back from a castle keeps the map where it was
+// (unless a new castle opened meanwhile: then the map centres on that one).
 let savedScroll = null
+let savedTop = null
 
 function Castle({ x, y, size, locked, flag }) {
   const w = size, h = size * 0.8
@@ -116,17 +121,22 @@ export default function CastleMap({ states, loadingCastle, onSelect }) {
   const W = box?.w ?? 360
   const seg = Math.max(150, (box?.h ?? 480) / 3)                       // about three castles per screen
   const fogH = shown < CASTLE_COUNT ? seg * 0.9 : seg * 0.35
-  const bottomPad = seg * 0.55
+  // room below castle 0, so that even castle 0 can be scrolled to the middle of the screen
+  const bottomPad = Math.max(seg * 0.55, (box?.h ?? 480) / 2)
   const H = fogH + (shown - 1) * seg + bottomPad + seg * 0.15
   const size = Math.min(84, seg * 0.42)
   const pos = (i) => ({ x: W * (0.5 + 0.2 * Math.sin(i * 2.1 + 0.4)), y: H - bottomPad - i * seg })
 
-  // Start with the highest open castle in view (or where the player left the map).
+  // Start with the current (highest open) castle in the middle of the screen, or where the player
+  // left the map if no new castle opened since.
   const ready = box !== null
   useLayoutEffect(() => {
     const el = scrollRef.current
     if (!el || !ready) return
-    el.scrollTop = savedScroll ?? Math.max(0, pos(top).y - el.clientHeight * 0.6)
+    const centred = Math.max(0, pos(top).y - el.clientHeight / 2)
+    el.scrollTop = savedScroll !== null && savedTop === top ? savedScroll : centred
+    savedScroll = el.scrollTop
+    savedTop = top
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready])
 
@@ -158,7 +168,7 @@ export default function CastleMap({ states, loadingCastle, onSelect }) {
   }
 
   return (
-    <div ref={scrollRef} className="relative flex-1 min-h-0 overflow-y-auto overflow-x-hidden rounded-2xl"
+    <div ref={scrollRef} className="no-scrollbar relative flex-1 min-h-0 overflow-y-auto overflow-x-hidden rounded-2xl"
          onScroll={(e) => { savedScroll = e.currentTarget.scrollTop }}
          style={{ background: palette.mapGrass }}>
       {box && (
@@ -196,7 +206,8 @@ export default function CastleMap({ states, loadingCastle, onSelect }) {
             const { x, y } = pos(i)
             const name = i === TUTORIAL_CASTLE ? t('castles.tutorial') : t('castles.name', { n: i })
             const label = s.unlocked
-              ? `${name}: ${t('castles.progress', { stars: s.stars, required: s.required })}`
+              ? `${name}: ${t(s.training ? 'castles.progressTraining' : 'castles.progress',
+                  { stars: s.stars, solved: s.solved, required: s.required })}`
               : `${name}: ${t('castles.locked')}`
             const badgeRight = x < W / 2                                // badge on the side with more room
             return (
@@ -213,7 +224,7 @@ export default function CastleMap({ states, loadingCastle, onSelect }) {
                       style={{ left: x, top: y + size * 0.5, opacity: s.unlocked ? 1 : 0.7 }} aria-hidden="true">
                   {loadingCastle === i ? '…' : name}
                 </span>
-                {s.unlocked && s.stars > 0 && (
+                {s.unlocked && (s.training ? s.solved > 0 : s.stars > 0) && (
                   <span className="absolute -translate-y-1/2 whitespace-nowrap rounded-full px-2.5 py-1 text-sm font-black
                                    bg-game-badge ring-2 pointer-events-none"
                         style={{
@@ -222,7 +233,9 @@ export default function CastleMap({ states, loadingCastle, onSelect }) {
                           '--tw-ring-color': s.done ? palette.correctGreen : palette.starGold,
                         }}
                         aria-hidden="true">
-                    <span className="text-game-star">★ {s.stars}</span>
+                    {s.training
+                      ? <span style={{ color: palette.correctGreen }}>✓ {s.solved}</span>
+                      : <span className="text-game-star">★ {s.stars}</span>}
                     <span className="text-game-silver"> / {s.required}</span>
                     {s.done && <span style={{ color: palette.correctGreen }}> ✓</span>}
                   </span>

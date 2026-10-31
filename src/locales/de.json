@@ -37,11 +37,18 @@
     "stars_other": "{{count}} von 5 Sternen",
     "newBest": "Neuer Bestwert!",
     "yourBest": "Dein Bestwert: {{count}} ★",
-    "pickNew": "Neues wählen"
+    "pickNew": "Neues wählen",
+    "trainingDay": "Trainingstag {{n}} bestanden",
+    "trainingPlan": "Trainingsplan",
+    "trainingComplete": "Training abgeschlossen",
+    "trainingReady": "Du bist jetzt bereit für die Reise.",
+    "trainingNext": "{{castle}} wartet.",
+    "startJourney": "Reise beginnen"
   },
   "levelScreen": {
     "back": "Start",
-    "choose": "Wähle dein Puzzle"
+    "choose": "Wähle dein Puzzle",
+    "trainingHint": "Löse alle Übungspuzzles eins nach dem anderen"
   },
   "progress": {
     "title": "Gesammelte Sterne",
@@ -83,13 +90,15 @@
     "close": "Los geht's"
   },
   "training": {
-    "notes": "Meine Notizen",
-    "nothing": "keine farbigen Nachbarn"
+    "notes": "Regel-Beobachtungen",
+    "nothing": "keine farbigen Nachbarn",
+    "empty": "Noch nichts notiert. Mach einen Zug!"
   },
   "castles": {
     "name": "Burg {{n}}",
     "tutorial": "Übungsburg",
     "progress": "{{stars}} von {{required}} Sternen",
+    "progressTraining": "{{solved}} von {{required}} Puzzles gelöst",
     "locked": "gesperrt",
     "toOpen": "um {{name}} zu öffnen",
     "nextOpen": "{{name}} ist offen!"
