@@ -1,73 +1,64 @@
 // Castles: the level hierarchy shown as a map on the home screen.
 //
-// 30 castles (0..29), stacked bottom to top. Castle n opens once castle n-1 is open AND done:
-// the player has collected its required stars there (UNLOCK_SHARE of the stars it can give:
-// 5 per puzzle, so 75 of 250 for 50 puzzles).
-// Training rules (catalog with native castles, see catalogHasCastles): castle 0 is the training
-// castle -- open from the start, played in a fixed order (puzzle k can only be played once puzzles
-// 1..k-1 are won: playableUpTo), and done once EVERY puzzle is won (stars do not count). Castle 1
-// then opens only when castle 0 is done. Without training rules (older catalog, temporary
-// mapping): castles 0 and 1 are open from the start, castle 0 is done like any other.
-// Unlocking is derived from the saved results (engine/progress.js) -- nothing extra is stored.
+// CASTLE_COUNT castles (src/config.js), stacked bottom to top. Castle 0 is the training castle:
+// open from the start, played in a fixed order (puzzle k can only be played once puzzles 1..k-1
+// are won: playableUpTo), and done once EVERY puzzle is won (stars do not count). Castle n >= 1
+// opens once castle n-1 is open AND done: the player has collected its required stars there
+// (UNLOCK_STARS, 20, however many puzzles it holds). When the catalog
+// has no training puzzles, castle 1 is open from the start.
+// Unlocking is derived from the per-castle star counters (engine/progress.js castleStars), not
+// from the stars of the puzzles currently in a castle: a counter only grows, so a castle stays
+// done when puzzles move between castles after a new catalog.
 //
-// Which puzzles belong to which castle:
-//   * catalog with CASTLE_COUNT levels numbered 0..CASTLE_COUNT-1 (the planned factory export):
-//     castle = instance.level. Inside a castle: instance.level_order first (hand-set order, e.g.
-//     the training castle), then seq.
-//   * older catalog (5 levels, today): TEMPORARY mapping -- every playable puzzle sorted by
-//     (factory level, seq) and cut into chunks of PUZZLES_PER_CASTLE; puzzles beyond the last
-//     castle are left out. Stable as long as the catalog does not change.
+// Which puzzles belong to which castle (assignCastles) -- the factory ships an order, not levels:
+//   * castle 0: every playable instance with a training_position, in that order;
+//   * castles 1..CASTLE_COUNT-1: every other playable instance with a difficulty_ranking, in
+//     ranking order (1 = easiest), cut into CASTLE_COUNT - 1 consecutive castles of nearly equal
+//     size (sizes differ by at most one). Inside a castle the puzzles stay in ranking order.
+// A new catalog can move puzzles to another castle; their own best stars go with them.
 // Pure functions (no React, no fetch) so the tests can use them.
 
-import { MAX_STARS } from './stars.js'
+import { CASTLE_COUNT, UNLOCK_STARS } from '../config.js'
 
-export const CASTLE_COUNT = 30
-export const PUZZLES_PER_CASTLE = 50
-export const UNLOCK_SHARE = 0.3
+export { CASTLE_COUNT, UNLOCK_STARS }
 export const TUTORIAL_CASTLE = 0
-export const OPEN_AT_START = 2          // castles 0 and 1
 
-/** True if the catalog index already numbers its levels as castles (0..CASTLE_COUNT-1). */
-export function catalogHasCastles(index) {
-  const levels = new Set((index?.levels ?? []).map((l) => l.level))
-  for (let c = 0; c < CASTLE_COUNT; c++) if (!levels.has(c)) return false
-  return true
+/** Split playable instances into castles: [{ castle, pool }] of length `count`. Sets
+ *  `inst.level` = its castle number on every assigned instance (the app's own field: used for
+ *  telemetry `level` and for the castle star counters); instances without a training_position
+ *  or difficulty_ranking are left out. */
+export function assignCastles(instances, count = CASTLE_COUNT) {
+  const pools = Array.from({ length: count }, () => [])
+  const byId = (a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0)
+  const training = instances.filter((i) => Number.isInteger(i.training_position))
+    .sort((a, b) => a.training_position - b.training_position || byId(a, b))
+  const ranked = instances.filter((i) => !Number.isInteger(i.training_position) && Number.isInteger(i.difficulty_ranking))
+    .sort((a, b) => a.difficulty_ranking - b.difficulty_ranking || byId(a, b))
+  pools[TUTORIAL_CASTLE].push(...training)
+  const n = count - 1
+  if (n > 0) ranked.forEach((inst, k) => pools[1 + Math.floor((k * n) / ranked.length)].push(inst))
+  pools.forEach((pool, castle) => { for (const inst of pool) inst.level = castle })
+  return pools.map((pool, castle) => ({ castle, pool }))
 }
 
-/** Split playable instances into castles: [{ castle, pool }] (pool in seq order).
- *  `nativeLevels`: true = castle is instance.level (see catalogHasCastles). */
-export function assignCastles(instances, nativeLevels) {
-  const bySeq = (a, b) => (a.level - b.level) || ((a.seq ?? 0) - (b.seq ?? 0)) || (a.id < b.id ? -1 : 1)
-  const sorted = [...instances].sort(bySeq)
-  const pools = Array.from({ length: CASTLE_COUNT }, () => [])
-  if (nativeLevels) {
-    for (const inst of sorted) if (inst.level >= 0 && inst.level < CASTLE_COUNT) pools[inst.level].push(inst)
-  } else {
-    sorted.forEach((inst, i) => {
-      const c = Math.floor(i / PUZZLES_PER_CASTLE)
-      if (c < CASTLE_COUNT) pools[c].push(inst)
-    })
-  }
-  const byOrder = (a, b) => (a.level_order ?? Infinity) - (b.level_order ?? Infinity) || (a.seq ?? 0) - (b.seq ?? 0)
-  return pools.map((pool, castle) => ({ castle, pool: pool.sort(byOrder) }))
-}
-
-/** Stars needed in a castle with `count` puzzles to open the next one (at least 1). */
-export function requiredStars(count) {
-  return Math.max(1, Math.ceil(UNLOCK_SHARE * MAX_STARS * count))
+/** Stars needed in a castle to open the next one: UNLOCK_STARS, independent of its puzzle count. */
+export function requiredStars() {
+  return UNLOCK_STARS
 }
 
 /** State of every castle: [{ castle, count, stars, required, done, unlocked, fromStart, training,
- *  solved }]. `totalsIn(pool)` returns { stars, solved } over a pool (progressTotals). With
- *  `training` (see the top of this file) castle 0 is the training castle: required = every puzzle,
- *  done = all solved, and castle 1 waits for it. fromStart = open without having earned it. */
-export function castleStates(castles, totalsIn, { training = false } = {}) {
+ *  solved }]. `totalsIn(pool, castle)` returns { stars, solved }: stars = the castle's star counter
+ *  (engine/progress.js castleStars), solved = solved puzzles of the pool (progressTotals). Castle 0
+ *  is the training castle: required = every puzzle, done = all solved, and castle 1 waits for it
+ *  (unless it is empty). fromStart = open without having earned it. */
+export function castleStates(castles, totalsIn) {
   const out = []
-  const openAtStart = training ? 1 : OPEN_AT_START
+  const trainingEmpty = (castles[TUTORIAL_CASTLE]?.pool.length ?? 0) === 0
+  const openAtStart = trainingEmpty ? 2 : 1
   for (const { castle, pool } of castles) {
-    const { stars, solved } = totalsIn(pool)
-    const isTraining = training && castle === TUTORIAL_CASTLE
-    const required = isTraining ? pool.length : requiredStars(pool.length)
+    const { stars, solved } = totalsIn(pool, castle)
+    const isTraining = castle === TUTORIAL_CASTLE
+    const required = isTraining ? pool.length : requiredStars()
     const done = isTraining ? pool.length > 0 && solved >= pool.length : stars >= required
     const prev = out[castle - 1]
     const fromStart = castle < openAtStart

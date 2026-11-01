@@ -23,9 +23,9 @@ needed to run the app and to receive telemetry. See README.md for the full workf
 src/
   App.jsx                 # screens: Home (castle map) -> Castle (grid) -> Game; ?instance=<name or id> opens one puzzle
   engine/engine.js        # THE rule engine (must match the factory's instance.py exactly)
-  engine/catalog.js       # loads public/catalog/{index,level-N}.json (loadAll for the castle map)
-  engine/castles.js       # the 30-castle level hierarchy: puzzle -> castle, required stars, unlocking
-  engine/progress.js      # tried/solved puzzles + best stars; saved in localStorage only after opt-in
+  engine/catalog.js       # loads public/catalog/{index,puzzles}.json (loadAll for the castle map)
+  engine/castles.js       # the castle hierarchy: ranking -> castles, required stars, unlocking
+  engine/progress.js      # tried/solved puzzles + best stars + per-castle star counters; saved only after opt-in
   engine/stars.js         # star rating of a win (1-5) from moves and moves_to_win_min
   telemetry/telemetry.js  # anonymous screen-view and puzzle-play telemetry (see privacy rule below)
   game/GameScene.js       # Phaser scene: draws the board, turns taps into engine calls
@@ -33,7 +33,7 @@ src/
   components/             # HomeScreen (CastleMap: scrollable SVG map of castles), LevelScreen (one castle:
                           # progress bar to the next castle + 10-column tile grid in seq order),
                           # GameScreen (Retry/Back -> back to the level grid; shows the puzzle name), Board, WinDialog,
-                          # ConsentBanner (opt-in for saved progress + the setting on the home page)
+                          # ConsentBanner (opt-in for saved progress; the home footer's "opt in/out" link reopens it)
   theme.js                # all colours
   themes.js               # visual themes (classic, halloween, sorcerer): cell looks, cursor, texts, decorations;
                           # ACTIVE_THEME or ?theme=<name>. Appearance only, never rules/ids/telemetry
@@ -72,28 +72,44 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   cookies/localStorage ids, no user agent, screen size, language, location, referrer. Any new field
   must keep this property and must be added to `telemetry/schema.sql` and the factory's `stats_helpers.py`.
 - **Best / stars** -- `instance.moves_to_win_min` (not hashed, exported by the factory: the lowest
-  number of moves it found; proven minimum when `meta.proven_min_moves`) is shown under the moves
-  counter as "Best: X"; a win gets 1-5 stars from `src/engine/stars.js` `starsForWin` (5 at/below
+  number of moves it found; proven minimum when `meta.proven_min_moves`) is shown as "Best: X" in
+  the win dialog only (not on the game screen); a win gets 1-5 stars from `src/engine/stars.js` `starsForWin` (5 at/below
   the min, 2 at 1.4 x min, linear in between rounded to the nearest star, 1 above), shown in the
   win dialog. Missing value -> neither is shown. Stars are not sent to telemetry (derivable from
   moves); `meta` itself is still never read by the app.
 - **Saved progress** -- `src/engine/progress.js` is the ONLY code that touches browser storage:
   `loc-storage-consent` (the opt-in answer) and, only while that is 'granted', `loc-progress-v1`
-  ({v:1, p:{id: 't' | 0..5}}: tried, or solved with the best stars). Nothing is persisted before the
+  ({v:2, p:{id: 't' | 0..5}, c:{castle: stars}}: tried, or solved with the best stars; c = the
+  per-castle star counters, see Castles; v:1 without c is still read and converted once by
+  seedCastleStars). Nothing is persisted before the
   player says yes (ConsentBanner); "No thanks" deletes saved progress. Without consent progress
   lives in memory for the visit. Total stars = sum of each puzzle's best rating (max 5 each).
   Progress is never sent anywhere (not in telemetry). Every storage access is try/catch: blocked
   storage must never break the game. A new stored field needs the same opt-in.
-- **Castles** -- `src/engine/castles.js`: 30 castles (0..29), shown bottom to top on the home map.
-  Castle 0 (tutorial, details to come) and castle 1 are open from the start; castle n >= 2 opens
-  when castle n-1 is open and has `UNLOCK_SHARE` (30%) of its achievable stars (5 per puzzle, so
-  75 for 50 puzzles). Unlocking is derived from the saved best stars -- nothing new is stored.
-  Puzzle -> castle: `instance.level` once the factory exports levels 0..29; until then a TEMPORARY
-  mapping cuts all playable puzzles, sorted by (catalog level, seq), into castles of 50.
-  When play opens a castle and progress is not saved, the consent banner reappears once per visit
-  (`nudge`). Telemetry `level`: castle number on the castle screen, catalog level in a game.
+- **Castles** -- `src/engine/castles.js`, settings in `src/config.js`: `CASTLE_COUNT` castles
+  (0..N-1), shown bottom to top on the home map. The catalog has NO levels: castle 0 = every
+  playable instance with `training_position` (in that order; played in order, done when all are
+  won); the remaining instances with `difficulty_ranking` are cut, in ranking order, into
+  `CASTLE_COUNT - 1` castles of nearly equal size. Changing the number of castles = changing
+  `CASTLE_COUNT`, no factory export. `assignCastles` sets `instance.level` = castle number (app
+  field). Castle 1 opens when castle 0 is done (open from the start if there are no training
+  puzzles); castle n >= 2 when castle n-1 is open and its STAR COUNTER reaches `UNLOCK_STARS`
+  (20, the same for every castle, independent of its number of puzzles). Star counters (engine/progress.js castleStars):
+  each gain in a puzzle's best rating is added to the castle it is in at that moment; they never go
+  down and are independent of which puzzles a castle holds now (puzzles can move after a new
+  export; their own stars move with them). When play opens a castle and progress is not saved,
+  the consent banner reappears once per visit (`nudge`). Telemetry `level` = castle number, on the
+  castle screen and in a game.
 - **Start cell switch** -- `src/config.js` `HIDE_START_CELL_IF_NOT_REQUIRED`: puzzles with
   `start_cell_required: false` start all-uncolored (`src/game/startBoard.js`); same id either way.
+- **Game screen** -- top row: Retry, Back, and an info button (circled "i") that opens the
+  rules pop-up (RulesDialog, "How it works"). Below: puzzle name and the moves counter only. No
+  goal / rules line under the board; in training the notebook peek sits right below the board.
+- **Training note animation** -- `components/NoteFlight.jsx`: a new rule observation is circled on
+  the board and flies into a note card, which drops into the notebook. Training puzzles
+  1..`PHASED_LESSONS` (3) use the phased version (first the coloured neighbours are circled and fly
+  to the left side of the rule, then the changed cell is circled and flies to the right side); later
+  training puzzles move everything at once.
 - **Mobile first** -- portrait phones are the main target; boards up to 9 rows x 6 cols must fit.
 
 ## Branching Strategy (as in Maze Inc.)

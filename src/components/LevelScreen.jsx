@@ -152,7 +152,7 @@ export default function LevelScreen({ title, nextTitle, state, pool, onPick, onB
         )}
 
         <p className="mt-4 mb-2 text-sm text-game-silver font-sans font-semibold text-center">
-          {t(training ? 'levelScreen.trainingHint' : 'levelScreen.choose')}
+          {training ? t('levelScreen.trainingHint', { count: pool.length }) : t('levelScreen.choose')}
         </p>
       </div>
 

@@ -2,13 +2,6 @@
   "app": {
     "title": "Life of Colors"
   },
-  "levels": {
-    "1": "Level 1",
-    "2": "Level 2",
-    "3": "Level 3",
-    "4": "Level 4",
-    "5": "Level 5"
-  },
   "home": {
     "description": "Das Ziel: 🟩 auf dem gold umrandeten Feld. Tippe auf ein Feld um es zu verwandeln - oder auch nicht - je nachdem, welche Farben drumherum sind. Die versteckten Regeln sind bei jedem Puzzle anders.",
     "chooseLevel": "Wähle eine Stufe",
@@ -16,7 +9,9 @@
     "puzzleCount_other": "{{count}} Puzzles",
     "loading": "Puzzles werden geladen…",
     "loadError": "Die Puzzles konnten nicht geladen werden. Bitte prüfe deine Verbindung und lade die Seite neu.",
-    "privacy": "Keine Cookies, kein Tracking, keine identifizierenden Daten. Züge und Ergebnisse werden anonym zur Verbesserung des Spiels erfasst. Gespeicherter Fortschritt (nur wenn du es erlaubst) bleibt in diesem Browser und wird nie gesendet.",
+    "privacyBefore": "Keine Cookies. Fortschritt wird im Browser gespeichert (",
+    "privacyLink": "ein-/ausschalten",
+    "privacyAfter": "). Telemetrie wird nur ohne identifizierende Daten erhoben.",
     "more": "Mehr"
   },
   "game": {
@@ -25,9 +20,7 @@
     "home": "Start",
     "moves_one": "{{count}} Zug",
     "moves_other": "{{count}} Züge",
-    "best": "Bestwert: {{count}}",
-    "goal": "Ziel:",
-    "goalWhere": "auf den Goldrahmen"
+    "best": "Bestwert: {{count}}"
   },
   "win": {
     "title": "Geschafft!",
@@ -48,7 +41,8 @@
   "levelScreen": {
     "back": "Start",
     "choose": "Wähle dein Puzzle",
-    "trainingHint": "Löse alle Übungspuzzles eins nach dem anderen"
+    "trainingHint_one": "{{count}} Trainingslektion zu absolvieren",
+    "trainingHint_other": "{{count}} Trainingslektionen zu absolvieren"
   },
   "progress": {
     "title": "Gesammelte Sterne",
@@ -63,7 +57,6 @@
     "statusOn": "Fortschritt wird auf diesem Gerät gespeichert",
     "statusOff": "Fortschritt wird nicht gespeichert (nur dieser Besuch)",
     "declineDeletes": "„Nein, danke“ löscht den gespeicherten Fortschritt aus diesem Browser.",
-    "change": "Ändern",
     "nudgeNews": "🏰 {{name}} ist offen!",
     "nudgeBody": "Dein Fortschritt wird noch nicht gespeichert – die geöffneten Burgen wären beim nächsten Mal weg. In diesem Browser speichern? Er wird nirgendwohin gesendet."
   },

@@ -2,13 +2,6 @@
   "app": {
     "title": "Life of Colors"
   },
-  "levels": {
-    "1": "Level 1",
-    "2": "Level 2",
-    "3": "Level 3",
-    "4": "Level 4",
-    "5": "Level 5"
-  },
   "home": {
     "description": "Ton but : mettre 🟩 sur la case au cadre doré. Comment ? Touche une case : elle peut se transformer, selon les couleurs qui l'entourent. Les règles cachées changent à chaque puzzle.",
     "chooseLevel": "Choisis un niveau",
@@ -16,7 +9,9 @@
     "puzzleCount_other": "{{count}} puzzles",
     "loading": "Chargement des puzzles…",
     "loadError": "Les puzzles n'ont pas pu être chargés. Vérifie ta connexion et recharge la page.",
-    "privacy": "Pas de cookies, pas de pistage, aucune donnée d'identification. Les coups et résultats sont collectés anonymement pour améliorer le jeu. La progression sauvegardée (seulement si tu l'autorises) reste dans ce navigateur et n'est jamais envoyée.",
+    "privacyBefore": "Pas de cookies. Progression enregistrée dans le navigateur (",
+    "privacyLink": "activer/désactiver",
+    "privacyAfter": "). La télémétrie est collectée uniquement sans données identifiantes.",
     "more": "Plus"
   },
   "game": {
@@ -25,9 +20,7 @@
     "home": "Accueil",
     "moves_one": "{{count}} coup",
     "moves_other": "{{count}} coups",
-    "best": "Record : {{count}}",
-    "goal": "But :",
-    "goalWhere": "sur le cadre doré"
+    "best": "Record : {{count}}"
   },
   "win": {
     "title": "Bravo !",
@@ -48,7 +41,8 @@
   "levelScreen": {
     "back": "Accueil",
     "choose": "Choisis ton puzzle",
-    "trainingHint": "Résous tous les puzzles d’entraînement un par un"
+    "trainingHint_one": "{{count}} leçon d’entraînement à terminer",
+    "trainingHint_other": "{{count}} leçons d’entraînement à terminer"
   },
   "progress": {
     "title": "Étoiles récoltées",
@@ -63,7 +57,6 @@
     "statusOn": "Progression sauvegardée sur cet appareil",
     "statusOff": "Progression non sauvegardée (cette visite seulement)",
     "declineDeletes": "« Non merci » supprime la progression sauvegardée de ce navigateur.",
-    "change": "Modifier",
     "nudgeNews": "🏰 Le {{name}} est ouvert !",
     "nudgeBody": "Ta progression n’est pas encore enregistrée : les châteaux ouverts disparaîtraient la prochaine fois. L’enregistrer dans ce navigateur ? Elle n’est jamais envoyée nulle part."
   },

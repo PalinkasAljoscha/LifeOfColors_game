@@ -6,16 +6,18 @@ import GameScreen from './components/GameScreen.jsx'
 import ConsentBanner from './components/ConsentBanner.jsx'
 import { loadIndex, loadAll, markPlayed, findById } from './engine/catalog.js'
 import {
-  assignCastles, castleStates as computeStates, catalogHasCastles, earnedUnlocks, highestUnlocked, TUTORIAL_CASTLE,
+  assignCastles, castleStates as computeStates, earnedUnlocks, highestUnlocked, TUTORIAL_CASTLE,
 } from './engine/castles.js'
-import { progressTotals, storageConsent, CONSENT_GRANTED } from './engine/progress.js'
+import { castleStars, progressTotals, seedCastleStars, storageConsent, CONSENT_GRANTED } from './engine/progress.js'
 import { useProgress } from './hooks/useProgress.js'
 import { setCatalogVersion, screenView } from './telemetry/telemetry.js'
 
 // Three screens: Home (castle map, engine/castles.js) -> Castle (grid of its puzzles; the
 // LevelScreen component) -> Game (one instance). Back in the game returns to the castle's grid.
 // `pick` records how the puzzle was chosen (telemetry): 'grid' | 'link' (?instance=).
-// Telemetry `level`: the castle number on the castle screen, the instance's catalog level in a game.
+// Castles come from the catalog's difficulty_ranking / training_position (engine/castles.js, number
+// of castles in src/config.js). Telemetry `level`: the castle number, on the castle screen and in a
+// game (instance.level is set to its castle by assignCastles).
 export default function App() {
   const { t } = useTranslation()
   const [index, setIndex] = useState(null)
@@ -26,10 +28,12 @@ export default function App() {
   const progressVersion = useProgress()          // castle states follow the stars
 
   const states = useMemo(
-    () => castles && computeStates(castles, (pool) => progressTotals(pool.map((i) => i.id)),
-      { training: catalogHasCastles(index) }),
+    () => castles && computeStates(castles, (pool, c) => ({
+      solved: progressTotals(pool.map((i) => i.id)).solved,
+      stars: castleStars(c),                      // the castle's own counter (engine/progress.js)
+    })),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [castles, index, progressVersion],
+    [castles, progressVersion],
   )
 
   // Nudge the opt-in once per visit when play opens a new castle and progress is not being saved
@@ -64,7 +68,8 @@ export default function App() {
       .then(async (idx) => {
         setIndex(idx)
         setCatalogVersion(idx.catalog_version)
-        const all = assignCastles(await loadAll(), catalogHasCastles(idx))
+        const all = assignCastles(await loadAll())
+        seedCastleStars(all)                        // once, for progress saved before castle counters
         setCastles(all)
         // ?instance=<name or id> opens one specific puzzle (testing, sharing), even in a locked castle.
         const ref = new URLSearchParams(window.location.search).get('instance')
@@ -85,7 +90,7 @@ export default function App() {
   const pool = castle !== null ? castles?.[castle]?.pool ?? [] : []
 
   function playPicked(inst) {
-    markPlayed(inst, pool.length)
+    markPlayed(inst)
     setGame({ instance: inst, pick: 'grid' })
   }
 

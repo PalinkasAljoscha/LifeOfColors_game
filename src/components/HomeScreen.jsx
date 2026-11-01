@@ -7,7 +7,7 @@ import ThemeDecorations from './ThemeDecorations.jsx'
 import { Emoji } from './Emoji.jsx'
 import CastleMap from './CastleMap.jsx'
 import RulesDialog from './RulesDialog.jsx'
-import { ConsentBannerSpacer, ConsentDialog, ProgressSetting } from './ConsentBanner.jsx'
+import { ConsentBannerSpacer, ConsentDialog } from './ConsentBanner.jsx'
 import { useProgress } from '../hooks/useProgress.js'
 
 const theme = activeTheme()
@@ -88,9 +88,14 @@ export default function HomeScreen({ castleStates, error, loadingCastle, onSelec
           <CastleMap states={castleStates} loadingCastle={loadingCastle} onSelect={onSelectCastle} />
         )}
 
-        <footer className="pt-2 text-[10px] leading-snug text-game-hint font-sans shrink-0">
-          {t('home.privacy')}
-          <ProgressSetting onOpen={() => setShowConsent(true)} />
+        {/* Privacy line; "opt in/out" opens the saved-progress choice (ConsentDialog). */}
+        <footer className="pt-2 text-[11px] leading-snug text-game-hint font-sans shrink-0">
+          {t('home.privacyBefore')}
+          <button onClick={() => setShowConsent(true)} aria-haspopup="dialog"
+                  className="underline underline-offset-2 font-bold text-game-silver">
+            {t('home.privacyLink')}
+          </button>
+          {t('home.privacyAfter')}
         </footer>
         {showRules && <RulesDialog onClose={() => setShowRules(false)} />}
         {showConsent && <ConsentDialog onClose={() => setShowConsent(false)} />}

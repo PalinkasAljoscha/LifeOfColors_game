@@ -11,7 +11,6 @@
     "rule",
     "board",
     "goal",
-    "level",
     "name",
     "name_color",
     "seq"
@@ -125,10 +124,15 @@
         }
       }
     },
-    "level": {
+    "difficulty_ranking": {
       "type": "integer",
       "minimum": 1,
-      "description": "App level the instance is offered under."
+      "description": "Not hashed. Place 1..K (no ties, no gaps over the live ranked instances of the catalog; 1 = easiest) in the order the app distributes puzzles over its castles (src/engine/castles.js): it removes the training puzzles and cuts the rest, in this order, into CASTLE_COUNT - 1 castles. Absent = not ranked; absent on retired instances."
+    },
+    "training_position": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Optional, not hashed. Place 1..k in the training castle (castle 0). A training instance may also have a difficulty_ranking (ignored for the castle split). Absent on retired instances."
     },
     "start_cell_required": {
       "type": [
@@ -153,12 +157,12 @@
     "name_color": {
       "type": "string",
       "pattern": "^#[0-9A-F]{6}$",
-      "description": "Not hashed. Colour of the name's colour word (#RRGGBB); the level grid draws the puzzle's tile in it. May be corrected in later exports, the name stays."
+      "description": "Not hashed. Colour of the name's colour word (#RRGGBB); the castle grid draws the puzzle's tile in it. May be corrected in later exports, the name stays."
     },
     "seq": {
       "type": "integer",
       "minimum": 1,
-      "description": "Not hashed. Publication order (1 = first published); the level grid shows puzzles in this order, so new puzzles appear at the end."
+      "description": "Not hashed. Publication order (1 = first published); never changed."
     },
     "retired": {
       "type": "boolean",

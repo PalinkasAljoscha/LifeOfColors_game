@@ -3,8 +3,8 @@ import { useTranslation } from 'react-i18next'
 import Board from './Board.jsx'
 import WinDialog from './WinDialog.jsx'
 import RulesDialog from './RulesDialog.jsx'
-import NotebookOpen, { CellToken, NotebookPeek } from './TrainingNotes.jsx'
-import NoteFlight from './NoteFlight.jsx'
+import NotebookOpen, { NotebookPeek } from './TrainingNotes.jsx'
+import NoteFlight, { PHASED_LESSONS } from './NoteFlight.jsx'
 import { markSolved } from '../engine/catalog.js'
 import { progressTotals } from '../engine/progress.js'
 import { minMovesOf, starsForWin } from '../engine/stars.js'
@@ -13,7 +13,6 @@ import { addObservation, observation } from '../engine/training.js'
 import * as telemetry from '../telemetry/telemetry.js'
 
 // The goal colour as the board draws it in this game's look: its emoji, or a small colour square.
-const GoalLook = ({ color, look }) => <CellToken state={color} look={look} className="text-lg leading-none" />
 
 // One instance. Retry remounts the board (fresh start of the same instance); Back goes to the
 // level's grid. `pick` (how the puzzle was chosen) is passed on to telemetry.
@@ -155,10 +154,22 @@ export default function GameScreen({ instance, place, training = null, pick, onP
         </button>
         <button
           onClick={() => leave(onPickNew, 'back')}
-          className="w-28 h-16 rounded-2xl bg-game-panel border-2 border-white/15 active:scale-95 transition-transform
+          className="w-24 h-16 rounded-2xl bg-game-panel border-2 border-white/15 active:scale-95 transition-transform
                      text-lg font-black flex items-center justify-center gap-1.5"
         >
           <span aria-hidden="true">←</span> {t('game.back')}
+        </button>
+        {/* Info: the rules pop-up ("How it works") */}
+        <button
+          onClick={() => setShowRules(true)}
+          className="w-14 h-16 rounded-2xl bg-game-panel border-2 border-white/15 active:scale-95 transition-transform
+                     flex items-center justify-center text-game-score shrink-0"
+          aria-haspopup="dialog"
+          aria-label={t('rules.title')}
+          title={t('rules.title')}
+        >
+          <span className="w-8 h-8 rounded-full border-[3px] border-current flex items-center justify-center
+                           text-lg font-black font-serif leading-none" aria-hidden="true">i</span>
         </button>
       </div>
 
@@ -175,41 +186,20 @@ export default function GameScreen({ instance, place, training = null, pick, onP
           )}
           <span className="truncate select-all text-white/90">{instance.name ?? instance.id}</span>
         </span>
-        {/* Moves counter, with the puzzle's best-known move count under it ("Best: X"). */}
-        <span className="shrink-0 flex flex-col items-end leading-tight">
-          <span className="text-game-score">{t('game.moves', { count: moves })}</span>
-          {minMoves !== null && (
-            <span className="text-xs text-game-silver">{t('game.best', { count: minMoves })}</span>
-          )}
-        </span>
+        {/* Moves counter (the best-known move count is shown in the win dialog only). */}
+        <span className="shrink-0 text-game-score">{t('game.moves', { count: moves })}</span>
       </div>
 
       <div ref={boardBoxRef} className="flex-1 min-h-0 mt-2 relative">
         <Board key={round} instance={instance} look={look} training={training !== null} onClick={onClick} onWon={onWon} />
         {training && flights.length > 0 && (
           <NoteFlight key={flights[0].id} job={flights[0]} instance={instance} look={look}
+                      phased={Number.isInteger(training.day) && training.day <= PHASED_LESSONS}
                       boardRef={boardBoxRef} rollRef={rollRef} onLanded={landed} />
         )}
       </div>
 
-
-      {/* Goal reminder (players opening a shared link never saw the homepage) + the rules pop-up. */}
-      <div className="mx-auto w-full max-w-md flex justify-between items-center gap-3 mt-2 px-1 text-sm font-sans font-bold">
-        <span className="min-w-0 flex items-center gap-1.5 text-game-silver">
-          <span className="shrink-0">{t('game.goal')}</span>
-          <GoalLook color={instance.goal.color} look={look} />
-          <span className="truncate">{t('game.goalWhere')}</span>
-        </span>
-        <button
-          onClick={() => setShowRules(true)}
-          className="shrink-0 font-black text-game-score underline underline-offset-2 decoration-2 px-1 py-1"
-          aria-haspopup="dialog"
-        >
-          {t('rules.title')} ›
-        </button>
-      </div>
-
-      {/* training: the notebook peeking in at the bottom of the screen, and opened */}
+      {/* training: the notebook peeking in right below the board (no goal / rules line any more), and opened */}
       {training && <NotebookPeek ref={rollRef} bump={rollBump} onOpen={openNotes} />}
       {training && <NotebookOpen open={notesOpen} notes={notes} look={look} onClose={closeNotes} />}
 
