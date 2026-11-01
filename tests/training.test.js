@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { neighbourCells, observation, addObservation } from '../src/engine/training.js'
+import { neighbourCells, observation, addObservation, flightSources } from '../src/engine/training.js'
 import { tableIndex } from '../src/engine/engine.js'
 
 test('neighbourCells: corner, edge and inner cells', () => {
@@ -22,4 +22,22 @@ test('observation decodes the rule entry; repeats are not added twice', () => {
   ;({ notes, isNew } = addObservation(notes, observation(tableIndex(0, 0, 1), 'B')))
   assert.ok(isNew)
   assert.equal(notes.length, 2)
+})
+
+test('flightSources: coloured neighbours to their card slots, the changed cell to R', () => {
+  const board = [
+    ['O', 'B', 'U'],
+    ['O', 'G', 'U'],
+    ['U', 'U', 'U'],
+  ]
+  // move on (1, 1) turned it G: neighbours O (0,0), O (1,0), B (0,1)
+  assert.deepEqual(flightSources(board, 1, 1), [
+    { r: 0, c: 0, state: 'O', slot: 'O0' },
+    { r: 1, c: 0, state: 'O', slot: 'O1' },
+    { r: 0, c: 1, state: 'B', slot: 'B0' },
+    { r: 1, c: 1, state: 'G', slot: 'R' },
+  ])
+  // more than 3 of a kind share one slot ("4 × O")
+  const full = [['O', 'O', 'O'], ['O', 'B', 'U'], ['U', 'U', 'U']]
+  assert.ok(flightSources(full, 1, 1).filter((f) => f.state === 'O').every((f) => f.slot === 'O0'))
 })

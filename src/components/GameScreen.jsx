@@ -3,12 +3,13 @@ import { useTranslation } from 'react-i18next'
 import Board from './Board.jsx'
 import WinDialog from './WinDialog.jsx'
 import RulesDialog from './RulesDialog.jsx'
-import NotesScroll, { CellToken, RolledNotes } from './TrainingNotes.jsx'
+import NotebookOpen, { CellToken, NotebookPeek } from './TrainingNotes.jsx'
+import NoteFlight from './NoteFlight.jsx'
 import { markSolved } from '../engine/catalog.js'
 import { progressTotals } from '../engine/progress.js'
 import { minMovesOf, starsForWin } from '../engine/stars.js'
 import { drawLook } from '../themes.js'
-import { NOTES_AUTO_CLOSE_MS, addObservation, observation } from '../engine/training.js'
+import { addObservation, observation } from '../engine/training.js'
 import * as telemetry from '../telemetry/telemetry.js'
 
 // The goal colour as the board draws it in this game's look: its emoji, or a small colour square.
@@ -18,9 +19,10 @@ const GoalLook = ({ color, look }) => <CellToken state={color} look={look} class
 // level's grid. `pick` (how the puzzle was chosen) is passed on to telemetry.
 // `place`: the label in front of the puzzle name (the castle it belongs to).
 // `training`: null, or in the training castle { day (the puzzle's place in the plan, 1-based),
-// ids (every training puzzle), next (name of the castle it opens) } -- board helps, the scroll of
+// ids (every training puzzle), next (name of the castle it opens) } -- board helps, the notebook of
 // observed transformations (src/engine/training.js; the notes survive Retry, the rules stay the
-// same) and the training win dialog ("Passed training day X"; "Training complete" for the win
+// same; a new one is taken down by the note animation, components/NoteFlight.jsx, and lands in
+// the notebook at the bottom of the screen, which opens only when tapped) and the training win dialog ("Passed training day X"; "Training complete" for the win
 // that completes the plan).
 export default function GameScreen({ instance, place, training = null, pick, onPickNew, onHome }) {
   const { t } = useTranslation()
@@ -36,24 +38,34 @@ export default function GameScreen({ instance, place, training = null, pick, onP
   // keeps them; leaving and opening a game again (even the same one) draws anew.
   const [look] = useState(() => drawLook())
   const [notes, setNotes] = useState([])         // training: observed transformations, in order
-  const [lastNote, setLastNote] = useState(null) // training: { key, n } of the latest move (n re-triggers the highlight)
-  const [notesOpen, setNotesOpen] = useState(null) // training: null (rolled up) | 'move' (after a move) | 'tap'
-  const [rollHidden, setRollHidden] = useState(false) // training: the rolled scroll is up over the board
-  const notesTimer = useRef(null)
+  const [notesOpen, setNotesOpen] = useState(false)   // training: the notebook is open (tapped)
+  const [flights, setFlights] = useState([])          // training: note animations to play, in order
+  const [rollBump, setRollBump] = useState(0)         // training: bumped when a note lands in the notebook
+  const pendingRef = useRef([])                       // observations noted or on their way (no repeats)
+  const flightId = useRef(0)
   const boardBoxRef = useRef(null)
   const rollRef = useRef(null)
 
-  function openNotes(how) {
-    clearTimeout(notesTimer.current)
-    setNotesOpen(how)
-    setRollHidden(true)
-    if (how === 'move') notesTimer.current = setTimeout(() => setNotesOpen(null), NOTES_AUTO_CLOSE_MS)
+  function openNotes() {
+    flushFlights()   // notes still on their way are written at once, so the notebook shows them
+    setNotesOpen(true)
   }
   function closeNotes() {
-    clearTimeout(notesTimer.current)
-    setNotesOpen(null)
+    setNotesOpen(false)
   }
-  useEffect(() => () => clearTimeout(notesTimer.current), [])
+  // A note animation finished: its observation goes into the notebook.
+  function landed(job) {
+    setFlights((q) => q.filter((j) => j.id !== job.id))
+    setNotes((prev) => addObservation(prev, job.obs).notes)
+    setRollBump((n) => n + 1)
+  }
+  // Stop all note animations (win, Retry, notebook opened): their observations are noted at once.
+  function flushFlights() {
+    setFlights((q) => {
+      if (q.length) setNotes((prev) => q.reduce((n, j) => addObservation(n, j.obs).notes, prev))
+      return []
+    })
+  }
 
   // Telemetry: one play per puzzle opened (Retry stays in the same play).
   useEffect(() => {
@@ -85,6 +97,7 @@ export default function GameScreen({ instance, place, training = null, pick, onP
   function retry() {
     clearTimeout(winTimer.current)
     closeNotes()
+    flushFlights()
     telemetry.restartPlay()
     setRound((n) => n + 1)
   }
@@ -97,21 +110,20 @@ export default function GameScreen({ instance, place, training = null, pick, onP
     to()
   }
 
-  function onClick({ r, c, changed, rule, color }) {
+  function onClick({ r, c, changed, board, rule, color }) {
     telemetry.recordClick(r, c, changed, rule, color)
     if (changed) {
       movesRef.current += 1
       setMoves(movesRef.current)
       if (training) {
-        // Only a NEW transformation is added and unrolls the scroll; a known one changes nothing
-        // (the scroll stays as it is -- if open, its entry is highlighted).
+        // Only a NEW transformation is taken down (note animation, then into the notebook); a known
+        // one shows nothing.
         const obs = observation(rule, color)
-        if (addObservation(notes, obs).isNew) {
-          setNotes((prev) => addObservation(prev, obs).notes)
-          setLastNote((prev) => ({ key: obs.key, n: (prev?.n ?? 0) + 1 }))
-          openNotes('move')
-        } else if (notesOpen !== null) {
-          setLastNote((prev) => ({ key: obs.key, n: (prev?.n ?? 0) + 1 }))
+        const added = addObservation(pendingRef.current, obs)
+        if (added.isNew) {
+          pendingRef.current = added.notes
+          flightId.current += 1
+          setFlights((q) => [...q, { id: flightId.current, obs, r, c, board }])
         }
       }
     }
@@ -119,7 +131,8 @@ export default function GameScreen({ instance, place, training = null, pick, onP
 
   function onWon() {
     telemetry.recordWin()
-    closeNotes()   // the winning move is noted, but the win dialog follows: no scroll over the board
+    closeNotes()     // the win dialog follows: no notebook or note animation over the board
+    flushFlights()
     const stars = starsForWin(movesRef.current, minMoves)
     const allWon = () => training !== null && progressTotals(training.ids).solved === training.ids.length
     const wasComplete = allWon()
@@ -173,14 +186,12 @@ export default function GameScreen({ instance, place, training = null, pick, onP
 
       <div ref={boardBoxRef} className="flex-1 min-h-0 mt-2 relative">
         <Board key={round} instance={instance} look={look} training={training !== null} onClick={onClick} onWon={onWon} />
-        {training && (
-          <NotesScroll open={notesOpen !== null} notes={notes} last={lastNote} highlight={notesOpen === 'move'}
-                       look={look} onClose={closeNotes} onClosed={() => setRollHidden(false)}
-                       boardRef={boardBoxRef} rollRef={rollRef} />
+        {training && flights.length > 0 && (
+          <NoteFlight key={flights[0].id} job={flights[0]} instance={instance} look={look}
+                      boardRef={boardBoxRef} rollRef={rollRef} onLanded={landed} />
         )}
       </div>
 
-      {training && <RolledNotes ref={rollRef} hidden={rollHidden} onOpen={() => openNotes('tap')} />}
 
       {/* Goal reminder (players opening a shared link never saw the homepage) + the rules pop-up. */}
       <div className="mx-auto w-full max-w-md flex justify-between items-center gap-3 mt-2 px-1 text-sm font-sans font-bold">
@@ -197,6 +208,10 @@ export default function GameScreen({ instance, place, training = null, pick, onP
           {t('rules.title')} ›
         </button>
       </div>
+
+      {/* training: the notebook peeking in at the bottom of the screen, and opened */}
+      {training && <NotebookPeek ref={rollRef} bump={rollBump} onOpen={openNotes} />}
+      {training && <NotebookOpen open={notesOpen} notes={notes} look={look} onClose={closeNotes} />}
 
       {showRules && <RulesDialog onClose={() => setShowRules(false)} />}
       {won && <WinDialog look={look} training={training && { day: training.day, next: training.next, complete: result?.trainingComplete === true }} moves={moves} best={minMoves} stars={result?.stars ?? null} newBest={result?.newBest ?? false} previousBest={result?.previousBest ?? null} onRetry={retry} onPickNew={() => leave(onPickNew, 'pick_new')} onHome={() => leave(onHome, 'home')} />}

@@ -50,15 +50,33 @@ body {
 .star-pop { display: inline-block; animation: starPop 320ms ease-out both; }
 @media (prefers-reduced-motion: reduce) { .star-pop { animation: none; } }
 
-/* Training castle scroll (components/TrainingNotes.jsx; flight and unrolling are animated there):
-   the entry of the latest move flashes. */
+/* Training castle note animation (components/NoteFlight.jsx): neighbours light up, rings pop
+   around the objects (and fade as they fly off), the card appears, the notebook nods on landing. */
+@keyframes noteGlow { from { opacity: 0; } to { opacity: 0.42; } }
+.note-glow { animation: noteGlow 160ms ease-out both; }
+@keyframes noteRingIn {
+  from { transform: scale(1.6); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+.note-ring-in { animation: noteRingIn 280ms ease-out both; }
+@keyframes noteRingOut { from { opacity: 1; } to { opacity: 0; } }
+.note-ring-out { animation: noteRingOut 300ms ease-in both; }
+@keyframes noteCardIn { from { opacity: 0; } to { opacity: 1; } }
+.note-card-in { animation: noteCardIn 200ms ease-out both; }
+@keyframes bookBump {
+  0%, 100% { transform: translateY(0); }
+  40%      { transform: translateY(-6px); }
+}
+.book-bump { animation: bookBump 420ms ease-out; }
+
+/* Training castle notebook (components/TrainingNotes.jsx): a highlighted note flashes. */
 @keyframes noteFlash {
   0%   { transform: scale(1); }
   35%  { transform: scale(1.12); }
   100% { transform: scale(1); }
 }
 .note-flash { animation: noteFlash 520ms ease-out; }
-@media (prefers-reduced-motion: reduce) { .note-flash { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .note-flash, .book-bump { animation: none; } }
 
 /* ── Themes (src/themes.js) ── */
 /* The theme's mouse cursor everywhere, also over buttons and the board canvas. */
