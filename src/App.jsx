@@ -8,7 +8,7 @@ import { loadIndex, loadAll, markPlayed, findById } from './engine/catalog.js'
 import {
   assignCastles, castleStates as computeStates, earnedUnlocks, highestUnlocked, TUTORIAL_CASTLE,
 } from './engine/castles.js'
-import { castleStars, progressTotals, seedCastleStars, storageConsent, CONSENT_GRANTED } from './engine/progress.js'
+import { castleStars, progressTotals, recentlyPlayed, seedCastleStars, storageConsent, CONSENT_GRANTED } from './engine/progress.js'
 import { useProgress } from './hooks/useProgress.js'
 import { setCatalogVersion, screenView } from './telemetry/telemetry.js'
 
@@ -94,6 +94,24 @@ export default function App() {
     setGame({ instance: inst, pick: 'grid' })
   }
 
+  // Homepage history: the recently played puzzles that are still in the catalog, with their castle.
+  function recent() {
+    if (!castles) return []
+    const where = new Map()
+    for (const { castle: c, pool: p } of castles) for (const inst of p) where.set(inst.id, { inst, c })
+    return recentlyPlayed().filter((id) => where.has(id))
+      .map((id) => ({ inst: where.get(id).inst, castle: where.get(id).c, castleName: castleName(where.get(id).c) }))
+  }
+
+  // Replay from the history: open it in its castle (Back returns to that castle's grid).
+  // Telemetry pick 'grid' (chosen from a list in the app; the database only accepts random/grid/link).
+  function playRecent(inst) {
+    const entry = recent().find((r) => r.inst.id === inst.id)
+    markPlayed(inst)
+    setCastle(entry ? entry.castle : null)
+    setGame({ instance: inst, pick: 'grid' })
+  }
+
   function leaveGame() {
     setGame(null)
     const url = new URL(window.location.href)
@@ -147,6 +165,8 @@ export default function App() {
       error={error}
       loadingCastle={null}
       onSelectCastle={setCastle}
+      recent={recent}
+      onPlayRecent={playRecent}
       nudging={nudge !== null}
     />
     </>

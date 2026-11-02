@@ -34,6 +34,8 @@ src/
                           # progress bar to the next castle + 10-column tile grid in seq order),
                           # GameScreen (Retry/Back -> back to the level grid; shows the puzzle name), Board, WinDialog,
                           # ConsentBanner (opt-in for saved progress; the home footer's "opt in/out" link reopens it)
+                          # HistoryDialog (home header, circled-arrow button left of "?": the last 20
+                          # played puzzles, each opens the puzzle again in its castle; pick = 'grid')
   theme.js                # all colours
   themes.js               # visual themes (classic, halloween, sorcerer): cell looks, cursor, texts, decorations;
                           # ACTIVE_THEME or ?theme=<name>. Appearance only, never rules/ids/telemetry
@@ -79,9 +81,9 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   moves); `meta` itself is still never read by the app.
 - **Saved progress** -- `src/engine/progress.js` is the ONLY code that touches browser storage:
   `loc-storage-consent` (the opt-in answer) and, only while that is 'granted', `loc-progress-v1`
-  ({v:2, p:{id: 't' | 0..5}, c:{castle: stars}}: tried, or solved with the best stars; c = the
-  per-castle star counters, see Castles; v:1 without c is still read and converted once by
-  seedCastleStars). Nothing is persisted before the
+  ({v:2, p:{id: 't' | 0..5}, c:{castle: stars}, h:[id, ...]}: tried, or solved with the best stars; c = the
+  per-castle star counters, see Castles; h = recently played ids, newest first, max 20, optional;
+  v:1 without c is still read and converted once by seedCastleStars). Nothing is persisted before the
   player says yes (ConsentBanner); "No thanks" deletes saved progress. Without consent progress
   lives in memory for the visit. Total stars = sum of each puzzle's best rating (max 5 each).
   Progress is never sent anywhere (not in telemetry). Every storage access is try/catch: blocked
