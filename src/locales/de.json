@@ -95,5 +95,10 @@
     "locked": "gesperrt",
     "toOpen": "um {{name}} zu öffnen",
     "nextOpen": "{{name}} ist offen!"
+  },
+  "history": {
+    "title": "Zuletzt gespielt",
+    "empty": "Noch keine Puzzles gespielt.",
+    "close": "Schließen"
   }
 }

@@ -3,7 +3,7 @@ import { test, beforeEach } from 'node:test'
 import assert from 'node:assert/strict'
 import {
   initProgress, resetProgressForTests, storageConsent, setStorageConsent, recordTried, recordSolved,
-  puzzleState, bestStars, progressTotals, castleStars, seedCastleStars, STORAGE_CONSENT_KEY, PROGRESS_KEY, CONSENT_GRANTED, CONSENT_DENIED,
+  puzzleState, bestStars, progressTotals, recentlyPlayed, HISTORY_MAX, castleStars, seedCastleStars, STORAGE_CONSENT_KEY, PROGRESS_KEY, CONSENT_GRANTED, CONSENT_DENIED,
 } from '../src/engine/progress.js'
 
 function fakeStorage(initial = {}) {
@@ -141,4 +141,27 @@ test('v1 progress (no castle counters) is converted once from the current castle
   recordSolved('b', 5, 2)
   seedCastleStars(castles)                                           // only once
   assert.equal(castleStars(2), 5)
+})
+
+test('recently played: newest first, no duplicates, at most HISTORY_MAX', () => {
+  recordTried('a'); recordTried('b'); recordTried('a')
+  assert.deepEqual(recentlyPlayed(), ['a', 'b'])
+  for (let i = 0; i < HISTORY_MAX + 5; i++) recordTried(`x${i}`)
+  const h = recentlyPlayed()
+  assert.equal(h.length, HISTORY_MAX)
+  assert.equal(h[0], `x${HISTORY_MAX + 4}`)
+  assert.equal(puzzleState('a'), 'played')        // dropping out of the history keeps the progress
+})
+
+test('recently played is saved only with consent and comes back next visit', () => {
+  recordTried('a'); recordTried('b')
+  assert.equal(store.map.size, 0)
+  setStorageConsent(CONSENT_GRANTED)
+  assert.deepEqual(JSON.parse(store.getItem(PROGRESS_KEY)).h, ['b', 'a'])
+  resetProgressForTests()
+  initProgress(store)
+  recordTried('c')                                 // this visit's play goes in front
+  assert.deepEqual(recentlyPlayed(), ['c', 'b', 'a'])
+  setStorageConsent(CONSENT_DENIED)
+  assert.equal(store.getItem(PROGRESS_KEY), null)
 })

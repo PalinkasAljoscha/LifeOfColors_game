@@ -7,6 +7,7 @@ import ThemeDecorations from './ThemeDecorations.jsx'
 import { Emoji } from './Emoji.jsx'
 import CastleMap from './CastleMap.jsx'
 import RulesDialog from './RulesDialog.jsx'
+import HistoryDialog, { HistoryIcon } from './HistoryDialog.jsx'
 import { ConsentBannerSpacer, ConsentDialog } from './ConsentBanner.jsx'
 import { useProgress } from '../hooks/useProgress.js'
 
@@ -34,10 +35,12 @@ function Logo() {
 }
 
 // castleStates: per castle { castle, count, stars, required, done, unlocked } (engine/castles.js),
-// or null while the catalog loads.
-export default function HomeScreen({ castleStates, error, loadingCastle, onSelectCastle, nudging = false }) {
+// or null while the catalog loads. recent(): the recently played puzzles for the history pop-up
+// ([{ inst, castleName }], newest first); onPlayRecent(inst) opens one of them.
+export default function HomeScreen({ castleStates, error, loadingCastle, onSelectCastle, recent, onPlayRecent, nudging = false }) {
   const { t, i18n } = useTranslation()
   const [showRules, setShowRules] = useState(false)
+  const [showHistory, setShowHistory] = useState(false)
   const [showConsent, setShowConsent] = useState(false)
   useProgress()   // re-render when progress or the storage choice changes
 
@@ -67,6 +70,19 @@ export default function HomeScreen({ castleStates, error, loadingCastle, onSelec
                 </button>
               ))}
             </div>
+            <div className="flex gap-2">
+            {castleStates && (
+              <button
+                onClick={() => setShowHistory(true)}
+                className="w-9 h-9 rounded-full bg-game-panel border-2 border-white/15 text-game-score flex items-center
+                           justify-center active:scale-90 transition-transform"
+                aria-haspopup="dialog"
+                aria-label={t('history.title')}
+                title={t('history.title')}
+              >
+                <HistoryIcon />
+              </button>
+            )}
             <button
               onClick={() => setShowRules(true)}
               className="w-9 h-9 rounded-full bg-game-panel border-2 border-white/15 text-lg font-black text-game-score
@@ -77,6 +93,7 @@ export default function HomeScreen({ castleStates, error, loadingCastle, onSelec
             >
               ?
             </button>
+            </div>
           </div>
         </header>
 
@@ -98,6 +115,10 @@ export default function HomeScreen({ castleStates, error, loadingCastle, onSelec
           {t('home.privacyAfter')}
         </footer>
         {showRules && <RulesDialog onClose={() => setShowRules(false)} />}
+        {showHistory && (
+          <HistoryDialog recent={recent()} onPlay={(inst) => { setShowHistory(false); onPlayRecent(inst) }}
+                         onClose={() => setShowHistory(false)} />
+        )}
         {showConsent && <ConsentDialog onClose={() => setShowConsent(false)} />}
         <ConsentBannerSpacer nudge={nudging} />
       </div>

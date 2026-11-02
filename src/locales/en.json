@@ -95,5 +95,10 @@
     "locked": "locked",
     "toOpen": "to open {{name}}",
     "nextOpen": "{{name}} is open!"
+  },
+  "history": {
+    "title": "Recently played",
+    "empty": "No puzzles played yet.",
+    "close": "Close"
   }
 }

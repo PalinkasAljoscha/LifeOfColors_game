@@ -33,7 +33,7 @@ function Arrow({ dir, color }) {
 }
 
 // Star badge / check mark / dot on a tile (solved with rating / solved / only opened).
-function TileMark({ state, best }) {
+export function TileMark({ state, best }) {
   if (state === 'solved' && best > 0) {
     return (
       <span className="min-w-4 h-4 px-0.5 rounded-full bg-black/80 ring-1 ring-white/70 text-game-star text-[9px]
