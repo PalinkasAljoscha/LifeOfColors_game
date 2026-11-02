@@ -38,7 +38,7 @@
 //   tagline     i18n key of a short line under the title on the homepage, or null
 //   decorations homepage decorations ('halloween' -> components/ThemeDecorations.jsx), or null
 
-export const ACTIVE_THEME = 'halloween'
+export const ACTIVE_THEME = 'sorcerer'
 
 // Halloween objects for the orange / blue cells (first two = the default look: pumpkin, ghost).
 // All light enough to read on the dark cell, helped by the glow (bat / black cat were too dark).

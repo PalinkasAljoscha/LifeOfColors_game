@@ -43,8 +43,9 @@ uncolored cells, a witch-hand mouse cursor, its own homepage texts and decoratio
   green, blue, red or yellow. The goal reminder and the win title show this game's candy.
   Outside a game (homepage) the first choice of everything is used. A new theme gets this by
   listing choices.
-- `ACTIVE_THEME` picks the theme everyone sees (change it, then redeploy). It is `halloween`
-  since 2026-10-26; `?theme=classic` shows the classic look.
+- `ACTIVE_THEME` picks the theme everyone sees (change it, then redeploy). It is `sorcerer`
+  (Sorcerer's apprentice) since 2026-11-02 (`halloween` from 2026-10-26); `?theme=halloween` or
+  `?theme=classic` show the other looks.
 - `?theme=<name>` in the URL previews any theme, e.g. `…/LifeOfColors_game/?theme=halloween`.
 - A theme only changes the look: rules, puzzle ids, the catalog and telemetry are the same in
   every theme. Telemetry doesn't record the theme.
