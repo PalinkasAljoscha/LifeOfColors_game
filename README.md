@@ -141,6 +141,7 @@ CC BY-NC-SA 4.0 (see `LICENSE`).
 The factory ships an order, not levels: `difficulty_ranking` (1 = easiest) and the training
 puzzles' `training_position`. The app turns that into castles (`src/engine/castles.js`):
 castle 0 holds the training puzzles in their order; the other ranked puzzles are cut, in ranking
-order, into `CASTLE_COUNT - 1` castles of (nearly) equal size. **To change the number of castles,
+order, into `CASTLE_COUNT - 1` castles of (nearly) equal size. The training castle and castle 1
+are open from the start (castle 1 does not wait for the training to be finished). **To change the number of castles,
 change `CASTLE_COUNT` in `src/config.js`** (and `UNLOCK_STARS`, the stars to collect in a castle to open
 the next one: 20, whatever the castle's size) -- no new catalog export is needed.

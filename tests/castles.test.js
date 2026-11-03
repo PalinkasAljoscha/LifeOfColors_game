@@ -54,28 +54,37 @@ function sampleCastles(trainingCount = 10) {
   }))
 }
 
-test('castle 0 needs every puzzle won (no stars); then each castle needs the stars of the one below', () => {
+test('castles 0 and 1 are open from the start; then each castle needs the stars of the one below', () => {
   const castles = sampleCastles()
   const stars = { 0: 50, 1: 20, 2: 19, 3: 200 }
   const totals = (solved0) => (pool, c) => ({ stars: stars[c] ?? 0, solved: c === 0 ? solved0 : 0 })
   let states = castleStates(castles, totals(9))
   assert.equal(states[0].required, 10)
   assert.equal(states[0].done, false)                   // 50 stars, but one puzzle not won
-  assert.deepEqual(states.slice(0, 2).map((s) => s.unlocked), [true, false])
-  assert.equal(highestUnlocked(states), 0)
+  // castle 1 is open without finishing training; castle 2 opens with castle 1's 20 stars
+  assert.deepEqual(states.slice(0, 4).map((s) => s.unlocked), [true, true, true, false])
+  assert.equal(earnedUnlocks(states), 1)
   states = castleStates(castles, totals(10))
+  assert.equal(states[0].done, true)
   assert.deepEqual(states.slice(0, 5).map((s) => s.unlocked), [true, true, true, false, false])
   assert.equal(states[1].done, true)
   assert.equal(states[2].done, false)
   // castle 3 has stars (e.g. via a shared ?instance= link) but stays locked: castle 2 not done
   assert.equal(states[3].unlocked, false)
   assert.equal(highestUnlocked(states), 2)
-  assert.equal(earnedUnlocks(states), 2)
+  assert.equal(earnedUnlocks(states), 1)            // castle 2 (0 and 1 are open from the start)
 })
 
 test('without training puzzles castle 1 is open from the start', () => {
   const states = castleStates(sampleCastles(0), () => ({ stars: 0, solved: 0 }))
-  assert.deepEqual(states.slice(0, 3).map((s) => s.unlocked), [false, true, false])
+  assert.deepEqual(states.slice(0, 3).map((s) => s.unlocked), [false, true, false])   // castle 0 empty
+  assert.equal(earnedUnlocks(states), 0)
+})
+
+test('castle 1 is open from the start, before any training puzzle is won', () => {
+  const states = castleStates(sampleCastles(), () => ({ stars: 0, solved: 0 }))
+  assert.deepEqual(states.slice(0, 3).map((s) => s.unlocked), [true, true, false])
+  assert.equal(states[1].fromStart, true)
   assert.equal(earnedUnlocks(states), 0)
 })
 
