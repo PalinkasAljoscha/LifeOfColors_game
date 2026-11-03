@@ -2,10 +2,10 @@
 //
 // CASTLE_COUNT castles (src/config.js), stacked bottom to top. Castle 0 is the training castle:
 // open from the start, played in a fixed order (puzzle k can only be played once puzzles 1..k-1
-// are won: playableUpTo), and done once EVERY puzzle is won (stars do not count). Castle n >= 1
-// opens once castle n-1 is open AND done: the player has collected its required stars there
-// (UNLOCK_STARS, 20, however many puzzles it holds). When the catalog
-// has no training puzzles, castle 1 is open from the start.
+// are won: playableUpTo), and done once EVERY puzzle is won (stars do not count). Castle 1 is
+// open from the start too: it does not wait for the training castle. Castle n >= 2 opens once
+// castle n-1 is open AND done: the player has collected its required stars there
+// (UNLOCK_STARS, 20, however many puzzles it holds).
 // Unlocking is derived from the per-castle star counters (engine/progress.js castleStars), not
 // from the stars of the puzzles currently in a castle: a counter only grows, so a castle stays
 // done when puzzles move between castles after a new catalog.
@@ -49,12 +49,11 @@ export function requiredStars() {
 /** State of every castle: [{ castle, count, stars, required, done, unlocked, fromStart, training,
  *  solved }]. `totalsIn(pool, castle)` returns { stars, solved }: stars = the castle's star counter
  *  (engine/progress.js castleStars), solved = solved puzzles of the pool (progressTotals). Castle 0
- *  is the training castle: required = every puzzle, done = all solved, and castle 1 waits for it
- *  (unless it is empty). fromStart = open without having earned it. */
+ *  is the training castle: required = every puzzle, done = all solved. Castles 0 and 1 are open
+ *  from the start (castle 1 does not wait for training). fromStart = open without having earned it. */
 export function castleStates(castles, totalsIn) {
   const out = []
-  const trainingEmpty = (castles[TUTORIAL_CASTLE]?.pool.length ?? 0) === 0
-  const openAtStart = trainingEmpty ? 2 : 1
+  const openAtStart = 2                       // castles 0 (training) and 1
   for (const { castle, pool } of castles) {
     const { stars, solved } = totalsIn(pool, castle)
     const isTraining = castle === TUTORIAL_CASTLE
