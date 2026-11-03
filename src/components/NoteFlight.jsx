@@ -3,13 +3,15 @@ import { createPortal } from 'react-dom'
 import { CellToken, NoteCard } from './TrainingNotes.jsx'
 import { palette } from '../theme.js'
 import { CELL, GAP, PAD, boardCanvasSize } from '../game/GameScene.js'
-import { flightSources, neighbourCells } from '../engine/training.js'
+import { flightSources, neighbourCells, noteCardPlace } from '../engine/training.js'
 
 // Training castle: the animation that takes a NEW rule observation down as a note.
 //   1. highlight  the tapped cell's neighbours light up strongly                      HIGHLIGHT_MS
 //   2. circle     rings appear around every coloured neighbour and the changed cell   CIRCLE_MS
 //   3. fly        copies of those objects fly from the board into a note card that
-//                 appears over the middle of the board, forming the rule ("👻 👻 + 🕷️ → 🍬") FLY_MS
+//                 appears on the board, in the free space above the tapped cell's neighbourhood
+//                 (below it when it does not fit above; noteCardPlace), forming the rule
+//                 ("👻 👻 + 🕷️ → 🍬")                                                     FLY_MS
 //   4. show       the finished card stays for a moment                                SHOW_MS
 //   5. drop       the card moves down onto the notebook at the bottom of the screen
 //                 and shrinks into it; then onLanded() (the note is added to it)      DROP_MS
@@ -39,7 +41,9 @@ export default function NoteFlight({ job, instance, look, boardRef, rollRef, onL
   const setPhase = (kind, g = 0) => setPhaseState({ kind, g })
   const [geo, setGeo] = useState(null)              // cells in page px, card centre, notebook centre
   const [slots, setSlots] = useState(null)          // { slot name: { x, y, size } } on the card
+  const [cardPos, setCardPos] = useState(null)      // the card's centre (page px), from its measured size
   const cardRef = useRef(null)
+  const measureRef = useRef(null)
   const flyerRefs = useRef([])
   const landedRef = useRef(onLanded)
   landedRef.current = onLanded
@@ -64,6 +68,12 @@ export default function NoteFlight({ job, instance, look, boardRef, rollRef, onL
     const sources = flightSources(job.board, job.r, job.c).map((f) => ({ ...f, ...cell(f.r, f.c) }))
     // groups of source indices that are circled and fly together: phased = neighbours, then the
     // changed cell (slot 'R'); otherwise all at once. Empty groups (no coloured neighbours) drop out.
+    // the tapped cell's neighbourhood (it and its neighbours), which the card must not cover
+    const block = [[job.r, job.c], ...neighbourCells(job.r, job.c, rows, cols)].map(([r, c]) => cell(r, c))
+    const hood = {
+      left: Math.min(...block.map((p) => p.x)) - size / 2, right: Math.max(...block.map((p) => p.x)) + size / 2,
+      top: Math.min(...block.map((p) => p.y)) - size / 2, bottom: Math.max(...block.map((p) => p.y)) + size / 2,
+    }
     const all = sources.map((_, i) => i)
     const groups = (phased
       ? [all.filter((i) => sources[i].slot !== 'R'), all.filter((i) => sources[i].slot === 'R')]
@@ -73,7 +83,8 @@ export default function NoteFlight({ job, instance, look, boardRef, rollRef, onL
       neighbours: neighbourCells(job.r, job.c, rows, cols).map(([r, c]) => cell(r, c)),
       sources,
       groups,
-      card: { x: box.left + box.width / 2, y: box.top + box.height / 2 },
+      hood,
+      board: { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom },
       roll: { x: roll.left + roll.width / 2, y: roll.top + roll.height / 2 },
     })
     // the timeline: highlight, then circle + fly per group, then show and drop
@@ -90,10 +101,19 @@ export default function NoteFlight({ job, instance, look, boardRef, rollRef, onL
     return () => timers.forEach(clearTimeout)
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Place the card: measure it (rendered hidden first, see below), then put it on the board above /
+  // below the neighbourhood. Before the first flight, so the slots are measured at the card's final place.
+  useLayoutEffect(() => {
+    if (!geo || cardPos || !measureRef.current) return undefined
+    const r = measureRef.current.getBoundingClientRect()
+    setCardPos(noteCardPlace(geo.hood, { width: r.width, height: r.height }, geo.board))
+    return undefined
+  }, [geo, cardPos])
+
   // Fly: measure the card's slots (once, when the card first appears), then move the objects of the
   // current group from their cells to their slots.
   useLayoutEffect(() => {
-    if (phase.kind !== 'fly' || slots || !cardRef.current || !geo) return undefined
+    if (phase.kind !== 'fly' || slots || !cardRef.current || !geo || !cardPos) return undefined
     const found = {}
     for (const el of cardRef.current.querySelectorAll('[data-slot]')) {
       const r = el.getBoundingClientRect()
@@ -101,7 +121,7 @@ export default function NoteFlight({ job, instance, look, boardRef, rollRef, onL
     }
     setSlots(found)
     return undefined
-  }, [phase, geo, slots])
+  }, [phase, geo, slots, cardPos])
 
   useLayoutEffect(() => {
     if (phase.kind !== 'fly' || !slots || !geo) return undefined
@@ -121,21 +141,21 @@ export default function NoteFlight({ job, instance, look, boardRef, rollRef, onL
 
   // Drop: the card moves onto the notebook and shrinks into it.
   useLayoutEffect(() => {
-    if (phase.kind !== 'drop' || !cardRef.current || !geo) return undefined
+    if (phase.kind !== 'drop' || !cardRef.current || !geo || !cardPos) return undefined
     const anim = cardRef.current.animate([
       { transform: 'translate(-50%, -50%) scale(1)', opacity: 1 },
-      { transform: `translate(calc(-50% + ${geo.roll.x - geo.card.x}px), calc(-50% + ${geo.roll.y - geo.card.y}px)) scale(0.18)`, opacity: 0.3 },
+      { transform: `translate(calc(-50% + ${geo.roll.x - cardPos.x}px), calc(-50% + ${geo.roll.y - cardPos.y}px)) scale(0.18)`, opacity: 0.3 },
     ], { duration: DROP_MS, easing: 'ease-in', fill: 'forwards' })
     anim.onfinish = () => landedRef.current(job)
     return () => anim.cancel()
-  }, [phase, geo]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [phase, geo, cardPos]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!geo) return null
   const { size, groups } = geo
   const { kind, g } = phase
   // the card is up from the first flight on; during circle / fly its own objects stay hidden and
   // the flyers (landed or flying) stand in for them
-  const showCard = kind === 'show' || kind === 'drop' || kind === 'fly' || (kind === 'circle' && g > 0)
+  const showCard = cardPos && (kind === 'show' || kind === 'drop' || kind === 'fly' || (kind === 'circle' && g > 0))
   const building = kind === 'fly' || (kind === 'circle' && g > 0)
   const ringed = kind === 'circle' || kind === 'fly' ? groups[g] : []
   const landed = new Set(groups.slice(0, g).flat())        // flown in an earlier group: at its slot
@@ -159,12 +179,17 @@ export default function NoteFlight({ job, instance, look, boardRef, rollRef, onL
                 }} />
         )
       })}
-      {/* 3.-5. the note card over the middle of the board */}
+      {/* the card, invisible, only to measure its size (placement, see above) */}
+      {!cardPos && (
+        <NoteCard ref={measureRef} obs={job.obs} look={look} className="absolute"
+                  style={{ left: 0, top: 0, fontSize: CARD_FONT, visibility: 'hidden' }} />
+      )}
+      {/* 3.-5. the note card right above / below the tapped cell's neighbourhood */}
       {showCard && (
         <NoteCard ref={cardRef} obs={job.obs} look={look}
                   className={`absolute shadow-2xl ${kind === 'fly' && g === 0 ? 'note-card-in' : ''}`}
                   style={{
-                    left: geo.card.x, top: geo.card.y, transform: 'translate(-50%, -50%)', fontSize: CARD_FONT,
+                    left: cardPos.x, top: cardPos.y, transform: 'translate(-50%, -50%)', fontSize: CARD_FONT,
                     background: palette.notePaper,
                     // while the objects fly in, the card's own objects stay invisible
                     ...(building ? { '--slot-visibility': 'hidden' } : null),

@@ -41,3 +41,26 @@ test('flightSources: coloured neighbours to their card slots, the changed cell t
   const full = [['O', 'O', 'O'], ['O', 'B', 'U'], ['U', 'U', 'U']]
   assert.ok(flightSources(full, 1, 1).filter((f) => f.state === 'O').every((f) => f.slot === 'O0'))
 })
+
+test('noteCardPlace: on the board above the neighbourhood, below when it does not fit, never over it', async () => {
+  const { noteCardPlace } = await import('../src/engine/training.js')
+  const board = { left: 20, top: 100, right: 380, bottom: 550 }     // 5 rows of 90 px
+  const card = { width: 200, height: 60 }
+  const clear = (p, hood) => p.y + card.height / 2 <= hood.top || p.y - card.height / 2 >= hood.bottom
+  const onBoard = (p) => p.y - card.height / 2 >= board.top && p.y + card.height / 2 <= board.bottom
+  // block = rows 1..3: one free row above -> above, on the board
+  let hood = { left: 20, right: 290, top: 190, bottom: 460 }
+  let p = noteCardPlace(hood, card, board)
+  assert.equal(p.side, 'above'); assert.ok(clear(p, hood) && onBoard(p))
+  // block = rows 0..1 (tap in the top row): no room above -> below, on the board
+  hood = { left: 110, right: 380, top: 100, bottom: 280 }
+  p = noteCardPlace(hood, card, board)
+  assert.equal(p.side, 'below'); assert.ok(clear(p, hood) && onBoard(p))
+  // horizontally centred on the block, kept inside the board
+  assert.equal(p.x, 245)
+  assert.equal(noteCardPlace({ left: 290, right: 380, top: 280, bottom: 460 }, card, board).x, board.right - card.width / 2)
+  // no room on either side (block = whole board height): never covers the block
+  hood = { left: 20, right: 290, top: 100, bottom: 550 }
+  p = noteCardPlace(hood, card, board)
+  assert.ok(clear(p, hood))
+})

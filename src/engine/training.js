@@ -30,6 +30,32 @@ export function neighbourCells(r, c, rows, cols) {
   return out
 }
 
+/** Where the note card goes: ON the board, but never over the tapped cell or its neighbours.
+ *  It is centred horizontally on the neighbourhood (the block of the tapped cell and its
+ *  neighbours, at most 3 x 3 cells) and placed in the board's free space right ABOVE that block, or
+ *  right BELOW it when the card does not fit above. When it fits on neither side, it goes on the
+ *  side with more room and may stick out of the board a little (it never covers the block).
+ *  Horizontally it stays inside the board (centred on it if wider).
+ *  hood = { left, top, right, bottom } (the block), card = { width, height },
+ *  board = { left, top, right, bottom }, all in page px; gap = space between block and card.
+ *  Returns { x, y, side } -- the card's centre and 'above' | 'below'. */
+export function noteCardPlace(hood, card, board, gap = 6) {
+  const roomAbove = hood.top - board.top - gap
+  const roomBelow = board.bottom - hood.bottom - gap
+  const side = card.height <= roomAbove ? 'above'
+    : card.height <= roomBelow ? 'below'
+      : roomAbove >= roomBelow ? 'above' : 'below'
+  const halfH = card.height / 2
+  // in the middle of the free space when it fits there, else right next to the block
+  const y = side === 'above'
+    ? (card.height <= roomAbove ? board.top + (roomAbove) / 2 : hood.top - gap - halfH)
+    : (card.height <= roomBelow ? hood.bottom + gap + roomBelow / 2 : hood.bottom + gap + halfH)
+  const halfW = card.width / 2
+  const x = card.width >= board.right - board.left ? (board.left + board.right) / 2
+    : Math.min(Math.max((hood.left + hood.right) / 2, board.left + halfW), board.right - halfW)
+  return { x, y, side }
+}
+
 /** The transformation a cell-changing click showed: { key, counts: { O, B, G }, result }.
  *  rule = the rule-table index the click looked up (GameScene's boardClick `rule`), result = the
  *  cell's new state ('U' | 'O' | 'B' | 'G'). Same key = same transformation (same rule entry

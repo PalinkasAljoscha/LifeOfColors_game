@@ -108,7 +108,9 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   rules pop-up (RulesDialog, "How it works"). Below: puzzle name and the moves counter only. No
   goal / rules line under the board; in training the notebook peek sits right below the board.
 - **Training note animation** -- `components/NoteFlight.jsx`: a new rule observation is circled on
-  the board and flies into a note card, which drops into the notebook. Training puzzles
+  the board and flies into a note card, which drops into the notebook. The card sits ON the board
+  but never over the tapped cell's neighbourhood: in the free space above it, or below when it does
+  not fit above (`engine/training.js` `noteCardPlace`, tested). Training puzzles
   1..`PHASED_LESSONS` (3) use the phased version (first the coloured neighbours are circled and fly
   to the left side of the rule, then the changed cell is circled and flies to the right side); later
   training puzzles move everything at once.
