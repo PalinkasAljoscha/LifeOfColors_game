@@ -192,6 +192,9 @@ export default function GameScreen({ instance, place, training = null, pick, onP
 
       <div ref={boardBoxRef} className="flex-1 min-h-0 mt-2 relative">
         <Board key={round} instance={instance} look={look} training={training !== null} onClick={onClick} onWon={onWon} />
+        {/* training: while a note animation runs the board takes no taps -- this layer over it
+            catches them, so the next move waits until the note has landed in the notebook */}
+        {training && flights.length > 0 && <div className="absolute inset-0 z-10" aria-hidden="true" />}
         {training && flights.length > 0 && (
           <NoteFlight key={flights[0].id} job={flights[0]} instance={instance} look={look}
                       phased={Number.isInteger(training.day) && training.day <= PHASED_LESSONS}

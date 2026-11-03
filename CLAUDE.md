@@ -94,8 +94,8 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   won); the remaining instances with `difficulty_ranking` are cut, in ranking order, into
   `CASTLE_COUNT - 1` castles of nearly equal size. Changing the number of castles = changing
   `CASTLE_COUNT`, no factory export. `assignCastles` sets `instance.level` = castle number (app
-  field). Castle 1 is open from the start (it does not wait for the training castle, since
-  2026-11-03); castle n >= 2 when castle n-1 is open and its STAR COUNTER reaches `UNLOCK_STARS`
+  field). Castle 1 opens when castle 0 is done (open from the start if there are no training
+  puzzles); castle n >= 2 when castle n-1 is open and its STAR COUNTER reaches `UNLOCK_STARS`
   (20, the same for every castle, independent of its number of puzzles). Star counters (engine/progress.js castleStars):
   each gain in a puzzle's best rating is added to the castle it is in at that moment; they never go
   down and are independent of which puzzles a castle holds now (puzzles can move after a new
@@ -110,7 +110,9 @@ tests/                    # engine vectors (generated), classic-rule test, catal
 - **Training note animation** -- `components/NoteFlight.jsx`: a new rule observation is circled on
   the board and flies into a note card, which drops into the notebook. The card sits ON the board
   but never over the tapped cell's neighbourhood: in the free space above it, or below when it does
-  not fit above (`engine/training.js` `noteCardPlace`, tested). Training puzzles
+  not fit above (`engine/training.js` `noteCardPlace`, tested). While a note animation runs the
+  board takes no taps (GameScreen: a transparent layer over the board), so the next move waits until
+  the note has landed. Training puzzles
   1..`PHASED_LESSONS` (3) use the phased version (first the coloured neighbours are circled and fly
   to the left side of the rule, then the changed cell is circled and flies to the right side); later
   training puzzles move everything at once.
