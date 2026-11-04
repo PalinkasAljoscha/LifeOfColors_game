@@ -30,6 +30,14 @@ body {
   padding-right: max(env(safe-area-inset-right), 16px);
 }
 
+/* Training castle path (components/LevelScreen.jsx): the next card to play glows gently. */
+@keyframes trainingNext {
+  0%, 100% { box-shadow: 0 0 0 0 transparent; }
+  50%      { box-shadow: 0 0 14px 2px var(--pulse); }
+}
+.training-next { animation: trainingNext 1800ms ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .training-next { animation: none; } }
+
 @keyframes popIn {
   from { transform: scale(0.85); opacity: 0; }
   to   { transform: scale(1);    opacity: 1; }

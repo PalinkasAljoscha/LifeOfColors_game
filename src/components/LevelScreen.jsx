@@ -15,18 +15,16 @@ import { playableUpTo } from '../engine/castles.js'
 // Used for one castle (engine/castles.js): `state` = { stars, required, done }, shown as a bar
 // towards opening `nextTitle` (the castle above; null for the last one).
 // Training castle (state.training): the puzzles are a path to follow in order (TrainingPath):
-// tiles in their name colours joined by silver arrows, the next one to win framed in silver, the
-// ones after it faded (not playable yet). No progress bar: every puzzle has to be won, the path shows how far the player is.
-const COLS = 4         // training path: tiles per row (the rows snake left-right, right-left, ...)
-const TILE = '3.75rem' // training path: tile width
-const ARROW = '2rem'   // training path: width of the arrow columns / height of the arrow rows
+// one card per puzzle, one below the other, joined by down arrows -- "Intro", "Lesson 1" ...,
+// "Exam" (the last). Won ones show a check and their stars, the next one is highlighted with a
+// "Start" button, the ones after it are greyed out with a lock (not playable yet). No progress
+// bar: every puzzle has to be won, the path shows how far the player is.
 
-// Thick arrow pointing right / left / down (training path).
-function Arrow({ dir, color }) {
-  const rotate = { right: 0, down: 90, left: 180 }[dir]
+// Down arrow between two training cards (green once the card above is won).
+function DownArrow({ color }) {
   return (
-    <svg viewBox="0 0 28 28" width="28" height="28" style={{ transform: `rotate(${rotate}deg)` }} aria-hidden="true">
-      <path d="M3 14 H21 M14 6 L22 14 L14 22" fill="none" stroke={color} strokeWidth="4.5"
+    <svg viewBox="0 0 28 28" width="26" height="26" aria-hidden="true">
+      <path d="M14 3 V22 M6 14 L14 22 L22 14" fill="none" stroke={color} strokeWidth="4"
             strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )
@@ -52,57 +50,76 @@ export function TileMark({ state, best }) {
   return null
 }
 
-// Training castle: the puzzles in their fixed order as a snaking path of tiles and arrows.
-// Grid of 2 * COLS - 1 columns: tiles in the odd columns, horizontal arrows between them; a row of
-// down arrows between two tile rows, under the tile where the path turns.
+/** The label of training puzzle k (0-based) of n: Intro, Lesson 1 .. n-2, Exam. */
+function trainingLabel(t, k, n) {
+  if (k === 0) return t('levelScreen.intro')
+  if (k === n - 1) return t('levelScreen.exam')
+  return t('levelScreen.lesson', { n: k })
+}
+
+// Training castle: the puzzles in their fixed order, one card each, with arrows in between.
 function TrainingPath({ pool, states, onPick }) {
   const { t } = useTranslation()
   const upTo = playableUpTo(pool, (_, i) => states[i] === 'solved')
-  const place = (k) => {
-    const row = Math.floor(k / COLS)
-    const pos = k % COLS
-    return { row, col: row % 2 === 0 ? pos : COLS - 1 - pos }
-  }
-  const items = []
-  pool.forEach((inst, k) => {
-    const { row, col } = place(k)
-    const locked = k > upTo
-    const next = k === upTo && states[k] !== 'solved'
-    const best = states[k] === 'solved' ? bestStars(inst.id) : null
-    items.push(
-      <button
-        key={inst.id}
-        onClick={() => !locked && onPick(inst)}
-        disabled={locked}
-        className={`relative aspect-[4/3] rounded-lg ring-1 ring-inset ring-white/20 transition-transform flex items-center
-                    justify-center ${locked ? 'opacity-30 cursor-default' : 'active:scale-90'}`}
-        style={{
-          gridColumn: 2 * col + 1, gridRow: 2 * row + 1, background: inst.name_color,
-          boxShadow: next ? `0 0 0 3px ${palette.silverGray}` : undefined,
-        }}
-        aria-label={`${k + 1}. ${inst.name}${states[k] === 'solved' ? ' ✓' : ''}${locked ? ` (${t('castles.locked')})` : ''}`}
-        title={inst.name}
-      >
-        {!locked && <TileMark state={states[k]} best={best} />}
-      </button>,
-    )
-    if (k === pool.length - 1) return
-    const to = place(k + 1)
-    const arrow = to.row === row
-      ? { gridColumn: 2 * Math.min(col, to.col) + 2, gridRow: 2 * row + 1, dir: to.col > col ? 'right' : 'left' }
-      : { gridColumn: 2 * col + 1, gridRow: 2 * row + 2, dir: 'down' }
-    items.push(
-      <span key={`a${k}`} aria-hidden="true" className="flex items-center justify-center"
-            style={{ gridColumn: arrow.gridColumn, gridRow: arrow.gridRow }}>
-        <Arrow dir={arrow.dir} color={palette.silverGray} />
-      </span>,
-    )
-  })
   return (
-    <div className="mx-auto w-fit grid gap-1 px-2 pt-2 pb-4 items-center"
-         style={{ gridTemplateColumns: Array.from({ length: 2 * COLS - 1 }, (_, i) => (i % 2 ? ARROW : TILE)).join(' ') }}>
-      {items}
-    </div>
+    <ol className="mx-auto w-full max-w-xs px-2 pt-1 pb-4 flex flex-col items-stretch">
+      {pool.map((inst, k) => {
+        const solved = states[k] === 'solved'
+        const locked = k > upTo
+        const next = k === upTo && !solved
+        const exam = k === pool.length - 1 && pool.length > 1
+        const best = solved ? bestStars(inst.id) : null
+        const label = trainingLabel(t, k, pool.length)
+        return (
+          <li key={inst.id} className="flex flex-col items-center">
+            {k > 0 && (
+              <span className={`my-1 ${locked ? 'opacity-30' : ''}`}>
+                <DownArrow color={states[k - 1] === 'solved' ? palette.correctGreen : palette.silverGray} />
+              </span>
+            )}
+            <button
+              onClick={() => !locked && onPick(inst)}
+              disabled={locked}
+              className={`w-full flex items-center gap-3 rounded-2xl px-3 py-2.5 text-left transition-transform
+                          ${locked ? 'opacity-35 grayscale cursor-default' : 'active:scale-95'} ${next ? 'training-next' : ''}`}
+              style={{
+                background: palette.panel,
+                '--pulse': exam ? palette.starGold : palette.silverGray,
+                border: `2px solid ${next ? (exam ? palette.starGold : palette.silverGray) : solved ? palette.correctGreen : palette.panelBorder}`,
+              }}
+              aria-label={`${label}: ${inst.name}${solved ? ' ✓' : ''}${locked ? ` (${t('castles.locked')})` : ''}`}
+            >
+              {/* the puzzle's colour (as on the other castles' tiles), with its state */}
+              <span className="w-11 h-11 shrink-0 rounded-xl ring-1 ring-inset ring-white/25 flex items-center justify-center
+                               text-xl font-black"
+                    style={{ background: inst.name_color }} aria-hidden="true">
+                <span className="w-7 h-7 rounded-full bg-black/45 flex items-center justify-center text-base leading-none"
+                      style={{ color: solved ? palette.correctGreen : palette.white }}>
+                  {solved ? '✓' : locked ? '🔒' : '▶'}
+                </span>
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-lg font-black leading-tight"
+                      style={{ color: exam ? palette.starGold : palette.white }}>
+                  {label}{exam && <span aria-hidden="true"> 🏆</span>}
+                </span>
+                <span className="block truncate text-xs font-sans font-semibold text-game-silver">{inst.name}</span>
+              </span>
+              {solved && best > 0 && (
+                <span className="shrink-0 text-sm text-game-star font-black" aria-hidden="true">
+                  {'★'.repeat(best)}
+                </span>
+              )}
+              {next && (
+                <span className="shrink-0 rounded-xl px-3 py-1.5 text-sm font-black bg-game-btn" aria-hidden="true">
+                  {t('levelScreen.start')}
+                </span>
+              )}
+            </button>
+          </li>
+        )
+      })}
+    </ol>
   )
 }
 
@@ -152,7 +169,7 @@ export default function LevelScreen({ title, nextTitle, state, pool, onPick, onB
         )}
 
         <p className="mt-4 mb-2 text-sm text-game-silver font-sans font-semibold text-center">
-          {training ? t('levelScreen.trainingHint', { count: pool.length }) : t('levelScreen.choose')}
+          {training ? t('levelScreen.trainingHint') : t('levelScreen.choose')}
         </p>
       </div>
 

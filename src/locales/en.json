@@ -41,8 +41,11 @@
   "levelScreen": {
     "back": "Home",
     "choose": "Choose your puzzle",
-    "trainingHint_one": "{{count}} training lesson to complete",
-    "trainingHint_other": "{{count}} training lessons to complete"
+    "intro": "Intro",
+    "lesson": "Lesson {{n}}",
+    "exam": "Exam",
+    "start": "Start",
+    "trainingHint": "Win each step to unlock the next one"
   },
   "progress": {
     "title": "Stars collected",
