@@ -17,14 +17,14 @@ import { palette } from '../theme.js'
 // Then onDone(): the board stays as it is (the scene takes no more taps after a win); the player
 // goes on with Retry or Back. Everything is random within limits, drawn once per win.
 // Reduced motion: no shake, bolts or flying stars -- the text alone, then onDone().
-const BURST = 7            // lightning bolts in the opening burst ...
-const BURST_MS = 1250      // ... spread over this time
-const LATE = 3             // sporadic bolts later on (after the stars have come)
+const BURST = 3            // lightning bolts in the opening burst ...
+const BURST_MS = 600       // ... spread over this time
+const LATE = 2             // sporadic bolts later on (after the stars have come)
 const BOLT_MS = 460        // one bolt: flash, flicker, fade
-const STARS_AT = 1300
+const STARS_AT = 650       // the stars come right after the burst
 const STAR_MS = 2700        // one star's life: pop, brighten, turn white, evaporate
 const STARS = 14
-const TEXT_AT = 1900
+const TEXT_AT = 1250
 const TEXT_MS = 2900
 const DONE_AT = TEXT_AT + TEXT_MS + 100
 
