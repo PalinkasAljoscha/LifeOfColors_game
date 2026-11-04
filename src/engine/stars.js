@@ -23,8 +23,8 @@ export function minMovesOf(instance) {
   return Number.isInteger(m) && m >= 1 ? m : null
 }
 
-/** How much of the win animation plays (components/WinCelebration.jsx): 'full' (shake, lightning,
- *  stars, text) for a 5-star win outside the training castle, 'stars' (stars and text) for any
+/** How much of the win animation plays (components/WinCelebration.jsx): 'full' (stars, coloured
+ *  sparkling stars, text) for a 5-star win outside the training castle, 'stars' (stars and text) for any
  *  other win outside it, 'text' (the result box only) in the training castle or with reduced
  *  motion. training: truthy in the training castle; stars: 1-5 or null (unknown best). */
 export function winMode({ training, stars, reduced = false }) {

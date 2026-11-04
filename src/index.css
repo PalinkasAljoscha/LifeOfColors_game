@@ -50,17 +50,22 @@ body {
 .star-pop { display: inline-block; animation: starPop 320ms ease-out both; }
 
 /* Win animation (components/WinCelebration.jsx); delays / durations / per-element values inline. */
-.win-bolt { opacity: 0; animation-name: winBolt; animation-timing-function: linear; animation-fill-mode: both; }
-@keyframes winBolt {
-  0%   { opacity: 0; }
-  6%   { opacity: 1; }
-  18%  { opacity: 0.25; }
-  28%  { opacity: 1; }
-  45%  { opacity: 0.85; }
-  100% { opacity: 0; }
+.win-sparkle { animation-name: winSparkle; animation-timing-function: ease-out; animation-fill-mode: both; }
+@keyframes winSparkle {
+  0%   { transform: scale(0) rotate(-40deg); opacity: 1; filter: brightness(1) drop-shadow(0 0 0 var(--glow)); }
+  10%  { transform: scale(1.35) rotate(8deg); }
+  16%  { transform: scale(1) rotate(0deg); filter: brightness(1.15) drop-shadow(0 0 10px var(--glow)); }
+  30%  { transform: scale(1.12) rotate(6deg); filter: brightness(1.6) drop-shadow(0 0 22px var(--glow)); }
+  44%  { transform: scale(1) rotate(-4deg); filter: brightness(1.1) drop-shadow(0 0 10px var(--glow)); }
+  58%  { transform: scale(1.12) rotate(5deg); filter: brightness(1.7) drop-shadow(0 0 24px var(--glow)); }
+  72%  { transform: scale(1.02) rotate(0deg); filter: brightness(1.2) drop-shadow(0 0 12px var(--glow)); opacity: 1; }
+  100% { transform: scale(1.5) translateY(-20px); filter: brightness(2) blur(8px) drop-shadow(0 0 24px var(--glow)); opacity: 0; }
 }
-.win-flash { opacity: 0; animation: winFlash 260ms ease-out both; }
-@keyframes winFlash { 0% { opacity: 0; } 10% { opacity: 0.16; } 100% { opacity: 0; } }
+.win-glint { animation: winGlint 660ms ease-in-out 4 both; }
+@keyframes winGlint {
+  0%, 100% { transform: scale(0) rotate(0deg); opacity: 0; }
+  50%      { transform: scale(1) rotate(45deg); opacity: 1; }
+}
 .win-star { animation-name: winStar; animation-timing-function: ease-out; animation-fill-mode: both; }
 @keyframes winStar {
   0%   { transform: scale(0) rotate(var(--spin)); color: var(--star); opacity: 1; filter: drop-shadow(0 0 0 var(--star)); }

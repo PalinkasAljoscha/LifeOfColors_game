@@ -23,9 +23,11 @@ export const palette = {
   starEmpty:    '#3d4766',   // star not won
 
   // ── Win animation (components/WinCelebration.jsx) ──
-  winBolt:      '#e05cff',   // bright purple lightning bolts across the screen
-  winBoltGlow:  '#b52bff',   // their glow (and the faint screen flash)
-  winBoltCore:  '#fbeaff',   // their bright inner line
+  winSparkle1:  '#ff5fd2',   // 5-star wins: the bigger coloured sparkling stars (pink,
+  winSparkle2:  '#4fe3ff',   //   cyan,
+  winSparkle3:  '#b57bff',   //   violet,
+  winSparkle4:  '#62f08a',   //   green,
+  winSparkle5:  '#ff9d3c',   //   orange)
   winStar:      '#ffd83d',   // the popping stars, before they turn white
   winVapour:    '#ffffff',   // the stars at their brightest, and the rising puffs
   winTextBack:  '#0f1028c4', // behind the result text (translucent)

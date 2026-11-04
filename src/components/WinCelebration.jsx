@@ -5,65 +5,30 @@ import { MAX_STARS, winMode } from '../engine/stars.js'
 import { palette } from '../theme.js'
 
 // The win animation (instead of a win dialog). Over the board, nothing to tap:
-//   1. shake    the board shakes irregularly, the whole time             0 .. DONE_AT
-//   2. bolts    bright purple lightning bolts flash across the whole screen: a burst at the
-//               start (0 .. BURST_MS), then only a few sporadic ones until the end
-//   3. stars    yellow stars of different sizes pop up over the board      STARS_AT ..
-//   4. vapour   the stars get brighter and brighter, turn white and evaporate (white puffs rise);
-//               meanwhile the result text shows: the won stars (1-5), "New best!", the
-//               training-complete message, moves and best (no title)      TEXT_AT .. TEXT_AT + TEXT_MS
+//   1. stars    yellow stars of different sizes pop up over the board          0 ..
+//   2. vapour   they get brighter and brighter, turn white and evaporate (white puffs rise);
+//               meanwhile the result box shows: the won stars (1-5), "New best!", the
+//               training-complete message, moves and best (no title)   TEXT_AT .. TEXT_AT + TEXT_MS
 // How much of it plays depends on the win (`mode`, engine/stars.js winMode):
-//   'full'   all of the above -- a 5-star win outside the training castle
-//   'stars'  no shake and no lightning: the stars (from the start) and the text -- any other win
-//            outside the training castle
-//   'text'   only the text box -- training puzzles (and reduced motion)
+//   'full'   a 5-star win outside the training castle: as 'stars', plus a few bigger coloured
+//            stars that sparkle (twinkle, with rotating glints) before they fade
+//   'stars'  any other win outside the training castle
+//   'text'   only the result box -- training puzzles (and reduced motion)
 // Then onDone(): the board stays as it is (the scene takes no more taps after a win); the player
 // goes on with Retry or Back. Everything is random within limits, drawn once per win.
-// Reduced motion: no shake, bolts or flying stars -- the text alone, then onDone().
-const BURST = 3            // lightning bolts in the opening burst ...
-const BURST_MS = 600       // ... spread over this time
-const LATE = 2             // sporadic bolts later on (after the stars have come)
-const BOLT_MS = 460        // one bolt: flash, flicker, fade
-const STARS_AT = 650       // the stars come right after the burst
 const STAR_MS = 2700        // one star's life: pop, brighten, turn white, evaporate
 const STARS = 14
-const TEXT_AT = 1250
+const SPARKLE_MS = 3000     // 'full': one coloured sparkling star's life
+const SPARKLES = 5
+const TEXT_AT = 600
 const TEXT_MS = 2900
-const DONE_AT = TEXT_AT + TEXT_MS + 100
+const DONE_AT = Math.max(TEXT_AT + TEXT_MS, 900 + SPARKLE_MS) + 100
+const TEXT_ONLY_MS = 2600   // 'text': how long the result box stays
 
 const rnd = (a, b) => a + Math.random() * (b - a)
 const reducedMotion = () => typeof window !== 'undefined' &&
   Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)
-
-// A jagged line from a to b (midpoint displacement): points [[x, y], ...].
-function jagged(a, b, rough, depth = 5) {
-  if (depth === 0) return [a, b]
-  const [dx, dy] = [b[0] - a[0], b[1] - a[1]]
-  const len = Math.hypot(dx, dy) || 1
-  const off = rnd(-1, 1) * rough
-  const m = [(a[0] + b[0]) / 2 - (dy / len) * off, (a[1] + b[1]) / 2 + (dx / len) * off]
-  return [...jagged(a, m, rough / 2, depth - 1).slice(0, -1), ...jagged(m, b, rough / 2, depth - 1)]
-}
-
-// One lightning bolt across a w x h screen: from just outside one edge to the opposite one, with
-// one or two shorter branches. Returns { main, branches } as SVG point lists.
-function boltShape(w, h) {
-  const sideways = Math.random() < 0.5
-  let a = sideways ? [-20, rnd(0.05, 0.95) * h] : [rnd(0.05, 0.95) * w, -20]
-  let b = sideways ? [w + 20, rnd(0.05, 0.95) * h] : [rnd(0.05, 0.95) * w, h + 20]
-  if (Math.random() < 0.5) [a, b] = [b, a]
-  const length = Math.hypot(b[0] - a[0], b[1] - a[1])
-  const main = jagged(a, b, length * 0.16)
-  const dir = Math.atan2(b[1] - a[1], b[0] - a[0])
-  const branches = Array.from({ length: Math.random() < 0.5 ? 1 : 2 }, () => {
-    const from = main[Math.floor(rnd(0.2, 0.7) * main.length)]
-    const ang = dir + (Math.random() < 0.5 ? -1 : 1) * rnd(0.4, 0.9)
-    const l = length * rnd(0.18, 0.35)
-    return jagged(from, [from[0] + Math.cos(ang) * l, from[1] + Math.sin(ang) * l], l * 0.2, 4)
-  })
-  const pts = (p) => p.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' ')
-  return { main: pts(main), branches: branches.map(pts) }
-}
+const SPARKLE_COLOURS = ['winSparkle1', 'winSparkle2', 'winSparkle3', 'winSparkle4', 'winSparkle5']
 
 // One five-pointed star (fill = currentColor, so its colour can be animated).
 function StarShape({ size }) {
@@ -79,7 +44,14 @@ function StarShape({ size }) {
   )
 }
 
-const TEXT_ONLY_MS = 2600   // 'text': how long the text box stays
+// A four-pointed glint (the sparkle over a coloured star).
+function Glint({ size }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 100 100" aria-hidden="true">
+      <path d="M50 0 C53 40 60 47 100 50 C60 53 53 60 50 100 C47 60 40 53 0 50 C40 47 47 40 50 0 Z" fill="currentColor" />
+    </svg>
+  )
+}
 
 /** training: null or { day, complete, next }; moves, best (null = unknown), stars (1-5 or null),
  *  newBest. */
@@ -88,29 +60,23 @@ export default function WinCelebration({ boardRef, training = null, moves, best 
   const { t } = useTranslation()
   const [mode] = useState(() => winMode({ training, stars, reduced: reducedMotion() }))
   const still = mode === 'text'
-  // 'stars' skips the lightning-only start: everything after it comes `shift` ms earlier
-  const shift = mode === 'stars' ? STARS_AT : 0
-  const doneAt = still ? TEXT_ONLY_MS : DONE_AT - shift
+  const doneAt = still ? TEXT_ONLY_MS : DONE_AT
   const [board, setBoard] = useState(null)   // the board's rect in page px
   const doneRef = useRef(onDone)
   doneRef.current = onDone
 
   // the random parts, once per win
-  const [screen] = useState(() => ({ w: window.innerWidth, h: window.innerHeight }))
-  const [bolts] = useState(() => {
-    // the burst: the first at once, the rest spread over BURST_MS; then LATE sporadic ones, each
-    // in its own slice of the time after the stars have come
-    const burst = Array.from({ length: BURST }, (_, i) => (i === 0 ? 0 : (i / BURST) * BURST_MS + rnd(-60, 60)))
-    const lateFrom = STARS_AT + 400
-    const slice = (DONE_AT - 500 - lateFrom) / LATE
-    const late = Array.from({ length: LATE }, (_, i) => lateFrom + slice * (i + rnd(0.15, 0.85)))
-    return [...burst, ...late].map((delay) => ({ delay: Math.max(0, delay), ...boltShape(screen.w, screen.h) }))
-  })
   const [starSpecs] = useState(() => Array.from({ length: STARS }, (_, i) => ({
     x: rnd(0.05, 0.95), y: rnd(0.05, 0.95),       // share of the board's width / height
     size: Math.round(rnd(18, 58)),
-    delay: STARS_AT - (mode === 'stars' ? STARS_AT : 0) + i * rnd(25, 55),
+    delay: i * rnd(25, 55),
     spin: rnd(-25, 25),
+  })))
+  const [sparkles] = useState(() => Array.from({ length: SPARKLES }, (_, i) => ({
+    x: rnd(0.12, 0.88), y: rnd(0.1, 0.9),
+    size: Math.round(rnd(64, 90)),
+    delay: 150 + i * rnd(120, 180),
+    colour: palette[SPARKLE_COLOURS[i % SPARKLE_COLOURS.length]],
   })))
 
   useLayoutEffect(() => {
@@ -119,24 +85,6 @@ export default function WinCelebration({ boardRef, training = null, moves, best 
     const r = (el?.querySelector('canvas') ?? el)?.getBoundingClientRect()
     if (r) setBoard({ left: r.left, top: r.top, width: r.width, height: r.height })
   }, [boardRef])
-
-  // 1. the board shakes irregularly for the whole animation: strongest during the lightning
-  //    burst, then a little calmer, still at the very end
-  useEffect(() => {
-    const el = boardRef.current
-    if (mode !== 'full' || !el) return undefined
-    const n = Math.round(DONE_AT / 70)
-    const frames = Array.from({ length: n + 1 }, (_, i) => {
-      const at = (i / n) * DONE_AT
-      const k = i === 0 || i === n ? 0 : at < BURST_MS ? 1 : 0.55
-      return {
-        transform: `translate(${rnd(-7, 7) * k}px, ${rnd(-5, 5) * k}px) rotate(${rnd(-1.6, 1.6) * k}deg)`,
-        offset: i === 0 ? 0 : i === n ? 1 : Math.min(1 - 0.5 / n, (i + rnd(-0.3, 0.3)) / n),
-      }
-    })
-    const anim = el.animate(frames, { duration: DONE_AT, easing: 'linear' })
-    return () => anim.cancel()
-  }, [boardRef, mode])
 
   // the end: back to the plain board
   useEffect(() => {
@@ -148,28 +96,7 @@ export default function WinCelebration({ boardRef, training = null, moves, best 
 
   return createPortal(
     <div className="fixed inset-0 z-40 pointer-events-none overflow-hidden" role="status" aria-live="polite">
-      {/* 2. lightning bolts across the whole screen (each with a faint flash of the screen) */}
-      {mode === 'full' && bolts.map((bolt, i) => (
-        <span key={`b${i}`}>
-          <span className="absolute inset-0 win-flash" style={{ background: palette.winBoltGlow, animationDelay: `${bolt.delay}ms` }} />
-          <svg className="absolute inset-0 win-bolt" width={screen.w} height={screen.h} aria-hidden="true"
-               style={{ animationDelay: `${bolt.delay}ms`, animationDuration: `${BOLT_MS}ms` }}>
-            {[bolt.main, ...bolt.branches].map((pts, j) => {
-              const k = j === 0 ? 1 : 0.55     // branches are thinner
-              return (
-                <g key={j} fill="none" strokeLinejoin="round" strokeLinecap="round">
-                  <polyline points={pts} stroke={palette.winBoltGlow} strokeWidth={16 * k} opacity="0.45"
-                            style={{ filter: 'blur(6px)' }} />
-                  <polyline points={pts} stroke={palette.winBolt} strokeWidth={6 * k} />
-                  <polyline points={pts} stroke={palette.winBoltCore} strokeWidth={2.2 * k} />
-                </g>
-              )
-            })}
-          </svg>
-        </span>
-      ))}
-
-      {/* 3.-4. stars over the board: pop, brighten, turn white, evaporate (with rising puffs) */}
+      {/* 1.-2. stars over the board: pop, brighten, turn white, evaporate (with rising puffs) */}
       {!still && board && starSpecs.map((s, i) => {
         const x = board.left + s.x * board.width
         const y = board.top + s.y * board.height
@@ -193,12 +120,34 @@ export default function WinCelebration({ boardRef, training = null, moves, best 
         )
       })}
 
+      {/* 'full' (5 stars): a few bigger coloured stars that sparkle, then fade */}
+      {mode === 'full' && board && sparkles.map((s, i) => {
+        const x = board.left + s.x * board.width
+        const y = board.top + s.y * board.height
+        return (
+          <span key={`p${i}`} className="absolute win-sparkle"
+                style={{ left: x - s.size / 2, top: y - s.size / 2, width: s.size, height: s.size,
+                         color: s.colour, '--glow': s.colour,
+                         animationDelay: `${s.delay}ms`, animationDuration: `${SPARKLE_MS}ms` }}>
+            <StarShape size={s.size} />
+            {/* two glints on the star's tips, twinkling out of step */}
+            {[[0.18, 0.12, 0], [0.78, 0.3, 1]].map(([gx, gy, k]) => (
+              <span key={k} className="absolute win-glint"
+                    style={{ left: s.size * gx - s.size * 0.22, top: s.size * gy - s.size * 0.22,
+                             color: palette.winVapour, animationDelay: `${s.delay + 250 + k * 330}ms` }}>
+                <Glint size={s.size * 0.44} />
+              </span>
+            ))}
+          </span>
+        )
+      })}
+
       {/* 4. the result, centred on the board */}
       {board && (
         <div className="absolute flex items-center justify-center px-3"
              style={{ left: board.left, top: board.top, width: board.width, height: board.height }}>
           <div className="win-text rounded-3xl px-5 py-4 text-center"
-               style={{ animationDelay: `${still ? 0 : TEXT_AT - shift}ms`, animationDuration: `${still ? TEXT_ONLY_MS - 100 : TEXT_MS}ms`,
+               style={{ animationDelay: `${still ? 0 : TEXT_AT}ms`, animationDuration: `${still ? TEXT_ONLY_MS - 100 : TEXT_MS}ms`,
                         background: palette.winTextBack }}>
             {complete && (
               <p className="mt-1.5 first:mt-0 font-sans font-bold text-white">
