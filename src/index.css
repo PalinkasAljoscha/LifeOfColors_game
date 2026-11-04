@@ -50,11 +50,17 @@ body {
 .star-pop { display: inline-block; animation: starPop 320ms ease-out both; }
 
 /* Win animation (components/WinCelebration.jsx); delays / durations / per-element values inline. */
-.win-arrow { transform-origin: 0 50%; animation-name: winArrow; animation-timing-function: cubic-bezier(.4,.05,.6,.95); animation-fill-mode: both; }
-@keyframes winArrow {
-  from { transform: rotate(var(--a)) translate(calc(-62vmax - var(--len)), var(--o)); }
-  to   { transform: rotate(var(--a)) translate(62vmax, var(--o)); }
+.win-bolt { opacity: 0; animation-name: winBolt; animation-timing-function: linear; animation-fill-mode: both; }
+@keyframes winBolt {
+  0%   { opacity: 0; }
+  6%   { opacity: 1; }
+  18%  { opacity: 0.25; }
+  28%  { opacity: 1; }
+  45%  { opacity: 0.85; }
+  100% { opacity: 0; }
 }
+.win-flash { opacity: 0; animation: winFlash 260ms ease-out both; }
+@keyframes winFlash { 0% { opacity: 0; } 10% { opacity: 0.16; } 100% { opacity: 0; } }
 .win-star { animation-name: winStar; animation-timing-function: ease-out; animation-fill-mode: both; }
 @keyframes winStar {
   0%   { transform: scale(0) rotate(var(--spin)); color: var(--star); opacity: 1; filter: drop-shadow(0 0 0 var(--star)); }

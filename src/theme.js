@@ -23,8 +23,9 @@ export const palette = {
   starEmpty:    '#3d4766',   // star not won
 
   // ── Win animation (components/WinCelebration.jsx) ──
-  winArrow:     '#e05cff',   // bright purple arrows across the screen
-  winArrowGlow: '#b52bff',
+  winBolt:      '#e05cff',   // bright purple lightning bolts across the screen
+  winBoltGlow:  '#b52bff',   // their glow (and the faint screen flash)
+  winBoltCore:  '#fbeaff',   // their bright inner line
   winStar:      '#ffd83d',   // the popping stars, before they turn white
   winVapour:    '#ffffff',   // the stars at their brightest, and the rising puffs
   winTextBack:  '#0f1028c4', // behind the result text (translucent)
