@@ -40,6 +40,7 @@ export default function GameScreen({ instance, place, training = null, pick, onP
   const [look] = useState(() => drawLook())
   const [notes, setNotes] = useState([])         // training: observed transformations, in order
   const [notesOpen, setNotesOpen] = useState(false)   // training: the notebook is open (tapped)
+  const [notesShown, setNotesShown] = useState(false) // ... and its page is on screen (incl. sliding down)
   const [flights, setFlights] = useState([])          // training: note animations to play, in order
   const [rollBump, setRollBump] = useState(0)         // training: bumped when a note lands in the notebook
   const pendingRef = useRef([])                       // observations noted or on their way (no repeats)
@@ -209,7 +210,7 @@ export default function GameScreen({ instance, place, training = null, pick, onP
         {introStep !== null && (
           <>
             <div className="absolute inset-0 z-10" onClick={nextIntro} aria-hidden="true" />
-            <TrainingIntro instance={instance} look={look} boardRef={boardBoxRef} step={introStep} onNext={nextIntro} />
+            <TrainingIntro instance={instance} look={look} boardRef={boardBoxRef} notesRef={rollRef} step={introStep} onNext={nextIntro} />
           </>
         )}
         {/* training: while a note animation runs the board takes no taps -- this layer over it
@@ -222,8 +223,8 @@ export default function GameScreen({ instance, place, training = null, pick, onP
       </div>
 
       {/* training: the notebook peeking in right below the board (no goal / rules line any more), and opened */}
-      {training && <NotebookPeek ref={rollRef} bump={rollBump} onOpen={openNotes} />}
-      {training && <NotebookOpen open={notesOpen} notes={notes} look={look} onClose={closeNotes} />}
+      {training && <NotebookPeek ref={rollRef} bump={rollBump} hidden={notesShown} onOpen={openNotes} />}
+      {training && <NotebookOpen open={notesOpen} notes={notes} look={look} onClose={closeNotes} onShown={setNotesShown} />}
 
       {showRules && <RulesDialog onClose={() => setShowRules(false)} />}
       {won && <WinDialog look={look} training={training && { day: training.day, next: training.next, complete: result?.trainingComplete === true }} moves={moves} best={minMoves} stars={result?.stars ?? null} newBest={result?.newBest ?? false} previousBest={result?.previousBest ?? null} onRetry={retry} onPickNew={() => leave(onPickNew, 'pick_new')} onHome={() => leave(onHome, 'home')} />}

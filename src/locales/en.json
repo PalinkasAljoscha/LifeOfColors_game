@@ -106,6 +106,7 @@
     "hood": "The neighbours of a field decide how it transforms.",
     "goal": "To win, get a {{goal}} onto the gold-framed field.",
     "next": "Next",
-    "start": "Let's go!"
+    "start": "Let's go!",
+    "notes": "Rules you have already observed are noted here. Have a look to come up with a path that puts the {{goal}} into the golden frame."
   }
 }

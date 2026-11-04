@@ -6,18 +6,20 @@ import { CELL, GAP, PAD, boardCanvasSize } from '../game/GameScene.js'
 import { introExampleCell, neighbourCells, noteCardPlace } from '../engine/training.js'
 import { palette } from '../theme.js'
 
-// The first training puzzle starts with three short explanations, one after the other, each a
-// speech bubble ON the board next to what it talks about (never over it, engine/training.js
-// noteCardPlace):
+// The first training puzzle starts with four short explanations, one after the other, each a
+// speech bubble next to what it talks about (never over it; on the board via engine/training.js
+// noteCardPlace, the last one right above the notebook):
 //   1. tap      a ring around an example field: "Tap a field to try transforming it."
 //   2. hood     the example field's neighbours glow inside a frame around its neighbourhood:
 //               "The neighbours of a field decide how it transforms."
 //   3. goal     a ring around the gold-framed goal field: "To win, get a <goal object> there."
+//   4. notes    a ring around the closed notebook below the board: observed rules are noted
+//               there, read them to find a way to the goal.
 // "Next" (or a tap on the board) goes on; after the last one onDone() and the puzzle starts.
 // GameScreen blocks the board while this runs (taps on the board only go to the next step).
-const STEPS = ['tap', 'hood', 'goal']
+const STEPS = ['tap', 'hood', 'goal', 'notes']
 
-export default function TrainingIntro({ instance, look, boardRef, step, onNext }) {
+export default function TrainingIntro({ instance, look, boardRef, notesRef, step, onNext }) {
   const { t } = useTranslation()
   const [geo, setGeo] = useState(null)       // cells in page px (from the board's canvas)
   const [bubble, setBubble] = useState(null) // measured size of the bubble { width, height }
@@ -43,8 +45,11 @@ export default function TrainingIntro({ instance, look, boardRef, step, onNext }
       const neighbours = neighbourCells(er, ec, rows, cols).map(([r, c]) => cell(r, c))
       const example = cell(er, ec)
       const goal = cell(...instance.goal.at)
+      // the notebook's cover, as far as it is on screen
+      const book = notesRef?.current?.getBoundingClientRect()
+      const notes = book && { left: book.left, right: book.right, top: book.top, bottom: Math.min(book.bottom, window.innerHeight) }
       setGeo({
-        size, example, neighbours, goal,
+        size, example, neighbours, goal, notes,
         hood: box([example, ...neighbours]),
         board: { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom },
       })
@@ -52,7 +57,7 @@ export default function TrainingIntro({ instance, look, boardRef, step, onNext }
     measure()
     window.addEventListener('resize', measure)
     return () => { cancelAnimationFrame(frame); window.removeEventListener('resize', measure) }
-  }, [boardRef, instance])
+  }, [boardRef, notesRef, instance])
 
   // The bubble's size, measured on each step (its text changes), for its placement.
   useLayoutEffect(() => {
@@ -67,10 +72,12 @@ export default function TrainingIntro({ instance, look, boardRef, step, onNext }
   if (!geo || !kind) return null
   const { size } = geo
   // what the bubble must not cover, and where its arrow points
-  const target = kind === 'hood' ? geo.hood
+  const target = kind === 'hood' ? geo.hood : kind === 'notes' ? geo.notes
     : (() => { const p = kind === 'goal' ? geo.goal : geo.example
       return { left: p.x - size / 2, right: p.x + size / 2, top: p.y - size / 2, bottom: p.y + size / 2 } })()
-  const place = bubble && noteCardPlace(target, bubble, geo.board, 14)
+  const place = !bubble ? null
+    : kind === 'notes' ? notesPlace(geo.notes, bubble, geo.board)
+      : noteCardPlace(target, bubble, geo.board, 14)
   const ring = (p, color) => (
     <span className="absolute rounded-xl intro-pulse"
           style={{ left: p.x - size / 2 - 4, top: p.y - size / 2 - 4, width: size + 8, height: size + 8,
@@ -100,6 +107,11 @@ export default function TrainingIntro({ instance, look, boardRef, step, onNext }
         </>
       )}
       {kind === 'goal' && ring(geo.goal, palette.noteGlow)}
+      {kind === 'notes' && geo.notes && (
+        <span className="absolute rounded-t-2xl intro-pulse"
+              style={{ left: geo.notes.left - 6, top: geo.notes.top - 14, width: geo.notes.right - geo.notes.left + 12,
+                       height: geo.notes.bottom - geo.notes.top + 20, border: `4px solid ${palette.noteGlow}`, borderBottom: 'none' }} />
+      )}
 
       {/* the speech bubble: invisible until measured and placed */}
       <div key={step} ref={bubbleRef} role="dialog" aria-live="polite"
@@ -143,3 +155,12 @@ export default function TrainingIntro({ instance, look, boardRef, step, onNext }
 }
 
 export const INTRO_STEPS = STEPS.length
+
+// Step 4's bubble: right above the notebook (its spiral rings included), centred on it but kept
+// within the board's width.
+function notesPlace(notes, bubble, board) {
+  if (!notes) return { x: (board.left + board.right) / 2, y: board.bottom - bubble.height / 2, side: 'above' }
+  const halfW = bubble.width / 2
+  const x = Math.min(Math.max((notes.left + notes.right) / 2, board.left + halfW), board.right - halfW)
+  return { x, y: notes.top - 22 - bubble.height / 2, side: 'above' }
+}
