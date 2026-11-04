@@ -1,7 +1,7 @@
 // Star rating of a win (src/engine/stars.js).
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { starsForWin, minMovesOf, MAX_STARS } from '../src/engine/stars.js'
+import { starsForWin, minMovesOf, MAX_STARS, winMode } from '../src/engine/stars.js'
 
 test('5 stars at the minimum (and below it, if the minimum is not proven)', () => {
   assert.equal(starsForWin(10, 10), MAX_STARS)
@@ -46,4 +46,13 @@ test('no rating without a valid moves_to_win_min', () => {
   assert.equal(minMovesOf({ moves_to_win_min: 7 }), 7)
   assert.equal(minMovesOf({ meta: { moves_to_win: 7 } }), null)   // meta is never used by the app
   assert.equal(minMovesOf({}), null)
+})
+
+test('winMode: text in training / reduced motion, full only for 5 stars, else stars', () => {
+  assert.equal(winMode({ training: { day: 2 }, stars: 5 }), 'text')
+  assert.equal(winMode({ training: null, stars: 5, reduced: true }), 'text')
+  assert.equal(winMode({ training: null, stars: 5 }), 'full')
+  assert.equal(winMode({ training: null, stars: 4 }), 'stars')
+  assert.equal(winMode({ training: null, stars: 1 }), 'stars')
+  assert.equal(winMode({ training: null, stars: null }), 'stars')
 })
