@@ -41,9 +41,7 @@
   "levelScreen": {
     "back": "Accueil",
     "choose": "Choisis ton puzzle",
-    "intro": "Intro",
-    "lesson": "Leçon {{n}}",
-    "exam": "Examen",
+    "intro": "Introduction",
     "start": "Jouer",
     "trainingHint": "Gagne chaque étape pour débloquer la suivante"
   },

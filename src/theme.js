@@ -9,7 +9,6 @@ export const palette = {
   gameBg:       '#1a1a2e',
   gameHeader:   '#16213e',
   panel:        '#22284a',
-  panelBorder:  '#363e66',   // frame of a training card that is neither next nor won
   divider:      '#2c3e50',
 
   // ── Text / UI ──
@@ -119,3 +118,12 @@ export const phaser = Object.fromEntries(
 )
 
 // Cell colours by engine letter (U/O/B/G) are defined per theme in src/themes.js.
+
+/** Readable text colour on a background of hex colour `bg` (e.g. a puzzle's name_color): the dark
+ *  game background on light colours, white on dark ones. */
+export function inkOn(bg) {
+  const n = toHex(bg)
+  const lin = (c) => { const v = c / 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4 }
+  const lum = 0.2126 * lin((n >> 16) & 255) + 0.7152 * lin((n >> 8) & 255) + 0.0722 * lin(n & 255)
+  return lum > 0.3 ? palette.gameBg : palette.white
+}
