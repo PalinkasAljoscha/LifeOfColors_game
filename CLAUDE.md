@@ -115,7 +115,8 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   but never over the tapped cell's neighbourhood: in the free space above it, or below when it does
   not fit above (`engine/training.js` `noteCardPlace`, tested). While a note animation runs the
   board takes no taps (GameScreen: a transparent layer over the board), so the next move waits until
-  the note has landed. Every training puzzle uses the phased version (first the coloured
+  the note has landed. The neighbours' highlight stays on for the whole animation, until the card
+  has dropped into the notebook. Every training puzzle uses the phased version (first the coloured
   neighbours are circled and fly to the left side of the rule, then the changed cell is circled and
   flies to the right side).
 - **Training intro** -- `components/TrainingIntro.jsx`: training puzzle 1 (`training.day === 1`)

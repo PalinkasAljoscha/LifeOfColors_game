@@ -6,7 +6,8 @@ import { CELL, GAP, PAD, boardCanvasSize } from '../game/GameScene.js'
 import { flightSources, neighbourCells, noteCardPlace } from '../engine/training.js'
 
 // Training castle: the animation that takes a NEW rule observation down as a note.
-//   1. highlight  the tapped cell's neighbours light up strongly                      HIGHLIGHT_MS
+//   1. highlight  the tapped cell's neighbours light up strongly (and stay lit until  HIGHLIGHT_MS
+//                 the card has dropped into the notebook)
 //   2. circle     rings appear around every coloured neighbour and the changed cell   CIRCLE_MS
 //   3. fly        copies of those objects fly from the board into a note card that
 //                 appears on the board, in the free space above the tapped cell's neighbourhood
@@ -167,8 +168,9 @@ export default function NoteFlight({ job, instance, look, boardRef, rollRef, onL
 
   return createPortal(
     <div className="fixed inset-0 z-30 pointer-events-none" aria-hidden="true">
-      {/* 1. strong highlight of the neighbours (until the first objects fly) */}
-      {(kind === 'highlight' || (kind === 'circle' && g === 0)) && geo.neighbours.map((p, i) => (
+      {/* 1. strong highlight of the neighbours: stays the whole animation, until the card has
+          dropped into the notebook */}
+      {geo.neighbours.map((p, i) => (
         <span key={`h${i}`} className="absolute rounded-xl note-glow"
               style={{ left: p.x - size / 2, top: p.y - size / 2, width: size, height: size, background: palette.noteGlow }} />
       ))}
