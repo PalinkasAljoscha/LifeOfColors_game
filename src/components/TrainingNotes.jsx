@@ -18,7 +18,7 @@ import { NOTE_MAX_REPEAT as MAX_REPEAT } from '../engine/training.js'
 
 // Handwriting for the notebook's title: fonts already on the device (no font download -- the app
 // makes no third-party requests). Segoe Print (Windows), Bradley Hand (macOS / iOS), else cursive.
-const HANDWRITING = '"Segoe Print", "Bradley Hand", "Chalkboard SE", "Comic Sans MS", cursive'
+export const HANDWRITING = '"Segoe Print", "Bradley Hand", "Chalkboard SE", "Comic Sans MS", cursive'
 const SLIDE_MS = 300   // the open page sliding up / down
 const RINGS = 11       // spiral rings along the top edge
 const LABEL_FONT = '1.95rem'  // the closed notebook's title label (scaled down only if too wide)
