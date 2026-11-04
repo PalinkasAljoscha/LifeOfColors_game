@@ -15,9 +15,9 @@ import { flightSources, neighbourCells, noteCardPlace } from '../engine/training
 //   4. show       the finished card stays for a moment                                SHOW_MS
 //   5. drop       the card moves down onto the notebook at the bottom of the screen
 //                 and shrinks into it; then onLanded() (the note is added to it)      DROP_MS
-// `phased` (the first training lessons, PHASED_LESSONS): steps 2-3 run twice -- first only the
-// coloured neighbours are circled and fly into the card (the left side of the rule), then the
-// changed cell is circled and flies to the right side. Otherwise everything moves at once.
+// `phased` (default, every training puzzle): steps 2-3 run twice -- first only the coloured
+// neighbours are circled and fly into the card (the left side of the rule), then the changed cell
+// is circled and flies to the right side. phased=false moves everything at once.
 // Everything is drawn in a fixed layer above the page (pointer-events: none), so the board stays
 // playable. Positions come from the board's canvas (scaled to fit) and the notebook's button.
 // job = { id, obs, r, c, board } (board after the move); unmounting cancels the animation.
@@ -29,12 +29,11 @@ const SHOW_MS = 700
 const DROP_MS = 550
 const EMOJI_SHARE = 0.6   // the board's emoji is 54 px on a 90 px cell (GameScene EMOJI_SIZE)
 const CARD_FONT = '2.4rem' // the card over the board is drawn larger than in the notebook (1.6rem)
-export const PHASED_LESSONS = 3   // training puzzles 1..3 use the phased (slower) animation
 
 const reducedMotion = () => typeof window !== 'undefined' &&
   Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)
 
-export default function NoteFlight({ job, instance, look, boardRef, rollRef, onLanded, phased = false }) {
+export default function NoteFlight({ job, instance, look, boardRef, rollRef, onLanded, phased = true }) {
   // phase = { kind: highlight | circle | fly | show | drop, g: index of the group of objects (see
   // geo.groups) being circled / flying; earlier groups have landed on the card already }
   const [phase, setPhaseState] = useState({ kind: 'highlight', g: 0 })
