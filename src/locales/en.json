@@ -100,5 +100,12 @@
     "title": "Recently played",
     "empty": "No puzzles played yet.",
     "close": "Close"
+  },
+  "intro": {
+    "tap": "Tap a field to try transforming it.",
+    "hood": "The neighbours of a field decide how it transforms.",
+    "goal": "To win, get a {{goal}} onto the gold-framed field.",
+    "next": "Next",
+    "start": "Let's go!"
   }
 }

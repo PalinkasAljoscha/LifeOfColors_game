@@ -86,7 +86,7 @@ export default class GameScene extends Phaser.Scene {
     this.training = Boolean(this.registry.get('training'))
     if (this.training) {
       this._addHover()
-      this._showGoalIntro()
+      if (this.registry.get('goalIntro') !== false) this._showGoalIntro()
     }
 
     this.input.on('pointerdown', this._onPointerDown, this)
