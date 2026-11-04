@@ -111,7 +111,8 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   space goes mostly into the notebook (grow 4, 5.5-13rem) and the rest above the board; the
   title label (1.95rem, nearly the cover's width) is the notes' drop target. While the open
   notebook (NotebookOpen) is on screen the closed one is hidden (`hidden`, via `onShown`), so it
-  looks like the same notebook opening. An empty open notebook shows only its title.
+  looks like the same notebook opening. An empty open notebook shows only its title; below the last notes row about half a note's
+  height stays free above the home-indicator area (safe-area inset). Notes have a 2px frame.
 - **Training note animation** -- `components/NoteFlight.jsx`: a new rule observation is circled on
   the board and flies into a note card, which drops into the notebook. The card sits ON the board
   but never over the tapped cell's neighbourhood: in the free space above it, or below when it does

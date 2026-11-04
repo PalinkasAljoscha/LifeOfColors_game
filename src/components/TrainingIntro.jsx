@@ -136,7 +136,7 @@ export default function TrainingIntro({ instance, look, boardRef, notesRef, step
         <p className="relative text-xl font-bold leading-snug">{withGoal(`intro.${kind}`)}</p>
         {/* step 4: a hint (light bulb, lighter text) after the explanation */}
         {kind === 'notes' && (
-          <p className="relative mt-1.5 text-lg font-medium leading-snug">
+          <p className="relative mt-1.5 text-lg font-medium italic leading-snug">
             <span aria-hidden="true" className="mr-1">💡</span>{withGoal('intro.notesHint')}
           </p>
         )}
