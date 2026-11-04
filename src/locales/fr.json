@@ -41,8 +41,11 @@
   "levelScreen": {
     "back": "Accueil",
     "choose": "Choisis ton puzzle",
-    "trainingHint_one": "{{count}} leçon d’entraînement à terminer",
-    "trainingHint_other": "{{count}} leçons d’entraînement à terminer"
+    "intro": "Intro",
+    "lesson": "Leçon {{n}}",
+    "exam": "Examen",
+    "start": "Jouer",
+    "trainingHint": "Gagne chaque étape pour débloquer la suivante"
   },
   "progress": {
     "title": "Étoiles récoltées",

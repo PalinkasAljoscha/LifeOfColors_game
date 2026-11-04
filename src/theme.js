@@ -9,6 +9,7 @@ export const palette = {
   gameBg:       '#1a1a2e',
   gameHeader:   '#16213e',
   panel:        '#22284a',
+  panelBorder:  '#363e66',   // frame of a training card that is neither next nor won
   divider:      '#2c3e50',
 
   // ── Text / UI ──

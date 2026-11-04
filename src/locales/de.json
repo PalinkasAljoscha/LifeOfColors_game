@@ -41,8 +41,11 @@
   "levelScreen": {
     "back": "Start",
     "choose": "Wähle dein Puzzle",
-    "trainingHint_one": "{{count}} Trainingslektion zu absolvieren",
-    "trainingHint_other": "{{count}} Trainingslektionen zu absolvieren"
+    "intro": "Einführung",
+    "lesson": "Lektion {{n}}",
+    "exam": "Prüfung",
+    "start": "Los",
+    "trainingHint": "Gewinne jeden Schritt, um den nächsten freizuschalten"
   },
   "progress": {
     "title": "Gesammelte Sterne",

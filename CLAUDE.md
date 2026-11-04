@@ -31,7 +31,10 @@ src/
   game/GameScene.js       # Phaser scene: draws the board, turns taps into engine calls
   hooks/usePhaserGame.js  # Phaser mount/unmount (from Maze Inc., takes width/height/registry/events)
   components/             # HomeScreen (CastleMap: scrollable SVG map of castles), LevelScreen (one castle:
-                          # progress bar to the next castle + 10-column tile grid in seq order),
+                          # progress bar to the next castle + 10-column tile grid in seq order; the
+                          # training castle instead: a vertical path of cards Intro, Lesson 1..4, Exam
+                          # joined by down arrows -- won ones green with stars, the next one glowing
+                          # with "Start", later ones greyed out with a lock),
                           # GameScreen (Retry/Back -> back to the level grid; shows the puzzle name), Board, WinCelebration,
                           # ConsentBanner (opt-in for saved progress; the home footer's "opt in/out" link reopens it)
                           # HistoryDialog (home header, circled-arrow button left of "?": the last 20
