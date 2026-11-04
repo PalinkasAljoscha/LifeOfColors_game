@@ -106,6 +106,7 @@
     "hood": "Les voisines d'une case décident comment elle se transforme.",
     "goal": "Pour gagner, amène un {{goal}} sur la case au cadre doré.",
     "next": "Suivant",
-    "start": "C'est parti !"
+    "start": "C'est parti !",
+    "notes": "Les règles déjà observées sont notées ici. Consulte-les pour trouver un chemin qui amène {{goal}} dans le cadre doré."
   }
 }

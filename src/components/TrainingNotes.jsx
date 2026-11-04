@@ -111,7 +111,7 @@ function Spiral() {
 /** The top of the closed notebook, right below the board in training. It fills the free space
  *  down to the screen bottom (between a minimum and a maximum height); the rest of the notebook
  *  is "below the screen". The ref is the button (the note animation drops new notes onto it). */
-export const NotebookPeek = forwardRef(function NotebookPeek({ onOpen, bump = 0 }, ref) {
+export const NotebookPeek = forwardRef(function NotebookPeek({ onOpen, bump = 0, hidden = false }, ref) {
   const { t } = useTranslation()
   const title = t('training.notes')
   const labelRef = useRef(null)
@@ -135,7 +135,10 @@ export const NotebookPeek = forwardRef(function NotebookPeek({ onOpen, bump = 0 
   return (
     // grows 4x faster than the space above the board (GameScreen), so it takes most of the free
     // space; -mb-3: the cover runs into the screen's bottom padding (safe-pad), so it touches the edge
-    <div className="mx-auto w-full max-w-md -mb-3 grow-[4] basis-0 min-h-[5.5rem] max-h-[13rem] overflow-hidden flex justify-center pt-3">
+    // hidden: the notebook is open (NotebookOpen) -- the closed one is not shown meanwhile, so it
+    // looks like this notebook opened (its place in the layout stays)
+    <div style={{ visibility: hidden ? 'hidden' : 'visible' }}
+         className="mx-auto w-full max-w-md -mb-3 grow-[4] basis-0 min-h-[5.5rem] max-h-[13rem] overflow-hidden flex justify-center pt-3">
       <button ref={ref} onClick={onOpen} aria-label={title} title={title}
               className="w-80 max-w-[85%] h-[14rem] active:translate-y-0.5 transition-transform">
         <span key={bump} className={`relative block w-full h-full rounded-t-xl shadow-2xl ${bump ? 'book-bump' : ''}`}
@@ -158,8 +161,9 @@ const reducedMotion = () => typeof window !== 'undefined' &&
   Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)
 
 /** The open notebook: a page sliding up from the bottom of the screen with every note.
- *  open: wanted open; a tap anywhere calls onClose (it then slides down). */
-export default function NotebookOpen({ open, notes, look, onClose }) {
+ *  open: wanted open; a tap anywhere calls onClose (it then slides down). onShown(true | false):
+ *  the page is on screen (from opening until it has slid down again). */
+export default function NotebookOpen({ open, notes, look, onClose, onShown = () => {} }) {
   const { t } = useTranslation()
   const [shown, setShown] = useState(open)
   const pageRef = useRef(null)
@@ -168,6 +172,10 @@ export default function NotebookOpen({ open, notes, look, onClose }) {
   useEffect(() => {
     if (open) setShown(true)
   }, [open])
+  // tell the game screen while the open notebook is on screen (it hides the closed one meanwhile)
+  const onShownRef = useRef(onShown)
+  onShownRef.current = onShown
+  useEffect(() => { onShownRef.current(shown) }, [shown])
 
   // Slide up when shown, slide down (then unmount) when closed.
   useLayoutEffect(() => {
