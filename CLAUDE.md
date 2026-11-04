@@ -32,7 +32,7 @@ src/
   hooks/usePhaserGame.js  # Phaser mount/unmount (from Maze Inc., takes width/height/registry/events)
   components/             # HomeScreen (CastleMap: scrollable SVG map of castles), LevelScreen (one castle:
                           # progress bar to the next castle + 10-column tile grid in seq order),
-                          # GameScreen (Retry/Back -> back to the level grid; shows the puzzle name), Board, WinDialog,
+                          # GameScreen (Retry/Back -> back to the level grid; shows the puzzle name), Board, WinCelebration,
                           # ConsentBanner (opt-in for saved progress; the home footer's "opt in/out" link reopens it)
                           # HistoryDialog (home header, circled-arrow button left of "?": the last 20
                           # played puzzles, each opens the puzzle again in its castle; pick = 'grid')
@@ -75,9 +75,9 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   must keep this property and must be added to `telemetry/schema.sql` and the factory's `stats_helpers.py`.
 - **Best / stars** -- `instance.moves_to_win_min` (not hashed, exported by the factory: the lowest
   number of moves it found; proven minimum when `meta.proven_min_moves`) is shown as "Best: X" in
-  the win dialog only (not on the game screen); a win gets 1-5 stars from `src/engine/stars.js` `starsForWin` (5 at/below
+  the win animation only (not on the game screen); a win gets 1-5 stars from `src/engine/stars.js` `starsForWin` (5 at/below
   the min, 2 at 1.4 x min, linear in between rounded to the nearest star, 1 above), shown in the
-  win dialog. Missing value -> neither is shown. Stars are not sent to telemetry (derivable from
+  win animation. Missing value -> neither is shown. Stars are not sent to telemetry (derivable from
   moves); `meta` itself is still never read by the app.
 - **Saved progress** -- `src/engine/progress.js` is the ONLY code that touches browser storage:
   `loc-storage-consent` (the opt-in answer) and, only while that is 'granted', `loc-progress-v1`
@@ -132,6 +132,13 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   the board goes on; the board takes no moves until the last one. Shown each time the puzzle is
   opened, not again on Retry; the scene's blinking-goal intro is skipped there (Board `goalIntro`).
   Texts: `intro.*` in the locales.
+- **Win animation** -- `components/WinCelebration.jsx` replaces the former win dialog: the board
+  shakes irregularly, bright purple arrows shoot across the screen, yellow stars of different sizes
+  pop up over the board, get brighter, turn white and evaporate (rising white puffs); meanwhile the
+  result shows over the board (title, won stars, "New best!", training messages, moves, "Best: X").
+  Then only the board is left as it is: the scene takes no more taps after a win, and the player
+  goes on with Retry or Back. Random within limits, drawn once per win; reduced motion = the text
+  alone. Colours `win*` in theme.js, keyframes `win-*` in index.css.
 - **Mobile first** -- portrait phones are the main target; boards up to 9 rows x 6 cols must fit.
 
 ## Branching Strategy (as in Maze Inc.)

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import Board from './Board.jsx'
 import { boardCanvasSize } from '../game/GameScene.js'
-import WinDialog from './WinDialog.jsx'
+import WinCelebration from './WinCelebration.jsx'
 import RulesDialog from './RulesDialog.jsx'
 import NotebookOpen, { NotebookPeek } from './TrainingNotes.jsx'
 import NoteFlight from './NoteFlight.jsx'
@@ -23,13 +23,15 @@ import * as telemetry from '../telemetry/telemetry.js'
 // ids (every training puzzle), next (name of the castle it opens) } -- board helps, the notebook of
 // observed transformations (src/engine/training.js; the notes survive Retry, the rules stay the
 // same; a new one is taken down by the note animation, components/NoteFlight.jsx, and lands in
-// the notebook at the bottom of the screen, which opens only when tapped) and the training win dialog ("Passed training day X"; "Training complete" for the win
-// that completes the plan).
+// the notebook at the bottom of the screen, which opens only when tapped) and the training texts of
+// the win animation ("Passed training day X"; "Training complete" for the win that completes the plan).
+// A win plays the win animation (components/WinCelebration.jsx) over the board; afterwards the board
+// stays as it is and only Retry / Back go on. onHome is no longer used here (no win dialog).
 export default function GameScreen({ instance, place, training = null, pick, onPickNew, onHome }) {
   const { t } = useTranslation()
   const [round, setRound] = useState(0)        // bumped by Retry -> remounts <Board>
   const [moves, setMoves] = useState(0)        // clicks that changed a cell
-  const [won, setWon] = useState(false)
+  const [won, setWon] = useState(false)        // the win animation is playing (components/WinCelebration.jsx)
   const [result, setResult] = useState(null)   // { stars, newBest, previousBest } of the win
   const movesRef = useRef(0)                   // moves at the time of the win (state may lag)
   const [showRules, setShowRules] = useState(false)
@@ -109,8 +111,8 @@ export default function GameScreen({ instance, place, training = null, pick, onP
     setRound((n) => n + 1)
   }
 
-  // reason: 'back' (the <- button), 'pick_new' or 'home' (win dialog). onPickNew goes back to the
-  // level's puzzle grid, onHome all the way to the level list.
+  // reason: 'back' (the <- button; 'pick_new' / 'home' came from the former win dialog). onPickNew
+  // goes back to the level's puzzle grid.
   function leave(to, reason) {
     clearTimeout(winTimer.current)
     telemetry.endPlay(reason)
@@ -138,14 +140,15 @@ export default function GameScreen({ instance, place, training = null, pick, onP
 
   function onWon() {
     telemetry.recordWin()
-    closeNotes()     // the win dialog follows: no notebook or note animation over the board
+    closeNotes()     // the win animation follows: no notebook or note animation over the board
     flushFlights()
     const stars = starsForWin(movesRef.current, minMoves)
     const allWon = () => training !== null && progressTotals(training.ids).solved === training.ids.length
     const wasComplete = allWon()
     const saved = markSolved(instance, stars)              // best rating per puzzle (engine/progress.js)
     setResult({ stars, ...saved, trainingComplete: !wasComplete && allWon() })
-    // Short pause so the player sees the goal cell change before the dialog covers it.
+    // Short pause so the player sees the goal cell change before the animation starts. After it the
+    // board stays as it is (the scene takes no more taps); Retry or Back go on.
     winTimer.current = setTimeout(() => setWon(true), 400)
   }
   useEffect(() => () => clearTimeout(winTimer.current), [])
@@ -227,7 +230,12 @@ export default function GameScreen({ instance, place, training = null, pick, onP
       {training && <NotebookOpen open={notesOpen} notes={notes} look={look} onClose={closeNotes} onShown={setNotesShown} />}
 
       {showRules && <RulesDialog onClose={() => setShowRules(false)} />}
-      {won && <WinDialog look={look} training={training && { day: training.day, next: training.next, complete: result?.trainingComplete === true }} moves={moves} best={minMoves} stars={result?.stars ?? null} newBest={result?.newBest ?? false} previousBest={result?.previousBest ?? null} onRetry={retry} onPickNew={() => leave(onPickNew, 'pick_new')} onHome={() => leave(onHome, 'home')} />}
+      {won && (
+        <WinCelebration key={round} boardRef={boardBoxRef} look={look}
+                        training={training && { day: training.day, next: training.next, complete: result?.trainingComplete === true }}
+                        moves={moves} best={minMoves} stars={result?.stars ?? null} newBest={result?.newBest ?? false}
+                        onDone={() => setWon(false)} />
+      )}
     </div>
   )
 }
