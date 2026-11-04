@@ -7,19 +7,20 @@ import { MAX_STARS } from '../engine/stars.js'
 import { palette } from '../theme.js'
 
 // The win animation (instead of a win dialog). Over the board, nothing to tap:
-//   1. shake    the board shakes irregularly                               0 .. SHAKE_MS
-//   2. arrows   bright purple arrows shoot across the whole screen         ARROWS_AT ..
+//   1. shake    the board shakes irregularly, the whole time             0 .. DONE_AT
+//   2. bolts    bright purple lightning bolts flash across the whole screen: a burst at the
+//               start (0 .. BURST_MS), then only a few sporadic ones until the end
 //   3. stars    yellow stars of different sizes pop up over the board      STARS_AT ..
 //   4. vapour   the stars get brighter and brighter, turn white and evaporate (white puffs rise);
 //               meanwhile the result text shows: title, moves, best, the won stars (1-5),
 //               "New best!", and the training messages                    TEXT_AT .. TEXT_AT + TEXT_MS
 // Then onDone(): the board stays as it is (the scene takes no more taps after a win); the player
 // goes on with Retry or Back. Everything is random within limits, drawn once per win.
-// Reduced motion: no shake, arrows or flying stars -- the text alone, then onDone().
-const SHAKE_MS = 750
-const ARROWS_AT = 450
-const ARROW_MS = 850
-const ARROWS = 9
+// Reduced motion: no shake, bolts or flying stars -- the text alone, then onDone().
+const BURST = 7            // lightning bolts in the opening burst ...
+const BURST_MS = 1250      // ... spread over this time
+const LATE = 3             // sporadic bolts later on (after the stars have come)
+const BOLT_MS = 460        // one bolt: flash, flicker, fade
 const STARS_AT = 1300
 const STAR_MS = 2700        // one star's life: pop, brighten, turn white, evaporate
 const STARS = 14
@@ -30,6 +31,36 @@ const DONE_AT = TEXT_AT + TEXT_MS + 100
 const rnd = (a, b) => a + Math.random() * (b - a)
 const reducedMotion = () => typeof window !== 'undefined' &&
   Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)
+
+// A jagged line from a to b (midpoint displacement): points [[x, y], ...].
+function jagged(a, b, rough, depth = 5) {
+  if (depth === 0) return [a, b]
+  const [dx, dy] = [b[0] - a[0], b[1] - a[1]]
+  const len = Math.hypot(dx, dy) || 1
+  const off = rnd(-1, 1) * rough
+  const m = [(a[0] + b[0]) / 2 - (dy / len) * off, (a[1] + b[1]) / 2 + (dx / len) * off]
+  return [...jagged(a, m, rough / 2, depth - 1).slice(0, -1), ...jagged(m, b, rough / 2, depth - 1)]
+}
+
+// One lightning bolt across a w x h screen: from just outside one edge to the opposite one, with
+// one or two shorter branches. Returns { main, branches } as SVG point lists.
+function boltShape(w, h) {
+  const sideways = Math.random() < 0.5
+  let a = sideways ? [-20, rnd(0.05, 0.95) * h] : [rnd(0.05, 0.95) * w, -20]
+  let b = sideways ? [w + 20, rnd(0.05, 0.95) * h] : [rnd(0.05, 0.95) * w, h + 20]
+  if (Math.random() < 0.5) [a, b] = [b, a]
+  const length = Math.hypot(b[0] - a[0], b[1] - a[1])
+  const main = jagged(a, b, length * 0.16)
+  const dir = Math.atan2(b[1] - a[1], b[0] - a[0])
+  const branches = Array.from({ length: Math.random() < 0.5 ? 1 : 2 }, () => {
+    const from = main[Math.floor(rnd(0.2, 0.7) * main.length)]
+    const ang = dir + (Math.random() < 0.5 ? -1 : 1) * rnd(0.4, 0.9)
+    const l = length * rnd(0.18, 0.35)
+    return jagged(from, [from[0] + Math.cos(ang) * l, from[1] + Math.sin(ang) * l], l * 0.2, 4)
+  })
+  const pts = (p) => p.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' ')
+  return { main: pts(main), branches: branches.map(pts) }
+}
 
 // One five-pointed star (fill = currentColor, so its colour can be animated).
 function StarShape({ size }) {
@@ -56,12 +87,16 @@ export default function WinCelebration({ boardRef, look, training = null, moves,
   doneRef.current = onDone
 
   // the random parts, once per win
-  const [arrows] = useState(() => Array.from({ length: ARROWS }, (_, i) => ({
-    angle: rnd(-35, 35) + (i % 2 ? 180 : 0) + (i % 3 === 2 ? 90 : 0),   // mostly sideways, some up/down
-    offset: rnd(-30, 30),                                                // vmin, across its path
-    delay: ARROWS_AT + i * rnd(40, 75),
-    length: rnd(28, 46),                                                 // vmin
-  })))
+  const [screen] = useState(() => ({ w: window.innerWidth, h: window.innerHeight }))
+  const [bolts] = useState(() => {
+    // the burst: the first at once, the rest spread over BURST_MS; then LATE sporadic ones, each
+    // in its own slice of the time after the stars have come
+    const burst = Array.from({ length: BURST }, (_, i) => (i === 0 ? 0 : (i / BURST) * BURST_MS + rnd(-60, 60)))
+    const lateFrom = STARS_AT + 400
+    const slice = (DONE_AT - 500 - lateFrom) / LATE
+    const late = Array.from({ length: LATE }, (_, i) => lateFrom + slice * (i + rnd(0.15, 0.85)))
+    return [...burst, ...late].map((delay) => ({ delay: Math.max(0, delay), ...boltShape(screen.w, screen.h) }))
+  })
   const [starSpecs] = useState(() => Array.from({ length: STARS }, (_, i) => ({
     x: rnd(0.05, 0.95), y: rnd(0.05, 0.95),       // share of the board's width / height
     size: Math.round(rnd(18, 58)),
@@ -76,19 +111,21 @@ export default function WinCelebration({ boardRef, look, training = null, moves,
     if (r) setBoard({ left: r.left, top: r.top, width: r.width, height: r.height })
   }, [boardRef])
 
-  // 1. the board shakes, irregularly (random offsets that fade out)
+  // 1. the board shakes irregularly for the whole animation: strongest during the lightning
+  //    burst, then a little calmer, still at the very end
   useEffect(() => {
     const el = boardRef.current
     if (still || !el) return undefined
-    const n = 12
+    const n = Math.round(DONE_AT / 70)
     const frames = Array.from({ length: n + 1 }, (_, i) => {
-      const k = i === 0 || i === n ? 0 : 1 - i / (n + 2)
+      const at = (i / n) * DONE_AT
+      const k = i === 0 || i === n ? 0 : at < BURST_MS ? 1 : 0.55
       return {
         transform: `translate(${rnd(-7, 7) * k}px, ${rnd(-5, 5) * k}px) rotate(${rnd(-1.6, 1.6) * k}deg)`,
-        offset: i === 0 ? 0 : i === n ? 1 : Math.min(0.97, i / n + rnd(-0.03, 0.03)),
+        offset: i === 0 ? 0 : i === n ? 1 : Math.min(1 - 0.5 / n, (i + rnd(-0.3, 0.3)) / n),
       }
     })
-    const anim = el.animate(frames, { duration: SHAKE_MS, easing: 'linear' })
+    const anim = el.animate(frames, { duration: DONE_AT, easing: 'linear' })
     return () => anim.cancel()
   }, [boardRef, still])
 
@@ -105,18 +142,24 @@ export default function WinCelebration({ boardRef, look, training = null, moves,
 
   return createPortal(
     <div className="fixed inset-0 z-40 pointer-events-none overflow-hidden" role="status" aria-live="polite">
-      {/* 2. arrows across the whole screen */}
-      {!still && arrows.map((a, i) => (
-        <span key={`a${i}`} className="absolute left-1/2 top-1/2 win-arrow"
-              style={{ '--a': `${a.angle}deg`, '--o': `${a.offset}vmin`, '--len': `${a.length}vmin`,
-                       animationDelay: `${a.delay}ms`, animationDuration: `${ARROW_MS}ms` }}>
-          <span className="block h-[1.5vmin] min-h-[6px] rounded-full"
-                style={{ width: 'var(--len)', background: palette.winArrow,
-                         boxShadow: `0 0 10px 3px ${palette.winArrowGlow}, 0 0 28px 8px ${palette.winArrowGlow}` }} />
-          <span className="absolute right-[-4vmin] top-1/2 -translate-y-1/2 w-0 h-0"
-                style={{ borderTop: '4vmin solid transparent', borderBottom: '4vmin solid transparent',
-                         borderLeft: `6vmin solid ${palette.winArrow}`,
-                         filter: `drop-shadow(0 0 8px ${palette.winArrowGlow})` }} />
+      {/* 2. lightning bolts across the whole screen (each with a faint flash of the screen) */}
+      {!still && bolts.map((bolt, i) => (
+        <span key={`b${i}`}>
+          <span className="absolute inset-0 win-flash" style={{ background: palette.winBoltGlow, animationDelay: `${bolt.delay}ms` }} />
+          <svg className="absolute inset-0 win-bolt" width={screen.w} height={screen.h} aria-hidden="true"
+               style={{ animationDelay: `${bolt.delay}ms`, animationDuration: `${BOLT_MS}ms` }}>
+            {[bolt.main, ...bolt.branches].map((pts, j) => {
+              const k = j === 0 ? 1 : 0.55     // branches are thinner
+              return (
+                <g key={j} fill="none" strokeLinejoin="round" strokeLinecap="round">
+                  <polyline points={pts} stroke={palette.winBoltGlow} strokeWidth={16 * k} opacity="0.45"
+                            style={{ filter: 'blur(6px)' }} />
+                  <polyline points={pts} stroke={palette.winBolt} strokeWidth={6 * k} />
+                  <polyline points={pts} stroke={palette.winBoltCore} strokeWidth={2.2 * k} />
+                </g>
+              )
+            })}
+          </svg>
         </span>
       ))}
 

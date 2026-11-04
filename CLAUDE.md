@@ -133,7 +133,9 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   opened, not again on Retry; the scene's blinking-goal intro is skipped there (Board `goalIntro`).
   Texts: `intro.*` in the locales.
 - **Win animation** -- `components/WinCelebration.jsx` replaces the former win dialog: the board
-  shakes irregularly, bright purple arrows shoot across the screen, yellow stars of different sizes
+  shakes irregularly for the whole animation; bright purple lightning bolts (jagged, branched, with
+  a faint screen flash) flash across the screen at the same time -- a burst at the start, then only
+  2-3 sporadic ones until the end; yellow stars of different sizes
   pop up over the board, get brighter, turn white and evaporate (rising white puffs); meanwhile the
   result shows over the board (title, won stars, "New best!", training messages, moves, "Best: X").
   Then only the board is left as it is: the scene takes no more taps after a win, and the player
