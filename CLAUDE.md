@@ -109,16 +109,15 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   goal / rules line under the board; in training the notebook peek starts right at the board's
   lower edge and reaches the screen bottom: the board box takes the board's aspect ratio, the free
   space goes mostly into the notebook (grow 4, 5.5-13rem) and the rest above the board; the
-  title label is text-2xl and is the notes' drop target.
+  title label (1.95rem, nearly the cover's width) is the notes' drop target.
 - **Training note animation** -- `components/NoteFlight.jsx`: a new rule observation is circled on
   the board and flies into a note card, which drops into the notebook. The card sits ON the board
   but never over the tapped cell's neighbourhood: in the free space above it, or below when it does
   not fit above (`engine/training.js` `noteCardPlace`, tested). While a note animation runs the
   board takes no taps (GameScreen: a transparent layer over the board), so the next move waits until
-  the note has landed. Training puzzles
-  1..`PHASED_LESSONS` (3) use the phased version (first the coloured neighbours are circled and fly
-  to the left side of the rule, then the changed cell is circled and flies to the right side); later
-  training puzzles move everything at once.
+  the note has landed. Every training puzzle uses the phased version (first the coloured
+  neighbours are circled and fly to the left side of the rule, then the changed cell is circled and
+  flies to the right side).
 - **Mobile first** -- portrait phones are the main target; boards up to 9 rows x 6 cols must fit.
 
 ## Branching Strategy (as in Maze Inc.)

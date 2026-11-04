@@ -21,6 +21,8 @@ import { NOTE_MAX_REPEAT as MAX_REPEAT } from '../engine/training.js'
 const HANDWRITING = '"Segoe Print", "Bradley Hand", "Chalkboard SE", "Comic Sans MS", cursive'
 const SLIDE_MS = 300   // the open page sliding up / down
 const RINGS = 11       // spiral rings along the top edge
+const LABEL_FONT = '1.95rem'  // the closed notebook's title label (scaled down only if too wide)
+const LABEL_SHARE = 0.92      // ... to at most this share of the cover's width
 
 /** One cell state as this game's look draws it: its emoji, or a small colour square. */
 export function CellToken({ state, look: looks, className = '' }) {
@@ -111,19 +113,40 @@ function Spiral() {
  *  is "below the screen". The ref is the button (the note animation drops new notes onto it). */
 export const NotebookPeek = forwardRef(function NotebookPeek({ onOpen, bump = 0 }, ref) {
   const { t } = useTranslation()
+  const title = t('training.notes')
+  const labelRef = useRef(null)
+  const [fit, setFit] = useState(1)   // label font scale (<= 1), so a long title still fits the cover
+  const fitRef = useRef(1)
+  // The label is drawn at LABEL_FONT; a title wider than LABEL_SHARE of the cover (long
+  // translations, narrow phones) is scaled down to fit. Measured again on every resize.
+  useLayoutEffect(() => {
+    const label = labelRef.current
+    if (!label) return undefined
+    const measure = () => {
+      const cover = label.parentElement.getBoundingClientRect().width
+      const next = Math.min(1, (fitRef.current * cover * LABEL_SHARE) / label.getBoundingClientRect().width)
+      if (Math.abs(next - fitRef.current) > 0.005) { fitRef.current = next; setFit(next) }
+    }
+    measure()   // runs again after each change of fit, until the width settles
+    document.fonts?.ready.then(measure)
+    window.addEventListener('resize', measure)
+    return () => window.removeEventListener('resize', measure)
+  }, [title, fit])
   return (
     // grows 4x faster than the space above the board (GameScreen), so it takes most of the free
     // space; -mb-3: the cover runs into the screen's bottom padding (safe-pad), so it touches the edge
     <div className="mx-auto w-full max-w-md -mb-3 grow-[4] basis-0 min-h-[5.5rem] max-h-[13rem] overflow-hidden flex justify-center pt-3">
-      <button ref={ref} onClick={onOpen} aria-label={t('training.notes')} title={t('training.notes')}
+      <button ref={ref} onClick={onOpen} aria-label={title} title={title}
               className="w-80 max-w-[85%] h-[14rem] active:translate-y-0.5 transition-transform">
         <span key={bump} className={`relative block w-full h-full rounded-t-xl shadow-2xl ${bump ? 'book-bump' : ''}`}
               style={{ background: palette.bookCover }}>
           <Spiral />
-          {/* the label with the title */}
-          <span className="absolute left-1/2 top-5 -translate-x-1/2 whitespace-nowrap rounded-md px-4 py-1 text-2xl"
-                style={{ background: palette.notePaper, color: palette.noteInk, fontFamily: HANDWRITING }}>
-            {t('training.notes')}
+          {/* the label with the title, nearly as wide as the cover */}
+          <span ref={labelRef}
+                className="absolute left-1/2 top-5 -translate-x-1/2 whitespace-nowrap rounded-md px-[0.6em] py-[0.15em] leading-tight"
+                style={{ background: palette.notePaper, color: palette.noteInk, fontFamily: HANDWRITING,
+                         fontSize: `calc(${LABEL_FONT} * ${fit})` }}>
+            {title}
           </span>
         </span>
       </button>

@@ -5,7 +5,7 @@ import { boardCanvasSize } from '../game/GameScene.js'
 import WinDialog from './WinDialog.jsx'
 import RulesDialog from './RulesDialog.jsx'
 import NotebookOpen, { NotebookPeek } from './TrainingNotes.jsx'
-import NoteFlight, { PHASED_LESSONS } from './NoteFlight.jsx'
+import NoteFlight from './NoteFlight.jsx'
 import { markSolved } from '../engine/catalog.js'
 import { progressTotals } from '../engine/progress.js'
 import { minMovesOf, starsForWin } from '../engine/stars.js'
@@ -204,7 +204,6 @@ export default function GameScreen({ instance, place, training = null, pick, onP
         {training && flights.length > 0 && <div className="absolute inset-0 z-10" aria-hidden="true" />}
         {training && flights.length > 0 && (
           <NoteFlight key={flights[0].id} job={flights[0]} instance={instance} look={look}
-                      phased={Number.isInteger(training.day) && training.day <= PHASED_LESSONS}
                       boardRef={boardBoxRef} rollRef={rollRef} onLanded={landed} />
         )}
       </div>
