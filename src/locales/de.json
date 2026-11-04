@@ -50,7 +50,8 @@
       "4": "Tag Vier",
       "5": "Tag Fünf"
     },
-    "dayN": "Tag {{n}}"
+    "dayN": "Tag {{n}}",
+    "journey": "Der junge Zauberer zieht los!"
   },
   "progress": {
     "title": "Gesammelte Sterne",

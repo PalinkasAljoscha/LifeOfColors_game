@@ -33,10 +33,12 @@ src/
   components/             # HomeScreen (CastleMap: scrollable SVG map of castles), LevelScreen (one castle:
                           # progress bar to the next castle + 10-column tile grid in seq order; the
                           # training castle instead: centred title under the Home button, no hint
-                          # line, and a vertical path of bars in the puzzles' colours -- a big title
+                          # or puzzle-count line, and a vertical path of bars in the puzzles' colours -- a big title
                           # ("Introduction", then "Day One".."Day Five", levelScreen.days) over the
                           # puzzle's name -- joined by down arrows; won ones with a small medal, the
-                          # next one framed and glowing with "Start", later ones faded),
+                          # next one framed and glowing with "Start", later ones faded; at the end one
+                          # more arrow and "The young sorcerer sets out!" (levelScreen.journey), grey
+                          # at first and more golden with each won step, glowing gold when all are won),
                           # GameScreen (Retry/Back -> back to the level grid; shows the puzzle name), Board, WinCelebration,
                           # ConsentBanner (opt-in for saved progress; the home footer's "opt in/out" link reopens it)
                           # HistoryDialog (home header, circled-arrow button left of "?": the last 20
