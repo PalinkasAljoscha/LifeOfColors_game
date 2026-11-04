@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import Board from './Board.jsx'
+import { boardCanvasSize } from '../game/GameScene.js'
 import WinDialog from './WinDialog.jsx'
 import RulesDialog from './RulesDialog.jsx'
 import NotebookOpen, { NotebookPeek } from './TrainingNotes.jsx'
@@ -43,6 +44,7 @@ export default function GameScreen({ instance, place, training = null, pick, onP
   const pendingRef = useRef([])                       // observations noted or on their way (no repeats)
   const flightId = useRef(0)
   const boardBoxRef = useRef(null)
+  const boardSize = boardCanvasSize(instance)
   const rollRef = useRef(null)
 
   function openNotes() {
@@ -190,7 +192,12 @@ export default function GameScreen({ instance, place, training = null, pick, onP
         <span className="shrink-0 text-game-score">{t('game.moves', { count: moves })}</span>
       </div>
 
-      <div ref={boardBoxRef} className="flex-1 min-h-0 mt-2 relative">
+      {/* training: the free space goes above the board and into the notebook below it (up to its
+          maximum height), so the notebook starts right at the board's lower edge and reaches the
+          screen bottom (the board box has the board's aspect ratio) */}
+      {training && <div className="flex-1 min-h-0" aria-hidden="true" />}
+      <div ref={boardBoxRef} className={training ? 'min-h-0 mt-2 relative w-full shrink' : 'flex-1 min-h-0 mt-2 relative'}
+           style={training ? { aspectRatio: `${boardSize.width} / ${boardSize.height}`, maxWidth: '100%' } : undefined}>
         <Board key={round} instance={instance} look={look} training={training !== null} onClick={onClick} onWon={onWon} />
         {/* training: while a note animation runs the board takes no taps -- this layer over it
             catches them, so the next move waits until the note has landed in the notebook */}

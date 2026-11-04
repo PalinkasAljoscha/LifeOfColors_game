@@ -106,7 +106,10 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   `start_cell_required: false` start all-uncolored (`src/game/startBoard.js`); same id either way.
 - **Game screen** -- top row: Retry, Back, and an info button (circled "i") that opens the
   rules pop-up (RulesDialog, "How it works"). Below: puzzle name and the moves counter only. No
-  goal / rules line under the board; in training the notebook peek sits right below the board.
+  goal / rules line under the board; in training the notebook peek starts right at the board's
+  lower edge and reaches the screen bottom: the board box takes the board's aspect ratio, the free
+  space goes mostly into the notebook (grow 4, 5.5-13rem) and the rest above the board; the
+  title label is text-2xl and is the notes' drop target.
 - **Training note animation** -- `components/NoteFlight.jsx`: a new rule observation is circled on
   the board and flies into a note card, which drops into the notebook. The card sits ON the board
   but never over the tapped cell's neighbourhood: in the free space above it, or below when it does
