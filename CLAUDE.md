@@ -134,14 +134,13 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   Texts: `intro.*` in the locales.
 - **Win animation** -- `components/WinCelebration.jsx` replaces the former win dialog. How much
   plays depends on the win (`engine/stars.js` `winMode`, tested):
-  - `full` (5-star win outside the training castle): the board shakes irregularly for the whole
-    animation; bright purple lightning bolts (jagged, branched, with a faint screen flash) flash
-    across the screen at the same time -- a short burst of 3 at the start (0.6 s, then the stars
-    come), then 2 sporadic ones until the end; yellow stars of different sizes pop up over the
-    board, get brighter, turn white and evaporate (rising white puffs); meanwhile the result box;
-  - `stars` (any other win outside the training castle, also without a known best): no shake, no
-    lightning -- the stars from the start, and the result box;
+  - `stars` (any win outside the training castle, also without a known best): yellow stars of
+    different sizes pop up over the board, get brighter, turn white and evaporate (rising white
+    puffs); meanwhile the result box;
+  - `full` (5-star win outside the training castle): as `stars`, plus 5 bigger coloured stars
+    (`winSparkle1-5`) that twinkle with glints before they fade;
   - `text` (training castle, or reduced motion): only the result box.
+  No shake, no lightning (both tried and dropped).
   The result box (translucent, over the board) has no title: the won stars, "New best!", the
   training-complete message, moves and "Best: X". Afterwards only the board is left as it is: the
   scene takes no more taps after a win, and the player goes on with Retry or Back. Random within
