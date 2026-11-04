@@ -3,7 +3,7 @@ import { playState } from '../engine/catalog.js'
 import { bestStars } from '../engine/progress.js'
 import { useProgress } from '../hooks/useProgress.js'
 import { ConsentBannerSpacer } from './ConsentBanner.jsx'
-import { palette } from '../theme.js'
+import { inkOn, palette } from '../theme.js'
 import { playableUpTo } from '../engine/castles.js'
 
 // One level: every puzzle of the level as a tile in its name's
@@ -15,9 +15,10 @@ import { playableUpTo } from '../engine/castles.js'
 // Used for one castle (engine/castles.js): `state` = { stars, required, done }, shown as a bar
 // towards opening `nextTitle` (the castle above; null for the last one).
 // Training castle (state.training): the puzzles are a path to follow in order (TrainingPath):
-// one plain bar per puzzle, one below the other, joined by down arrows -- just its step name
-// "Intro", "Lesson 1" ..., "Exam" (the last). Won ones carry a small medal, the next one glows
-// gently and has a "Start" button, the ones after it are greyed out (not playable yet). No progress
+// one bar per puzzle in the puzzle's colour (text dark or white, theme.js inkOn), one below the
+// other, joined by down arrows -- the puzzle's name; the first one also says "Introduction" in big.
+// Won ones carry a small medal, the next one is framed in white, glows gently and has a "Start"
+// button, the ones after it are faded (not playable yet). No progress
 // bar: every puzzle has to be won, the path shows how far the player is.
 
 // Down arrow between two training bars.
@@ -50,13 +51,6 @@ export function TileMark({ state, best }) {
   return null
 }
 
-/** The label of training puzzle k (0-based) of n: Intro, Lesson 1 .. n-2, Exam. */
-function trainingLabel(t, k, n) {
-  if (k === 0) return t('levelScreen.intro')
-  if (k === n - 1) return t('levelScreen.exam')
-  return t('levelScreen.lesson', { n: k })
-}
-
 // Training castle: the puzzles in their fixed order, one card each, with arrows in between.
 function TrainingPath({ pool, states, onPick }) {
   const { t } = useTranslation()
@@ -67,7 +61,8 @@ function TrainingPath({ pool, states, onPick }) {
         const solved = states[k] === 'solved'
         const locked = k > upTo
         const next = k === upTo && !solved
-        const label = trainingLabel(t, k, pool.length)
+        const intro = k === 0
+        const ink = inkOn(inst.name_color)
         return (
           <li key={inst.id} className="flex flex-col items-center">
             {k > 0 && (
@@ -78,19 +73,25 @@ function TrainingPath({ pool, states, onPick }) {
             <button
               onClick={() => !locked && onPick(inst)}
               disabled={locked}
-              className={`w-full h-14 flex items-center gap-3 rounded-2xl pl-5 pr-3 text-left transition-transform
-                          ${locked ? 'opacity-35 cursor-default' : 'active:scale-95'} ${next ? 'training-next' : ''}`}
+              className={`w-full ${intro ? 'min-h-[4.5rem] py-2' : 'h-14'} flex items-center gap-3 rounded-2xl pl-5 pr-3
+                          text-left transition-transform ring-1 ring-inset ring-white/20
+                          ${locked ? 'opacity-30 saturate-50 cursor-default' : 'active:scale-95'} ${next ? 'training-next' : ''}`}
               style={{
-                background: palette.panel, '--pulse': palette.silverGray,
-                border: `2px solid ${next ? palette.silverGray : palette.panelBorder}`,
+                background: inst.name_color, color: ink, '--pulse': palette.white,
+                outline: next ? `3px solid ${palette.white}` : 'none', outlineOffset: '2px',
               }}
-              aria-label={`${label}${solved ? ' ✓' : ''}${locked ? ` (${t('castles.locked')})` : ''}`}
+              aria-label={`${intro ? `${t('levelScreen.intro')}: ` : ''}${inst.name}${solved ? ' ✓' : ''}${locked ? ` (${t('castles.locked')})` : ''}`}
             >
-              <span className="min-w-0 flex-1 text-lg font-black leading-tight">{label}</span>
+              <span className="min-w-0 flex-1 leading-tight">
+                {intro && <span className="block text-2xl font-black">{t('levelScreen.intro')}</span>}
+                <span className={`block truncate ${intro ? 'text-sm font-bold opacity-80' : 'text-lg font-black'}`}>
+                  {inst.name}
+                </span>
+              </span>
               {/* won: a small medal */}
               {solved && <span className="shrink-0 text-2xl leading-none" aria-hidden="true">🏅</span>}
               {next && (
-                <span className="shrink-0 rounded-xl px-3 py-1.5 text-sm font-black bg-game-btn" aria-hidden="true">
+                <span className="shrink-0 rounded-xl px-3 py-1.5 text-sm font-black bg-game-btn text-white" aria-hidden="true">
                   {t('levelScreen.start')}
                 </span>
               )}

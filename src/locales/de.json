@@ -42,8 +42,6 @@
     "back": "Start",
     "choose": "Wähle dein Puzzle",
     "intro": "Einführung",
-    "lesson": "Lektion {{n}}",
-    "exam": "Prüfung",
     "start": "Los",
     "trainingHint": "Gewinne jeden Schritt, um den nächsten freizuschalten"
   },
