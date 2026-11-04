@@ -81,10 +81,10 @@ export function Transformation({ obs, look }) {
   )
 }
 
-/** One note: the transformation in a thin frame, 1.6x the normal text (as in the notebook). */
+/** One note: the transformation in a 2px frame, 1.6x the normal text (as in the notebook). */
 export const NoteCard = forwardRef(function NoteCard({ obs, look, className = '', style = null }, ref) {
   return (
-    <span ref={ref} className={`flex items-center gap-1 rounded-md border px-1.5 py-1 text-[1.6rem] leading-none
+    <span ref={ref} className={`flex items-center gap-1 rounded-md border-2 px-1.5 py-1 text-[1.6rem] leading-none
                                 font-sans font-bold ${className}`}
           style={{ borderColor: palette.noteFrame, color: palette.noteInk, ...style }}>
       <Transformation obs={obs} look={look} />
@@ -199,7 +199,10 @@ export default function NotebookOpen({ open, notes, look, onClose, onShown = () 
            style={{ background: palette.notePaper, color: palette.noteInk, borderTop: `10px solid ${palette.bookCover}` }}>
         <Spiral />
         {/* the page scrolls inside, so the spiral rings above it stay visible */}
-        <div className="pt-5 pb-6 px-4 max-h-[75dvh] overflow-y-auto">
+        {/* bottom padding: about half a note's height stays free below the last row, above the
+            phone's home-indicator area (safe-area inset; the app uses viewport-fit=cover) */}
+        <div className="pt-5 px-4 max-h-[75dvh] overflow-y-auto"
+             style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }}>
           <h2 className="text-3xl mb-3" style={{ fontFamily: HANDWRITING }}>{t('training.notes')}</h2>
           {/* no notes yet: just the empty page */}
           {notes.length > 0 && (
