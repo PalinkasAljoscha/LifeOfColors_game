@@ -84,8 +84,7 @@
   },
   "training": {
     "notes": "Regel-Beobachtungen",
-    "nothing": "keine farbigen Nachbarn",
-    "empty": "Noch nichts notiert. Mach einen Zug!"
+    "nothing": "keine farbigen Nachbarn"
   },
   "castles": {
     "name": "Burg {{n}}",
@@ -107,6 +106,7 @@
     "goal": "Um zu gewinnen, bring ein {{goal}} auf das gold umrandete Feld.",
     "next": "Weiter",
     "start": "Los geht's!",
-    "notes": "Hier stehen die Regeln, die du schon beobachtet hast. Schau hinein, um einen Weg zu finden, auf dem {{goal}} in den goldenen Rahmen kommt."
+    "notes": "Hier stehen die Regeln, die du schon beobachtet hast.",
+    "notesHint": "Schau hinein, um einen Weg zu finden, auf dem {{goal}} in den goldenen Rahmen kommt."
   }
 }

@@ -201,13 +201,12 @@ export default function NotebookOpen({ open, notes, look, onClose, onShown = () 
         {/* the page scrolls inside, so the spiral rings above it stay visible */}
         <div className="pt-5 pb-6 px-4 max-h-[75dvh] overflow-y-auto">
           <h2 className="text-3xl mb-3" style={{ fontFamily: HANDWRITING }}>{t('training.notes')}</h2>
-          {notes.length === 0
-            ? <p className="text-lg italic opacity-70" style={{ fontFamily: HANDWRITING }}>{t('training.empty')}</p>
-            : (
-              <ul className="flex flex-wrap items-start gap-1.5">
-                {notes.map((obs) => <li key={obs.key}><NoteCard obs={obs} look={look} /></li>)}
-              </ul>
-            )}
+          {/* no notes yet: just the empty page */}
+          {notes.length > 0 && (
+            <ul className="flex flex-wrap items-start gap-1.5">
+              {notes.map((obs) => <li key={obs.key}><NoteCard obs={obs} look={look} /></li>)}
+            </ul>
+          )}
         </div>
       </div>
     </div>,

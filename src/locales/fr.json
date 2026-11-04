@@ -84,8 +84,7 @@
   },
   "training": {
     "notes": "Observations des règles",
-    "nothing": "aucun voisin coloré",
-    "empty": "Rien de noté pour l’instant. Joue un coup !"
+    "nothing": "aucun voisin coloré"
   },
   "castles": {
     "name": "Château {{n}}",
@@ -107,6 +106,7 @@
     "goal": "Pour gagner, amène un {{goal}} sur la case au cadre doré.",
     "next": "Suivant",
     "start": "C'est parti !",
-    "notes": "Les règles déjà observées sont notées ici. Consulte-les pour trouver un chemin qui amène {{goal}} dans le cadre doré."
+    "notes": "Les règles déjà observées sont notées ici.",
+    "notesHint": "Consulte-les pour trouver un chemin qui amène {{goal}} dans le cadre doré."
   }
 }
