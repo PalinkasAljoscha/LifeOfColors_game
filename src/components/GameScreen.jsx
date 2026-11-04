@@ -231,7 +231,7 @@ export default function GameScreen({ instance, place, training = null, pick, onP
 
       {showRules && <RulesDialog onClose={() => setShowRules(false)} />}
       {won && (
-        <WinCelebration key={round} boardRef={boardBoxRef} look={look}
+        <WinCelebration key={round} boardRef={boardBoxRef}
                         training={training && { day: training.day, next: training.next, complete: result?.trainingComplete === true }}
                         moves={moves} best={minMoves} stars={result?.stars ?? null} newBest={result?.newBest ?? false}
                         onDone={() => setWon(false)} />

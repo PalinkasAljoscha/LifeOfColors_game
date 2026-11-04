@@ -1,9 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
-import { themedKey } from '../themes.js'
-import { ThemedText } from './Emoji.jsx'
-import { MAX_STARS } from '../engine/stars.js'
+import { MAX_STARS, winMode } from '../engine/stars.js'
 import { palette } from '../theme.js'
 
 // The win animation (instead of a win dialog). Over the board, nothing to tap:
@@ -12,8 +10,13 @@ import { palette } from '../theme.js'
 //               start (0 .. BURST_MS), then only a few sporadic ones until the end
 //   3. stars    yellow stars of different sizes pop up over the board      STARS_AT ..
 //   4. vapour   the stars get brighter and brighter, turn white and evaporate (white puffs rise);
-//               meanwhile the result text shows: title, moves, best, the won stars (1-5),
-//               "New best!", and the training messages                    TEXT_AT .. TEXT_AT + TEXT_MS
+//               meanwhile the result text shows: the won stars (1-5), "New best!", the
+//               training-complete message, moves and best (no title)      TEXT_AT .. TEXT_AT + TEXT_MS
+// How much of it plays depends on the win (`mode`, engine/stars.js winMode):
+//   'full'   all of the above -- a 5-star win outside the training castle
+//   'stars'  no shake and no lightning: the stars (from the start) and the text -- any other win
+//            outside the training castle
+//   'text'   only the text box -- training puzzles (and reduced motion)
 // Then onDone(): the board stays as it is (the scene takes no more taps after a win); the player
 // goes on with Retry or Back. Everything is random within limits, drawn once per win.
 // Reduced motion: no shake, bolts or flying stars -- the text alone, then onDone().
@@ -76,12 +79,18 @@ function StarShape({ size }) {
   )
 }
 
-/** look: the game's look (themed title); training: null or { day, complete, next };
- *  moves, best (null = unknown), stars (1-5 or null), newBest. */
-export default function WinCelebration({ boardRef, look, training = null, moves, best = null, stars = null,
+const TEXT_ONLY_MS = 2600   // 'text': how long the text box stays
+
+/** training: null or { day, complete, next }; moves, best (null = unknown), stars (1-5 or null),
+ *  newBest. */
+export default function WinCelebration({ boardRef, training = null, moves, best = null, stars = null,
                                          newBest = false, onDone }) {
   const { t } = useTranslation()
-  const [still] = useState(reducedMotion)
+  const [mode] = useState(() => winMode({ training, stars, reduced: reducedMotion() }))
+  const still = mode === 'text'
+  // 'stars' skips the lightning-only start: everything after it comes `shift` ms earlier
+  const shift = mode === 'stars' ? STARS_AT : 0
+  const doneAt = still ? TEXT_ONLY_MS : DONE_AT - shift
   const [board, setBoard] = useState(null)   // the board's rect in page px
   const doneRef = useRef(onDone)
   doneRef.current = onDone
@@ -100,7 +109,7 @@ export default function WinCelebration({ boardRef, look, training = null, moves,
   const [starSpecs] = useState(() => Array.from({ length: STARS }, (_, i) => ({
     x: rnd(0.05, 0.95), y: rnd(0.05, 0.95),       // share of the board's width / height
     size: Math.round(rnd(18, 58)),
-    delay: STARS_AT + i * rnd(25, 55),
+    delay: STARS_AT - (mode === 'stars' ? STARS_AT : 0) + i * rnd(25, 55),
     spin: rnd(-25, 25),
   })))
 
@@ -115,7 +124,7 @@ export default function WinCelebration({ boardRef, look, training = null, moves,
   //    burst, then a little calmer, still at the very end
   useEffect(() => {
     const el = boardRef.current
-    if (still || !el) return undefined
+    if (mode !== 'full' || !el) return undefined
     const n = Math.round(DONE_AT / 70)
     const frames = Array.from({ length: n + 1 }, (_, i) => {
       const at = (i / n) * DONE_AT
@@ -127,23 +136,20 @@ export default function WinCelebration({ boardRef, look, training = null, moves,
     })
     const anim = el.animate(frames, { duration: DONE_AT, easing: 'linear' })
     return () => anim.cancel()
-  }, [boardRef, still])
+  }, [boardRef, mode])
 
   // the end: back to the plain board
   useEffect(() => {
-    const id = setTimeout(() => doneRef.current(), still ? 2600 : DONE_AT)
+    const id = setTimeout(() => doneRef.current(), doneAt)
     return () => clearTimeout(id)
-  }, [still])
+  }, [doneAt])
 
   const complete = training?.complete === true
-  const title = complete ? t('win.trainingComplete')
-    : training?.day ? t('win.trainingDay', { n: training.day })
-      : <ThemedText text={t(themedKey('win.title'))} look={look} />
 
   return createPortal(
     <div className="fixed inset-0 z-40 pointer-events-none overflow-hidden" role="status" aria-live="polite">
       {/* 2. lightning bolts across the whole screen (each with a faint flash of the screen) */}
-      {!still && bolts.map((bolt, i) => (
+      {mode === 'full' && bolts.map((bolt, i) => (
         <span key={`b${i}`}>
           <span className="absolute inset-0 win-flash" style={{ background: palette.winBoltGlow, animationDelay: `${bolt.delay}ms` }} />
           <svg className="absolute inset-0 win-bolt" width={screen.w} height={screen.h} aria-hidden="true"
@@ -192,16 +198,15 @@ export default function WinCelebration({ boardRef, look, training = null, moves,
         <div className="absolute flex items-center justify-center px-3"
              style={{ left: board.left, top: board.top, width: board.width, height: board.height }}>
           <div className="win-text rounded-3xl px-5 py-4 text-center"
-               style={{ animationDelay: `${still ? 0 : TEXT_AT}ms`, animationDuration: `${still ? 2500 : TEXT_MS}ms`,
+               style={{ animationDelay: `${still ? 0 : TEXT_AT - shift}ms`, animationDuration: `${still ? TEXT_ONLY_MS - 100 : TEXT_MS}ms`,
                         background: palette.winTextBack }}>
-            <p className="text-2xl font-black text-game-score leading-tight">{title}</p>
             {complete && (
-              <p className="mt-1.5 font-sans font-bold text-white">
+              <p className="mt-1.5 first:mt-0 font-sans font-bold text-white">
                 {t('win.trainingReady')}{training.next && <> {t('win.trainingNext', { castle: training.next })}</>}
               </p>
             )}
             {stars !== null && (
-              <p className="mt-2 flex justify-center gap-1 text-3xl leading-none" role="img"
+              <p className="mt-2 first:mt-0 flex justify-center gap-1 text-3xl leading-none" role="img"
                  aria-label={t('win.stars', { count: stars })}>
                 {Array.from({ length: MAX_STARS }, (_, i) => (
                   <span key={i} aria-hidden="true" className={i < stars ? 'text-game-star' : 'text-game-star-empty'}>★</span>
@@ -211,7 +216,7 @@ export default function WinCelebration({ boardRef, look, training = null, moves,
             {stars !== null && newBest && (
               <p className="mt-1.5 text-sm font-black uppercase tracking-widest text-game-score">{t('win.newBest')}</p>
             )}
-            <p className="mt-2 font-sans font-bold text-xl text-white">{t('win.moves', { count: moves })}</p>
+            <p className="mt-2 first:mt-0 font-sans font-bold text-xl text-white">{t('win.moves', { count: moves })}</p>
             {best !== null && <p className="font-sans font-semibold text-game-silver">{t('game.best', { count: best })}</p>}
           </div>
         </div>

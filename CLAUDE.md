@@ -132,15 +132,20 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   the board goes on; the board takes no moves until the last one. Shown each time the puzzle is
   opened, not again on Retry; the scene's blinking-goal intro is skipped there (Board `goalIntro`).
   Texts: `intro.*` in the locales.
-- **Win animation** -- `components/WinCelebration.jsx` replaces the former win dialog: the board
-  shakes irregularly for the whole animation; bright purple lightning bolts (jagged, branched, with
-  a faint screen flash) flash across the screen at the same time -- a short burst of 3 at the start
-  (0.6 s, then the stars come), then 2 sporadic ones until the end; yellow stars of different sizes
-  pop up over the board, get brighter, turn white and evaporate (rising white puffs); meanwhile the
-  result shows over the board (title, won stars, "New best!", training messages, moves, "Best: X").
-  Then only the board is left as it is: the scene takes no more taps after a win, and the player
-  goes on with Retry or Back. Random within limits, drawn once per win; reduced motion = the text
-  alone. Colours `win*` in theme.js, keyframes `win-*` in index.css.
+- **Win animation** -- `components/WinCelebration.jsx` replaces the former win dialog. How much
+  plays depends on the win (`engine/stars.js` `winMode`, tested):
+  - `full` (5-star win outside the training castle): the board shakes irregularly for the whole
+    animation; bright purple lightning bolts (jagged, branched, with a faint screen flash) flash
+    across the screen at the same time -- a short burst of 3 at the start (0.6 s, then the stars
+    come), then 2 sporadic ones until the end; yellow stars of different sizes pop up over the
+    board, get brighter, turn white and evaporate (rising white puffs); meanwhile the result box;
+  - `stars` (any other win outside the training castle, also without a known best): no shake, no
+    lightning -- the stars from the start, and the result box;
+  - `text` (training castle, or reduced motion): only the result box.
+  The result box (translucent, over the board) has no title: the won stars, "New best!", the
+  training-complete message, moves and "Best: X". Afterwards only the board is left as it is: the
+  scene takes no more taps after a win, and the player goes on with Retry or Back. Random within
+  limits, drawn once per win. Colours `win*` in theme.js, keyframes `win-*` in index.css.
 - **Mobile first** -- portrait phones are the main target; boards up to 9 rows x 6 cols must fit.
 
 ## Branching Strategy (as in Maze Inc.)
