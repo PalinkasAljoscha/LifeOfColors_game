@@ -32,10 +32,11 @@ src/
   hooks/usePhaserGame.js  # Phaser mount/unmount (from Maze Inc., takes width/height/registry/events)
   components/             # HomeScreen (CastleMap: scrollable SVG map of castles), LevelScreen (one castle:
                           # progress bar to the next castle + 10-column tile grid in seq order; the
-                          # training castle instead: a vertical path of bars in the puzzles' colours
-                          # with their names (the first also "Introduction" in big), joined by down
-                          # arrows -- won ones with a small medal, the next one framed and glowing
-                          # with "Start", later ones faded),
+                          # training castle instead: centred title under the Home button, no hint
+                          # line, and a vertical path of bars in the puzzles' colours -- a big title
+                          # ("Introduction", then "Day One".."Day Five", levelScreen.days) over the
+                          # puzzle's name -- joined by down arrows; won ones with a small medal, the
+                          # next one framed and glowing with "Start", later ones faded),
                           # GameScreen (Retry/Back -> back to the level grid; shows the puzzle name), Board, WinCelebration,
                           # ConsentBanner (opt-in for saved progress; the home footer's "opt in/out" link reopens it)
                           # HistoryDialog (home header, circled-arrow button left of "?": the last 20

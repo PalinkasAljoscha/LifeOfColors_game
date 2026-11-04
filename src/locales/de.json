@@ -43,7 +43,14 @@
     "choose": "Wähle dein Puzzle",
     "intro": "Einführung",
     "start": "Los",
-    "trainingHint": "Gewinne jeden Schritt, um den nächsten freizuschalten"
+    "days": {
+      "1": "Tag Eins",
+      "2": "Tag Zwei",
+      "3": "Tag Drei",
+      "4": "Tag Vier",
+      "5": "Tag Fünf"
+    },
+    "dayN": "Tag {{n}}"
   },
   "progress": {
     "title": "Gesammelte Sterne",

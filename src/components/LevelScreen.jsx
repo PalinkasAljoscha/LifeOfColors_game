@@ -16,7 +16,8 @@ import { playableUpTo } from '../engine/castles.js'
 // towards opening `nextTitle` (the castle above; null for the last one).
 // Training castle (state.training): the puzzles are a path to follow in order (TrainingPath):
 // one bar per puzzle in the puzzle's colour (text dark or white, theme.js inkOn), one below the
-// other, joined by down arrows -- the puzzle's name; the first one also says "Introduction" in big.
+// other, joined by down arrows -- a big title ("Introduction", then "Day One" .. "Day Five") over
+// the puzzle's name.
 // Won ones carry a small medal, the next one is framed in white, glows gently and has a "Start"
 // button, the ones after it are faded (not playable yet). No progress
 // bar: every puzzle has to be won, the path shows how far the player is.
@@ -61,8 +62,10 @@ function TrainingPath({ pool, states, onPick }) {
         const solved = states[k] === 'solved'
         const locked = k > upTo
         const next = k === upTo && !solved
-        const intro = k === 0
         const ink = inkOn(inst.name_color)
+        // the step's title: "Introduction", then "Day One", "Day Two", ... (words; past five "Day 6")
+        const heading = k === 0 ? t('levelScreen.intro')
+          : t(`levelScreen.days.${k}`, { defaultValue: t('levelScreen.dayN', { n: k }) })
         return (
           <li key={inst.id} className="flex flex-col items-center">
             {k > 0 && (
@@ -73,18 +76,18 @@ function TrainingPath({ pool, states, onPick }) {
             <button
               onClick={() => !locked && onPick(inst)}
               disabled={locked}
-              className={`w-full ${intro ? 'min-h-[4.5rem] py-2' : 'h-14'} flex items-center gap-3 rounded-2xl pl-5 pr-3
+              className={`w-full min-h-[4.25rem] py-2 flex items-center gap-3 rounded-2xl pl-5 pr-3
                           text-left transition-transform ring-1 ring-inset ring-white/20
                           ${locked ? 'opacity-30 saturate-50 cursor-default' : 'active:scale-95'} ${next ? 'training-next' : ''}`}
               style={{
                 background: inst.name_color, color: ink, '--pulse': palette.white,
                 outline: next ? `3px solid ${palette.white}` : 'none', outlineOffset: '2px',
               }}
-              aria-label={`${intro ? `${t('levelScreen.intro')}: ` : ''}${inst.name}${solved ? ' ✓' : ''}${locked ? ` (${t('castles.locked')})` : ''}`}
+              aria-label={`${heading}: ${inst.name}${solved ? ' ✓' : ''}${locked ? ` (${t('castles.locked')})` : ''}`}
             >
               <span className="min-w-0 flex-1 leading-tight">
-                {intro && <span className="block text-2xl font-black">{t('levelScreen.intro')}</span>}
-                <span className={`block truncate ${intro ? 'text-sm font-bold opacity-80' : 'text-lg font-black'}`}>
+                <span className="block text-2xl font-black">{heading}</span>
+                <span className="block truncate text-sm font-bold opacity-80">
                   {inst.name}
                 </span>
               </span>
@@ -114,10 +117,11 @@ export default function LevelScreen({ title, nextTitle, state, pool, onPick, onB
   return (
     <div className="h-[100dvh] w-full flex flex-col bg-game-bg safe-pad">
       <div className="mx-auto w-full max-w-md">
-        <div className="flex items-center gap-3">
-          <div className="min-w-0">
-            <h1 className="text-2xl font-black leading-tight">{title}</h1>
-            <p className="text-xs text-game-silver font-sans font-semibold">
+        {/* training: the Home button alone on top, the title centred below it */}
+        <div className={training ? 'flex flex-col' : 'flex items-center gap-3'}>
+          <div className={training ? 'order-2 mt-3 mb-6 text-center' : 'min-w-0'}>
+            <h1 className={`${training ? 'text-3xl' : 'text-2xl'} font-black leading-tight`}>{title}</h1>
+            <p className={`${training ? 'mt-1 text-sm' : 'text-xs'} text-game-silver font-sans font-semibold`}>
               {t('home.puzzleCount', { count: pool.length })}
             </p>
           </div>
@@ -148,9 +152,9 @@ export default function LevelScreen({ title, nextTitle, state, pool, onPick, onB
           </div>
         )}
 
-        <p className="mt-4 mb-2 text-sm text-game-silver font-sans font-semibold text-center">
-          {training ? t('levelScreen.trainingHint') : t('levelScreen.choose')}
-        </p>
+        {!training && (
+          <p className="mt-4 mb-2 text-sm text-game-silver font-sans font-semibold text-center">{t('levelScreen.choose')}</p>
+        )}
       </div>
 
       <div className="flex-1 min-h-0 overflow-y-auto">

@@ -43,7 +43,14 @@
     "choose": "Choisis ton puzzle",
     "intro": "Introduction",
     "start": "Jouer",
-    "trainingHint": "Gagne chaque étape pour débloquer la suivante"
+    "days": {
+      "1": "Jour un",
+      "2": "Jour deux",
+      "3": "Jour trois",
+      "4": "Jour quatre",
+      "5": "Jour cinq"
+    },
+    "dayN": "Jour {{n}}"
   },
   "progress": {
     "title": "Étoiles récoltées",
