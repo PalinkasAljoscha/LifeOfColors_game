@@ -9,6 +9,8 @@ export const palette = {
   gameBg:       '#1a1a2e',
   gameHeader:   '#16213e',
   panel:        '#22284a',
+  journeyDim:   '#4b5070',   // training path's last line ("The young sorcerer sets out!"): nothing won yet ...
+  journeyGold:  '#f5c518',   // ... all training puzzles won
   divider:      '#2c3e50',
 
   // ── Text / UI ──
@@ -126,4 +128,11 @@ export function inkOn(bg) {
   const lin = (c) => { const v = c / 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4 }
   const lum = 0.2126 * lin((n >> 16) & 255) + 0.7152 * lin((n >> 8) & 255) + 0.0722 * lin(n & 255)
   return lum > 0.3 ? palette.gameBg : palette.white
+}
+
+/** The colour t of the way from hex colour a (t = 0) to hex colour b (t = 1), as '#rrggbb'. */
+export function mixHex(a, b, t) {
+  const [x, y] = [toHex(a), toHex(b)]
+  const ch = (shift) => Math.round(((x >> shift) & 255) + (((y >> shift) & 255) - ((x >> shift) & 255)) * t)
+  return `#${[16, 8, 0].map((sh) => ch(sh).toString(16).padStart(2, '0')).join('')}`
 }

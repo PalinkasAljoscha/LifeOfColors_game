@@ -50,7 +50,8 @@
       "4": "Day Four",
       "5": "Day Five"
     },
-    "dayN": "Day {{n}}"
+    "dayN": "Day {{n}}",
+    "journey": "The young sorcerer sets out!"
   },
   "progress": {
     "title": "Stars collected",

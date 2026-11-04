@@ -3,7 +3,7 @@ import { playState } from '../engine/catalog.js'
 import { bestStars } from '../engine/progress.js'
 import { useProgress } from '../hooks/useProgress.js'
 import { ConsentBannerSpacer } from './ConsentBanner.jsx'
-import { inkOn, palette } from '../theme.js'
+import { inkOn, mixHex, palette } from '../theme.js'
 import { playableUpTo } from '../engine/castles.js'
 
 // One level: every puzzle of the level as a tile in its name's
@@ -102,6 +102,24 @@ function TrainingPath({ pool, states, onPick }) {
           </li>
         )
       })}
+      {/* the end of the path: the journey -- grey at first, a little brighter and more golden with
+          every step won, fully golden (with a glow) when all are won */}
+      {pool.length > 0 && (() => {
+        const f = pool.filter((_, k) => states[k] === 'solved').length / pool.length
+        const colour = mixHex(palette.journeyDim, palette.journeyGold, f)
+        return (
+          <li className="flex flex-col items-center" aria-label={t('levelScreen.journey')}>
+            <span className="my-1" style={{ opacity: 0.35 + 0.65 * f }}>
+              <DownArrow color={colour} />
+            </span>
+            <p className="mt-1 whitespace-nowrap font-black text-center leading-tight"
+               style={{ color: colour, opacity: 0.45 + 0.55 * f, fontSize: 'min(1.35rem, 5.4vw)',
+                        textShadow: f === 1 ? `0 0 14px ${palette.journeyGold}` : 'none' }}>
+              {t('levelScreen.journey')}
+            </p>
+          </li>
+        )
+      })()}
     </ol>
   )
 }
@@ -121,9 +139,9 @@ export default function LevelScreen({ title, nextTitle, state, pool, onPick, onB
         <div className={training ? 'flex flex-col' : 'flex items-center gap-3'}>
           <div className={training ? 'order-2 mt-3 mb-6 text-center' : 'min-w-0'}>
             <h1 className={`${training ? 'text-3xl' : 'text-2xl'} font-black leading-tight`}>{title}</h1>
-            <p className={`${training ? 'mt-1 text-sm' : 'text-xs'} text-game-silver font-sans font-semibold`}>
-              {t('home.puzzleCount', { count: pool.length })}
-            </p>
+            {!training && (
+              <p className="text-xs text-game-silver font-sans font-semibold">{t('home.puzzleCount', { count: pool.length })}</p>
+            )}
           </div>
           <button
             onClick={onBack}
