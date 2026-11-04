@@ -15,12 +15,12 @@ import { playableUpTo } from '../engine/castles.js'
 // Used for one castle (engine/castles.js): `state` = { stars, required, done }, shown as a bar
 // towards opening `nextTitle` (the castle above; null for the last one).
 // Training castle (state.training): the puzzles are a path to follow in order (TrainingPath):
-// one card per puzzle, one below the other, joined by down arrows -- "Intro", "Lesson 1" ...,
-// "Exam" (the last). Won ones show a check and their stars, the next one is highlighted with a
-// "Start" button, the ones after it are greyed out with a lock (not playable yet). No progress
+// one plain bar per puzzle, one below the other, joined by down arrows -- just its step name
+// "Intro", "Lesson 1" ..., "Exam" (the last). Won ones carry a small medal, the next one glows
+// gently and has a "Start" button, the ones after it are greyed out (not playable yet). No progress
 // bar: every puzzle has to be won, the path shows how far the player is.
 
-// Down arrow between two training cards (green once the card above is won).
+// Down arrow between two training bars.
 function DownArrow({ color }) {
   return (
     <svg viewBox="0 0 28 28" width="26" height="26" aria-hidden="true">
@@ -67,49 +67,28 @@ function TrainingPath({ pool, states, onPick }) {
         const solved = states[k] === 'solved'
         const locked = k > upTo
         const next = k === upTo && !solved
-        const exam = k === pool.length - 1 && pool.length > 1
-        const best = solved ? bestStars(inst.id) : null
         const label = trainingLabel(t, k, pool.length)
         return (
           <li key={inst.id} className="flex flex-col items-center">
             {k > 0 && (
               <span className={`my-1 ${locked ? 'opacity-30' : ''}`}>
-                <DownArrow color={states[k - 1] === 'solved' ? palette.correctGreen : palette.silverGray} />
+                <DownArrow color={palette.silverGray} />
               </span>
             )}
             <button
               onClick={() => !locked && onPick(inst)}
               disabled={locked}
-              className={`w-full flex items-center gap-3 rounded-2xl px-3 py-2.5 text-left transition-transform
-                          ${locked ? 'opacity-35 grayscale cursor-default' : 'active:scale-95'} ${next ? 'training-next' : ''}`}
+              className={`w-full h-14 flex items-center gap-3 rounded-2xl pl-5 pr-3 text-left transition-transform
+                          ${locked ? 'opacity-35 cursor-default' : 'active:scale-95'} ${next ? 'training-next' : ''}`}
               style={{
-                background: palette.panel,
-                '--pulse': exam ? palette.starGold : palette.silverGray,
-                border: `2px solid ${next ? (exam ? palette.starGold : palette.silverGray) : solved ? palette.correctGreen : palette.panelBorder}`,
+                background: palette.panel, '--pulse': palette.silverGray,
+                border: `2px solid ${next ? palette.silverGray : palette.panelBorder}`,
               }}
-              aria-label={`${label}: ${inst.name}${solved ? ' ✓' : ''}${locked ? ` (${t('castles.locked')})` : ''}`}
+              aria-label={`${label}${solved ? ' ✓' : ''}${locked ? ` (${t('castles.locked')})` : ''}`}
             >
-              {/* the puzzle's colour (as on the other castles' tiles), with its state */}
-              <span className="w-11 h-11 shrink-0 rounded-xl ring-1 ring-inset ring-white/25 flex items-center justify-center
-                               text-xl font-black"
-                    style={{ background: inst.name_color }} aria-hidden="true">
-                <span className="w-7 h-7 rounded-full bg-black/45 flex items-center justify-center text-base leading-none"
-                      style={{ color: solved ? palette.correctGreen : palette.white }}>
-                  {solved ? '✓' : locked ? '🔒' : '▶'}
-                </span>
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block text-lg font-black leading-tight"
-                      style={{ color: exam ? palette.starGold : palette.white }}>
-                  {label}{exam && <span aria-hidden="true"> 🏆</span>}
-                </span>
-                <span className="block truncate text-xs font-sans font-semibold text-game-silver">{inst.name}</span>
-              </span>
-              {solved && best > 0 && (
-                <span className="shrink-0 text-sm text-game-star font-black" aria-hidden="true">
-                  {'★'.repeat(best)}
-                </span>
-              )}
+              <span className="min-w-0 flex-1 text-lg font-black leading-tight">{label}</span>
+              {/* won: a small medal */}
+              {solved && <span className="shrink-0 text-2xl leading-none" aria-hidden="true">🏅</span>}
               {next && (
                 <span className="shrink-0 rounded-xl px-3 py-1.5 text-sm font-black bg-game-btn" aria-hidden="true">
                   {t('levelScreen.start')}
