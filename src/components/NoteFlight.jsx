@@ -85,7 +85,9 @@ export default function NoteFlight({ job, instance, look, boardRef, rollRef, onL
       groups,
       hood,
       board: { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom },
-      roll: { x: roll.left + roll.width / 2, y: roll.top + roll.height / 2 },
+      // the drop target: the notebook's title label near the top of its cover (the cover runs on
+      // below the screen edge, so its centre may be out of sight)
+      roll: { x: roll.left + roll.width / 2, y: roll.top + Math.min(roll.height / 2, 40) },
     })
     // the timeline: highlight, then circle + fly per group, then show and drop
     const steps = [['highlight', 0, HIGHLIGHT_MS]]

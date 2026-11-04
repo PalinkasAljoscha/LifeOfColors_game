@@ -8,8 +8,8 @@ import { NOTE_MAX_REPEAT as MAX_REPEAT } from '../engine/training.js'
 // Training castle: a notebook with every transformation the player has observed in this puzzle
 // (src/engine/training.js observation): the coloured neighbours of the changed cell -> its new
 // state, e.g. 👻 👻 + 🕷️ -> 🍬.
-//   NotebookPeek  the top of a closed spiral notebook at the bottom of the screen, "Rule
-//                 Observations" on its label. Always looks the same (nothing of the notes shows);
+//   NotebookPeek  the top of a closed spiral notebook right below the board (down to the screen
+//                 bottom), "Rule Observations" on its label. Always looks the same (nothing of the notes shows);
 //                 a tap opens the notebook. `bump` (a counter) makes it nod when a note lands on
 //                 it (components/NoteFlight.jsx drops each new note onto it).
 //   NotebookOpen  the open notebook: a page that slides up from the bottom of the screen with all
@@ -106,20 +106,22 @@ function Spiral() {
   )
 }
 
-/** The top of the closed notebook at the bottom of the screen. The ref is the button (the note
- *  animation drops new notes onto it). */
+/** The top of the closed notebook, right below the board in training. It fills the free space
+ *  down to the screen bottom (between a minimum and a maximum height); the rest of the notebook
+ *  is "below the screen". The ref is the button (the note animation drops new notes onto it). */
 export const NotebookPeek = forwardRef(function NotebookPeek({ onOpen, bump = 0 }, ref) {
   const { t } = useTranslation()
   return (
-    // Only the top 3.25rem show; the rest of the notebook is "below the screen".
-    <div className="mx-auto w-full max-w-md -mb-3 h-14 overflow-hidden flex justify-center pt-2.5 shrink-0">
+    // grows 4x faster than the space above the board (GameScreen), so it takes most of the free
+    // space; -mb-3: the cover runs into the screen's bottom padding (safe-pad), so it touches the edge
+    <div className="mx-auto w-full max-w-md -mb-3 grow-[4] basis-0 min-h-[5.5rem] max-h-[13rem] overflow-hidden flex justify-center pt-3">
       <button ref={ref} onClick={onOpen} aria-label={t('training.notes')} title={t('training.notes')}
-              className="w-64 h-20 active:translate-y-0.5 transition-transform">
-        <span key={bump} className={`relative block w-full h-full rounded-t-lg shadow-2xl ${bump ? 'book-bump' : ''}`}
+              className="w-80 max-w-[85%] h-[14rem] active:translate-y-0.5 transition-transform">
+        <span key={bump} className={`relative block w-full h-full rounded-t-xl shadow-2xl ${bump ? 'book-bump' : ''}`}
               style={{ background: palette.bookCover }}>
           <Spiral />
           {/* the label with the title */}
-          <span className="absolute left-1/2 top-3.5 -translate-x-1/2 whitespace-nowrap rounded px-3 py-0.5 text-sm"
+          <span className="absolute left-1/2 top-5 -translate-x-1/2 whitespace-nowrap rounded-md px-4 py-1 text-2xl"
                 style={{ background: palette.notePaper, color: palette.noteInk, fontFamily: HANDWRITING }}>
             {t('training.notes')}
           </span>
