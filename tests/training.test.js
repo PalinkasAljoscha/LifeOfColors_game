@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { neighbourCells, observation, addObservation, flightSources } from '../src/engine/training.js'
+import { neighbourCells, observation, addObservation, flightSources, introExampleCell } from '../src/engine/training.js'
 import { tableIndex } from '../src/engine/engine.js'
 
 test('neighbourCells: corner, edge and inner cells', () => {
@@ -63,4 +63,18 @@ test('noteCardPlace: on the board above the neighbourhood, below when it does no
   hood = { left: 20, right: 290, top: 100, bottom: 550 }
   p = noteCardPlace(hood, card, board)
   assert.ok(clear(p, hood))
+})
+
+test('introExampleCell: an inner cell, away from the start cell and the goal', () => {
+  const inst = (rows, cols, goal, start = [[0, 0]]) => ({
+    board: { rows, cols, start: start.map((at) => ({ at, color: 'G' })) }, goal: { at: goal, color: 'G' },
+  })
+  assert.deepEqual(introExampleCell(inst(5, 4, [4, 3])), [1, 1])          // first inner cell
+  assert.deepEqual(introExampleCell(inst(5, 4, [4, 3], [[1, 1]])), [1, 2]) // not the start cell
+  // a 3 x 3 board with the goal in the middle: every cell is next to it -> still a cell, never the goal
+  const [r, c] = introExampleCell(inst(3, 3, [1, 1]))
+  assert.ok(!(r === 1 && c === 1) && !(r === 0 && c === 0))
+  // the example's neighbourhood never holds the goal when the board has room
+  const [er, ec] = introExampleCell(inst(5, 4, [2, 1]))
+  assert.ok(Math.abs(er - 2) > 1 || Math.abs(ec - 1) > 1)
 })

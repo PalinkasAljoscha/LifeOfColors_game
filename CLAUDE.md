@@ -118,6 +118,14 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   the note has landed. Every training puzzle uses the phased version (first the coloured
   neighbours are circled and fly to the left side of the rule, then the changed cell is circled and
   flies to the right side).
+- **Training intro** -- `components/TrainingIntro.jsx`: training puzzle 1 (`training.day === 1`)
+  opens with three speech bubbles on the board, each next to what it explains (placed with
+  `noteCardPlace`): tap a field (ring around an example cell, `engine/training.js`
+  `introExampleCell`), the neighbourhood decides (its neighbours glow inside a dashed frame), and
+  the goal (ring around the gold-framed cell, the goal object drawn in the text). "Next" or a tap on
+  the board goes on; the board takes no moves until the last one. Shown each time the puzzle is
+  opened, not again on Retry; the scene's blinking-goal intro is skipped there (Board `goalIntro`).
+  Texts: `intro.*` in the locales.
 - **Mobile first** -- portrait phones are the main target; boards up to 9 rows x 6 cols must fit.
 
 ## Branching Strategy (as in Maze Inc.)

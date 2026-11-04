@@ -30,6 +30,26 @@ export function neighbourCells(r, c, rows, cols) {
   return out
 }
 
+/** The example field of the first training puzzle's explanation (components/TrainingIntro.jsx):
+ *  the cell with the most on-board neighbours (an inner cell where possible) that is neither a
+ *  start cell nor the goal and whose neighbourhood does not contain the goal; ties go to the
+ *  cell nearest the top left. Returns [r, c]. */
+export function introExampleCell(inst) {
+  const { rows, cols } = inst.board
+  const [gr, gc] = inst.goal.at
+  const starts = new Set((inst.board.start ?? []).map((s) => s.at.join(',')))
+  let best = null
+  for (let r = 0; r < rows; r += 1) {
+    for (let c = 0; c < cols; c += 1) {
+      if (starts.has(`${r},${c}`) || (r === gr && c === gc)) continue
+      const nearGoal = Math.abs(r - gr) <= 1 && Math.abs(c - gc) <= 1
+      const score = neighbourCells(r, c, rows, cols).length - (nearGoal ? 9 : 0)
+      if (!best || score > best.score) best = { score, at: [r, c] }
+    }
+  }
+  return best ? best.at : [0, 0]
+}
+
 /** Where the note card goes: ON the board, but never over the tapped cell or its neighbours.
  *  It is centred horizontally on the neighbourhood (the block of the tapped cell and its
  *  neighbours, at most 3 x 3 cells) and placed in the board's free space right ABOVE that block, or

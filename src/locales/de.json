@@ -100,5 +100,12 @@
     "title": "Zuletzt gespielt",
     "empty": "Noch keine Puzzles gespielt.",
     "close": "Schließen"
+  },
+  "intro": {
+    "tap": "Tippe auf ein Feld, um es zu verwandeln.",
+    "hood": "Die Nachbarn eines Feldes bestimmen, wie es sich verwandelt.",
+    "goal": "Um zu gewinnen, bring ein {{goal}} auf das gold umrandete Feld.",
+    "next": "Weiter",
+    "start": "Los geht's!"
   }
 }

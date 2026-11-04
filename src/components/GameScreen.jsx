@@ -6,6 +6,7 @@ import WinDialog from './WinDialog.jsx'
 import RulesDialog from './RulesDialog.jsx'
 import NotebookOpen, { NotebookPeek } from './TrainingNotes.jsx'
 import NoteFlight from './NoteFlight.jsx'
+import TrainingIntro, { INTRO_STEPS } from './TrainingIntro.jsx'
 import { markSolved } from '../engine/catalog.js'
 import { progressTotals } from '../engine/progress.js'
 import { minMovesOf, starsForWin } from '../engine/stars.js'
@@ -46,6 +47,10 @@ export default function GameScreen({ instance, place, training = null, pick, onP
   const boardBoxRef = useRef(null)
   const boardSize = boardCanvasSize(instance)
   const rollRef = useRef(null)
+  // training puzzle 1: three explanations before the first move (components/TrainingIntro.jsx),
+  // each time the puzzle is opened (not again on Retry); null when done / not shown
+  const [introStep, setIntroStep] = useState(() => (training?.day === 1 ? 0 : null))
+  const nextIntro = () => setIntroStep((s) => (s === null || s + 1 >= INTRO_STEPS ? null : s + 1))
 
   function openNotes() {
     flushFlights()   // notes still on their way are written at once, so the notebook shows them
@@ -198,7 +203,15 @@ export default function GameScreen({ instance, place, training = null, pick, onP
       {training && <div className="flex-1 min-h-0" aria-hidden="true" />}
       <div ref={boardBoxRef} className={training ? 'min-h-0 mt-2 relative w-full shrink' : 'flex-1 min-h-0 mt-2 relative'}
            style={training ? { aspectRatio: `${boardSize.width} / ${boardSize.height}`, maxWidth: '100%' } : undefined}>
-        <Board key={round} instance={instance} look={look} training={training !== null} onClick={onClick} onWon={onWon} />
+        <Board key={round} instance={instance} look={look} training={training !== null}
+               goalIntro={!(training?.day === 1 && round === 0)} onClick={onClick} onWon={onWon} />
+        {/* training puzzle 1: the explanations come first; a tap on the board goes to the next one */}
+        {introStep !== null && (
+          <>
+            <div className="absolute inset-0 z-10" onClick={nextIntro} aria-hidden="true" />
+            <TrainingIntro instance={instance} look={look} boardRef={boardBoxRef} step={introStep} onNext={nextIntro} />
+          </>
+        )}
         {/* training: while a note animation runs the board takes no taps -- this layer over it
             catches them, so the next move waits until the note has landed in the notebook */}
         {training && flights.length > 0 && <div className="absolute inset-0 z-10" aria-hidden="true" />}

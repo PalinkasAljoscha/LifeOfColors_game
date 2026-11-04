@@ -100,5 +100,12 @@
     "title": "Joués récemment",
     "empty": "Aucun puzzle joué pour l’instant.",
     "close": "Fermer"
+  },
+  "intro": {
+    "tap": "Touche une case pour essayer de la transformer.",
+    "hood": "Les voisines d'une case décident comment elle se transforme.",
+    "goal": "Pour gagner, amène un {{goal}} sur la case au cadre doré.",
+    "next": "Suivant",
+    "start": "C'est parti !"
   }
 }
