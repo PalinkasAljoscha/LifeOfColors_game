@@ -51,8 +51,9 @@ function Group({ state, count, look }) {
       </span>
     )
   }
+  // gap: the object images overhang their slot a little (Emoji: 1.3em with -0.15em margins)
   return (
-    <span className="whitespace-nowrap inline-flex items-center">
+    <span className="whitespace-nowrap inline-flex items-center gap-[0.2em]">
       {Array.from({ length: count }, (_, i) => <Slot key={i} name={`${state}${i}`}><CellToken state={state} look={look} /></Slot>)}
     </span>
   )

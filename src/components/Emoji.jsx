@@ -18,7 +18,9 @@ export function Emoji({ e, look = undefined, className }) {
   return (
     <span className={className}>
       <img src={emojiDataUrl(e, PX, style)} alt={drawn ? '' : e} draggable="false"
-           style={{ display: 'inline-block', height: '1.3em', width: '1.3em', margin: '-0.15em', verticalAlign: '-0.3em' }} />
+           // maxWidth none: the base CSS caps images at their box's width, and with the -0.15em margins
+           // that box is narrower than the image -- it would squeeze the emoji horizontally
+           style={{ display: 'inline-block', height: '1.3em', width: '1.3em', maxWidth: 'none', margin: '-0.15em', verticalAlign: '-0.3em' }} />
     </span>
   )
 }

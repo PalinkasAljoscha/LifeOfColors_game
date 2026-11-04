@@ -106,7 +106,10 @@ export default function NoteFlight({ job, instance, look, boardRef, rollRef, onL
   useLayoutEffect(() => {
     if (!geo || cardPos || !measureRef.current) return undefined
     const r = measureRef.current.getBoundingClientRect()
-    setCardPos(noteCardPlace(geo.hood, { width: r.width, height: r.height }, geo.board))
+    // a rule too long for the board is drawn smaller, so the card never gets wider than the board
+    const scale = Math.min(1, (geo.board.right - geo.board.left) / r.width)
+    setCardPos({ ...noteCardPlace(geo.hood, { width: r.width * scale, height: r.height * scale }, geo.board),
+                 font: `calc(${CARD_FONT} * ${scale.toFixed(3)})` })
     return undefined
   }, [geo, cardPos])
 
@@ -182,14 +185,17 @@ export default function NoteFlight({ job, instance, look, boardRef, rollRef, onL
       {/* the card, invisible, only to measure its size (placement, see above) */}
       {!cardPos && (
         <NoteCard ref={measureRef} obs={job.obs} look={look} className="absolute"
-                  style={{ left: 0, top: 0, fontSize: CARD_FONT, visibility: 'hidden' }} />
+                  style={{ left: 0, top: 0, width: 'max-content', fontSize: CARD_FONT, visibility: 'hidden' }} />
       )}
       {/* 3.-5. the note card right above / below the tapped cell's neighbourhood */}
       {showCard && (
         <NoteCard ref={cardRef} obs={job.obs} look={look}
                   className={`absolute shadow-2xl ${kind === 'fly' && g === 0 ? 'note-card-in' : ''}`}
                   style={{
-                    left: cardPos.x, top: cardPos.y, transform: 'translate(-50%, -50%)', fontSize: CARD_FONT,
+                    left: cardPos.x, top: cardPos.y, transform: 'translate(-50%, -50%)', fontSize: cardPos.font,
+                    // its full width: an absolute box is otherwise only as wide as the room from `left` to
+                    // the screen edge, which squeezed cards placed right of the middle
+                    width: 'max-content',
                     background: palette.notePaper,
                     // while the objects fly in, the card's own objects stay invisible
                     ...(building ? { '--slot-visibility': 'hidden' } : null),
@@ -206,7 +212,7 @@ export default function NoteFlight({ job, instance, look, boardRef, rollRef, onL
                 className="absolute flex items-center justify-center leading-none font-sans font-bold"
                 style={{
                   left: to.x - to.size / 2, top: to.y - to.size / 2, width: to.size, height: to.size,
-                  fontSize: CARD_FONT,
+                  fontSize: cardPos.font,
                   transform: atSlot ? 'none'
                     : `translate(${src.x - to.x}px, ${src.y - to.y}px) scale(${(size * EMOJI_SHARE) / to.size})`,
                 }}>
