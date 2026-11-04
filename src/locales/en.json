@@ -43,7 +43,14 @@
     "choose": "Choose your puzzle",
     "intro": "Introduction",
     "start": "Start",
-    "trainingHint": "Win each step to unlock the next one"
+    "days": {
+      "1": "Day One",
+      "2": "Day Two",
+      "3": "Day Three",
+      "4": "Day Four",
+      "5": "Day Five"
+    },
+    "dayN": "Day {{n}}"
   },
   "progress": {
     "title": "Stars collected",
