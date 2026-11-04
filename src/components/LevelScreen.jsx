@@ -4,6 +4,7 @@ import { bestStars } from '../engine/progress.js'
 import { useProgress } from '../hooks/useProgress.js'
 import { ConsentBannerSpacer } from './ConsentBanner.jsx'
 import { inkOn, mixHex, palette } from '../theme.js'
+import { HANDWRITING } from './TrainingNotes.jsx'
 import { playableUpTo } from '../engine/castles.js'
 
 // One level: every puzzle of the level as a tile in its name's
@@ -103,7 +104,7 @@ function TrainingPath({ pool, states, onPick }) {
         )
       })}
       {/* the end of the path: the journey -- grey at first, a little brighter and more golden with
-          every step won, fully golden (with a glow) when all are won */}
+          every step won, fully golden when all are won; handwriting, as the notebook's title */}
       {pool.length > 0 && (() => {
         const f = pool.filter((_, k) => states[k] === 'solved').length / pool.length
         const colour = mixHex(palette.journeyDim, palette.journeyGold, f)
@@ -113,8 +114,8 @@ function TrainingPath({ pool, states, onPick }) {
               <DownArrow color={colour} />
             </span>
             <p className="mt-1 whitespace-nowrap font-black text-center leading-tight"
-               style={{ color: colour, opacity: 0.45 + 0.55 * f, fontSize: 'min(1.35rem, 5.4vw)',
-                        textShadow: f === 1 ? `0 0 14px ${palette.journeyGold}` : 'none' }}>
+               style={{ color: colour, opacity: 0.45 + 0.55 * f, fontSize: 'min(1.45rem, 5.6vw)',
+                        fontFamily: HANDWRITING }}>
               {t('levelScreen.journey')}
             </p>
           </li>
