@@ -84,8 +84,7 @@
   },
   "training": {
     "notes": "Rule Observations",
-    "nothing": "no coloured neighbours",
-    "empty": "Nothing noted yet. Make a move!"
+    "nothing": "no coloured neighbours"
   },
   "castles": {
     "name": "Castle {{n}}",
@@ -107,6 +106,7 @@
     "goal": "To win, get a {{goal}} onto the gold-framed field.",
     "next": "Next",
     "start": "Let's go!",
-    "notes": "Rules you have already observed are noted here. Have a look to come up with a path that puts the {{goal}} into the golden frame."
+    "notes": "Rules you have already observed are noted here.",
+    "notesHint": "Have a look to come up with a path that puts the {{goal}} into the golden frame."
   }
 }

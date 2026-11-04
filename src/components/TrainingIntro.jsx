@@ -14,7 +14,7 @@ import { palette } from '../theme.js'
 //               "The neighbours of a field decide how it transforms."
 //   3. goal     a ring around the gold-framed goal field: "To win, get a <goal object> there."
 //   4. notes    a ring around the closed notebook below the board: observed rules are noted
-//               there, read them to find a way to the goal.
+//               there; then a hint (light bulb, lighter text): read them to find a way to the goal.
 // "Next" (or a tap on the board) goes on; after the last one onDone() and the puzzle starts.
 // GameScreen blocks the board while this runs (taps on the board only go to the next step).
 const STEPS = ['tap', 'hood', 'goal', 'notes']
@@ -85,7 +85,13 @@ export default function TrainingIntro({ instance, look, boardRef, notesRef, step
   )
   // The text, with the goal object drawn inline in step 3 ({{goal}} in the string).
   const MARK = '\u0000'
-  const text = t(`intro.${kind}`, { goal: MARK, interpolation: { escapeValue: false } }).split(MARK)
+  const withGoal = (key) => t(key, { goal: MARK, interpolation: { escapeValue: false } }).split(MARK)
+    .map((part, i) => (
+      <span key={i}>
+        {i > 0 && <CellToken state={instance.goal.color} look={look} className="mx-0.5" />}
+        {part}
+      </span>
+    ))
   const last = step === STEPS.length - 1
   // the arrow: from the bubble's edge towards the target, at the target's centre (kept on the bubble)
   const arrowX = place && Math.min(Math.max((target.left + target.right) / 2, place.x - bubble.width / 2 + 18),
@@ -127,14 +133,13 @@ export default function TrainingIntro({ instance, look, boardRef, notesRef, step
                 style={{ left: arrowX - (place.x - bubble.width / 2) - 8, background: palette.notePaper,
                          ...(place.side === 'above' ? { bottom: -7 } : { top: -7 }) }} />
         )}
-        <p className="relative text-xl font-bold leading-snug">
-          {text.map((part, i) => (
-            <span key={i}>
-              {i > 0 && <CellToken state={instance.goal.color} look={look} className="mx-0.5" />}
-              {part}
-            </span>
-          ))}
-        </p>
+        <p className="relative text-xl font-bold leading-snug">{withGoal(`intro.${kind}`)}</p>
+        {/* step 4: a hint (light bulb, lighter text) after the explanation */}
+        {kind === 'notes' && (
+          <p className="relative mt-1.5 text-lg font-medium leading-snug">
+            <span aria-hidden="true" className="mr-1">💡</span>{withGoal('intro.notesHint')}
+          </p>
+        )}
         <div className="relative mt-2.5 flex items-center justify-between">
           <span className="flex gap-1.5" aria-hidden="true">
             {STEPS.map((s, i) => (

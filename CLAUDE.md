@@ -111,7 +111,7 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   space goes mostly into the notebook (grow 4, 5.5-13rem) and the rest above the board; the
   title label (1.95rem, nearly the cover's width) is the notes' drop target. While the open
   notebook (NotebookOpen) is on screen the closed one is hidden (`hidden`, via `onShown`), so it
-  looks like the same notebook opening.
+  looks like the same notebook opening. An empty open notebook shows only its title.
 - **Training note animation** -- `components/NoteFlight.jsx`: a new rule observation is circled on
   the board and flies into a note card, which drops into the notebook. The card sits ON the board
   but never over the tapped cell's neighbourhood: in the free space above it, or below when it does
@@ -126,7 +126,8 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   `noteCardPlace`): tap a field (ring around an example cell, `engine/training.js`
   `introExampleCell`), the neighbourhood decides (its neighbours glow inside a dashed frame), the
   goal (ring around the gold-framed cell, the goal object drawn in the text), and the notebook
-  (ring around its cover, bubble right above it: observed rules are noted there). "Next" or a tap on
+  (ring around its cover, bubble right above it: observed rules are noted there, then a hint in
+  lighter text after a light bulb, `intro.notesHint`). "Next" or a tap on
   the board goes on; the board takes no moves until the last one. Shown each time the puzzle is
   opened, not again on Retry; the scene's blinking-goal intro is skipped there (Board `goalIntro`).
   Texts: `intro.*` in the locales.
