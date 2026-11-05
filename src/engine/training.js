@@ -58,8 +58,10 @@ export function introExampleCell(inst) {
  *  Horizontally it stays inside the board (centred on it if wider).
  *  hood = { left, top, right, bottom } (the block), card = { width, height },
  *  board = { left, top, right, bottom }, all in page px; gap = space between block and card.
+ *  snug: the card always sits right next to the block (gap away), not in the middle of the free
+ *  space (the intro's speech bubbles, whose arrow must touch what they point at).
  *  Returns { x, y, side } -- the card's centre and 'above' | 'below'. */
-export function noteCardPlace(hood, card, board, gap = 6) {
+export function noteCardPlace(hood, card, board, gap = 6, snug = false) {
   const roomAbove = hood.top - board.top - gap
   const roomBelow = board.bottom - hood.bottom - gap
   const side = card.height <= roomAbove ? 'above'
@@ -68,8 +70,8 @@ export function noteCardPlace(hood, card, board, gap = 6) {
   const halfH = card.height / 2
   // in the middle of the free space when it fits there, else right next to the block
   const y = side === 'above'
-    ? (card.height <= roomAbove ? board.top + (roomAbove) / 2 : hood.top - gap - halfH)
-    : (card.height <= roomBelow ? hood.bottom + gap + roomBelow / 2 : hood.bottom + gap + halfH)
+    ? (card.height <= roomAbove && !snug ? board.top + (roomAbove) / 2 : hood.top - gap - halfH)
+    : (card.height <= roomBelow && !snug ? hood.bottom + gap + roomBelow / 2 : hood.bottom + gap + halfH)
   const halfW = card.width / 2
   const x = card.width >= board.right - board.left ? (board.left + board.right) / 2
     : Math.min(Math.max((hood.left + hood.right) / 2, board.left + halfW), board.right - halfW)

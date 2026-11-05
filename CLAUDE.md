@@ -131,8 +131,9 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   neighbours are circled and fly to the left side of the rule, then the changed cell is circled and
   flies to the right side).
 - **Training intro** -- `components/TrainingIntro.jsx`: training puzzle 1 (`training.day === 1`)
-  opens with four speech bubbles, each next to what it explains (on the board via
-  `noteCardPlace`): tap a field (ring around an example cell, `engine/training.js`
+  opens with four speech bubbles, each right next to what it explains, its arrow pointing at the ring with a
+  small space (`ARROW_SPACE`, 6 px)
+  (on the board via `noteCardPlace(..., snug = true)`): tap a field (ring around an example cell, `engine/training.js`
   `introExampleCell`), the neighbourhood decides (its neighbours glow inside a dashed frame), the
   goal (ring around the gold-framed cell, the goal object drawn in the text), and the notebook
   (ring around its cover, bubble right above it: observed rules are noted there, then a hint in
