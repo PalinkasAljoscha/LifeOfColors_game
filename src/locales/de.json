@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "Life of Colors"
+    "title": "Zauber­lehrling"
   },
   "home": {
     "description": "Das Ziel: 🟩 auf dem gold umrandeten Feld. Tippe auf ein Feld um es zu verwandeln - oder auch nicht - je nachdem, welche Farben drumherum sind. Die versteckten Regeln sind bei jedem Puzzle anders.",
@@ -77,7 +77,6 @@
       "winTitle": "Gewonnen! 🍬"
     },
     "sorcerer": {
-      "tagline": "Zauberlehrling-Edition",
       "description": "Das Ziel: 👑 auf dem gold umrandeten Feld. Tippe auf ein Feld, um es zu verwandeln – oder auch nicht –, je nachdem, welche Dinge drumherum sind. Die geheimen Zauber sind bei jedem Puzzle anders.",
       "chooseLevel": "Wähle deine Zauberstufe",
       "winTitle": "Gekrönt! 👑"

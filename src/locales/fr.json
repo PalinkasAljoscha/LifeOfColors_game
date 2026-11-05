@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "Life of Colors"
+    "title": "L'Apprenti sorcier"
   },
   "home": {
     "description": "Ton but : mettre 🟩 sur la case au cadre doré. Comment ? Touche une case : elle peut se transformer, selon les couleurs qui l'entourent. Les règles cachées changent à chaque puzzle.",
@@ -77,7 +77,6 @@
       "winTitle": "Douce victoire ! 🍬"
     },
     "sorcerer": {
-      "tagline": "Édition apprenti sorcier",
       "description": "Ton but : mettre 👑 sur la case au cadre doré. Comment ? Touche une case : elle peut se transformer, selon les objets qui l'entourent. Les sortilèges cachés changent à chaque puzzle.",
       "chooseLevel": "Choisis ton niveau de magie",
       "winTitle": "Couronné ! 👑"

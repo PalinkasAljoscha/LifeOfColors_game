@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "Life of Colors"
+    "title": "Sorcerer's Apprentice"
   },
   "home": {
     "description": "Your goal: Get 🟩 on the gold framed cell. How? Tap a cell and it might transform, depending on what colors are around it. The hidden rules are different for each puzzle.",
@@ -77,7 +77,6 @@
       "winTitle": "Sweet victory! 🍬"
     },
     "sorcerer": {
-      "tagline": "Sorcerer's apprentice edition",
       "description": "Your goal: Get 👑 on the gold framed field. How? Tap a field and it might transform, depending on what objects are around it. The hidden spells are different for each puzzle.",
       "chooseLevel": "Choose your level of magic",
       "winTitle": "Crowned! 👑"

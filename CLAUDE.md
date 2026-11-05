@@ -5,6 +5,12 @@ on 2026-10-18). Public repo, deployed to GitHub Pages. The puzzle factory (gener
 analysis) lives in the separate PRIVATE repo `LifeOfColors_factory`; this repo contains only what is
 needed to run the app and to receive telemetry. See README.md for the full workflow.
 
+**Player-facing name: "Sorcerer's Apprentice"** (de "Zauberlehrling", fr "L'Apprenti sorcier"):
+`app.title` in the locales (home heading, browser tab via `src/i18n.js`; the German one has a soft
+hyphen so it breaks as Zauber-/lehrling in the home header), `index.html` title and meta tags. The
+sorcerer theme has no "edition" tagline any more. "Life of Colors" stays only as the internal name (repos, Pages URL `/LifeOfColors_game/`,
+package name, code comments, schema, telemetry) -- never show it to players.
+
 ## Tech Stack (same as Maze Inc.)
 
 | Concern | Choice |
