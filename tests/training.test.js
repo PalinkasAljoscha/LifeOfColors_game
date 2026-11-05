@@ -78,3 +78,17 @@ test('introExampleCell: an inner cell, away from the start cell and the goal', (
   const [er, ec] = introExampleCell(inst(5, 4, [2, 1]))
   assert.ok(Math.abs(er - 2) > 1 || Math.abs(ec - 1) > 1)
 })
+
+test('noteCardPlace snug: right next to the block, above or below', async () => {
+  const { noteCardPlace } = await import('../src/engine/training.js')
+  const board = { left: 0, top: 0, right: 400, bottom: 500 }
+  const card = { width: 200, height: 80 }
+  // room above: right above the block, gap away
+  let p = noteCardPlace({ left: 100, right: 200, top: 300, bottom: 400 }, card, board, 15, true)
+  assert.equal(p.side, 'above')
+  assert.equal(p.y + card.height / 2, 300 - 15)
+  // no room above: right below
+  p = noteCardPlace({ left: 100, right: 200, top: 20, bottom: 120 }, card, board, 15, true)
+  assert.equal(p.side, 'below')
+  assert.equal(p.y - card.height / 2, 120 + 15)
+})

@@ -77,7 +77,9 @@ export default function TrainingIntro({ instance, look, boardRef, notesRef, step
       return { left: p.x - size / 2, right: p.x + size / 2, top: p.y - size / 2, bottom: p.y + size / 2 } })()
   const place = !bubble ? null
     : kind === 'notes' ? notesPlace(geo.notes, bubble, geo.board)
-      : noteCardPlace(target, bubble, geo.board, 14)
+      // right next to the ring / frame, so the bubble's arrow touches it (gap = ring offset and width
+      // plus the arrow's length)
+      : noteCardPlace(target, bubble, geo.board, 15, true)
   const ring = (p, color) => (
     <span className="absolute rounded-xl intro-pulse"
           style={{ left: p.x - size / 2 - 4, top: p.y - size / 2 - 4, width: size + 8, height: size + 8,
