@@ -18,6 +18,7 @@ import { palette } from '../theme.js'
 // "Next" (or a tap on the board) goes on; after the last one onDone() and the puzzle starts.
 // GameScreen blocks the board while this runs (taps on the board only go to the next step).
 const STEPS = ['tap', 'hood', 'goal', 'notes']
+const ARROW_SPACE = 6   // px between a bubble's arrow tip and the ring / frame it points at
 
 export default function TrainingIntro({ instance, look, boardRef, notesRef, step, onNext }) {
   const { t } = useTranslation()
@@ -77,9 +78,9 @@ export default function TrainingIntro({ instance, look, boardRef, notesRef, step
       return { left: p.x - size / 2, right: p.x + size / 2, top: p.y - size / 2, bottom: p.y + size / 2 } })()
   const place = !bubble ? null
     : kind === 'notes' ? notesPlace(geo.notes, bubble, geo.board)
-      // right next to the ring / frame, so the bubble's arrow touches it (gap = ring offset and width
-      // plus the arrow's length)
-      : noteCardPlace(target, bubble, geo.board, 15, true)
+      // right next to the ring / frame: the bubble's arrow points at it with a small space in
+      // between (gap = ring offset and width + the arrow's length + ARROW_SPACE)
+      : noteCardPlace(target, bubble, geo.board, 15 + ARROW_SPACE, true)
   const ring = (p, color) => (
     <span className="absolute rounded-xl intro-pulse"
           style={{ left: p.x - size / 2 - 4, top: p.y - size / 2 - 4, width: size + 8, height: size + 8,
@@ -169,5 +170,5 @@ function notesPlace(notes, bubble, board) {
   if (!notes) return { x: (board.left + board.right) / 2, y: board.bottom - bubble.height / 2, side: 'above' }
   const halfW = bubble.width / 2
   const x = Math.min(Math.max((notes.left + notes.right) / 2, board.left + halfW), board.right - halfW)
-  return { x, y: notes.top - 22 - bubble.height / 2, side: 'above' }
+  return { x, y: notes.top - 22 - ARROW_SPACE - bubble.height / 2, side: 'above' }
 }
