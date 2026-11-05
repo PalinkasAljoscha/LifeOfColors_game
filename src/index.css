@@ -158,8 +158,8 @@ body {
   50%      { opacity: 1;    transform: scale(1.1); }
 }
 .deco-twinkle { animation: twinkle 3.5s ease-in-out infinite; }
-/* Sorcerer theme: the moon, sparkle and star emojis drawn silvery white instead of yellow. */
-.deco-silver  { filter: grayscale(1) brightness(1.7); }
+/* Sorcerer theme: the moon, sparkle and star emojis drawn silver instead of yellow. */
+.deco-silver  { filter: grayscale(1) brightness(1.05) contrast(0.85); }
 .deco-bat    { animation: batFly 7s ease-in-out infinite; }
 .deco-spider { animation: spiderBob 5s ease-in-out infinite; }
 .deco-moon   { animation: moonGlow 6s ease-in-out infinite; }
