@@ -51,7 +51,7 @@ export default function HomeScreen({ castleStates, error, loadingCastle, onSelec
         <header className="flex items-center gap-3 mb-3">
           <Logo />
           <div className="min-w-0">
-            <h1 className="text-3xl font-black leading-none">{t('app.title')}</h1>
+            <h1 className="text-3xl font-black leading-none text-game-orange">{t('app.title')}</h1>
             {theme.tagline && (
               <p className="mt-1 text-xs font-black uppercase tracking-widest text-game-orange">{t(theme.tagline)}</p>
             )}

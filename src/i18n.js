@@ -29,4 +29,12 @@ i18n
     showSupportNotice: false,
   })
 
+// The browser tab shows the game's name in the current language (index.html has the English one).
+const setTitle = () => {
+  // (without soft hyphens: the German name has one for the narrow home header)
+  if (typeof document !== 'undefined') document.title = i18n.t('app.title').replace(/\u00ad/g, '')
+}
+setTitle()
+i18n.on('languageChanged', setTitle)
+
 export default i18n
