@@ -9,13 +9,17 @@ import { Emoji } from './Emoji.jsx'
 //   SpecialCallout  a speech bubble pointing at a cell: the intro of a bomb / mirror puzzle, the
 //                   first tap on a blocked / clock cell, the bomb's "Oh, careful!" (with a scared
 //                   face popping up and away, 2 s). Never takes taps (pointer-events: none).
-//   BoomOverlay     phase 'exploding': a cartoon starburst with BOOM over most of the board, flash
-//                   (the whole screen shakes meanwhile: GameScreen's boom-shake class), deliberately
-//                   jerky (steps() in index.css), EXPLOSION_MS; phase 'rubble': the board covered in
-//                   dust and rocks, a Retry button in the middle (same as the Retry button on top).
+//   BoomOverlay     phase 'exploding': a cartoon starburst with a hand-lettered BOOM over most of the
+//                   board, flash (the whole screen shakes meanwhile: GameScreen's boom-shake class),
+//                   deliberately jerky (steps() in index.css), EXPLOSION_MS; phase 'rubble': the real
+//                   board with its cells knocked out of line (GameScene _wreck) under a grey dust cloud,
+//                   a transparent grey Retry button in the middle (same as the Retry button on top).
 // Colours from src/theme.js, texts from the locales (special.*), keyframes in src/index.css.
 
 export const EXPLOSION_MS = 1000
+// hand-drawn cartoon lettering from the system's handwriting / comic fonts (no web font: loading one
+// from a font service would send the player's address to a third party)
+const BOOM_FONT = '"Marker Felt", "Chalkboard SE", "Comic Sans MS", "Segoe Print", "Bradley Hand", cursive'
 
 /** Speech bubble at cell `at` of the board in `boardRef` (above the cell, below it when there is
  *  no room above). `emoji`: a face that pops up next to the bubble. */
@@ -78,8 +82,10 @@ function burst(spikes, outer, inner, seed) {
   return pts.join(' ')
 }
 
-/** The explosion (phase 'exploding') and the destroyed board (phase 'rubble') over the board itself
- *  (the canvas inside the board box `boardRef`, measured once). */
+/** The explosion (phase 'exploding') and the dust cloud after it (phase 'rubble') over the board itself
+ *  (the canvas inside the board box `boardRef`, measured once). The board underneath stays visible:
+ *  the scene has knocked its cells out of line (GameScene _wreck); the dust and a transparent grey
+ *  Retry button lie on top. */
 export function BoomOverlay({ phase, onRetry, boardRef, instance }) {
   const { t } = useTranslation()
   const [rect, setRect] = useState(null)
@@ -88,16 +94,17 @@ export function BoomOverlay({ phase, onRetry, boardRef, instance }) {
     if (cell) setRect(cell.board)
   }, [boardRef, instance])
   const place = rect ? { left: rect.left, top: rect.top, width: rect.width, height: rect.height } : { inset: 0 }
-  const aspect = rect ? rect.height / rect.width : 1
-  const shapes = useMemo(() => ({
-    outer: burst(14, 49, 30, 7), mid: burst(12, 40, 24, 19), core: burst(10, 30, 17, 31),
-    // rocks of the rubble: position %, size %, angle, light or dark
-    rocks: Array.from({ length: 26 }, (_, i) => {
-      const r = (k) => ((Math.sin(i * 12.9898 + k * 78.233) * 43758.5453) % 1 + 1) % 1
-      return { x: 4 + r(1) * 92, y: 6 + r(2) * 88, s: 5 + r(3) * 9, a: r(4) * 360, light: r(5) > 0.55 }
-    }),
-  }), [])
+  const shapes = useMemo(() => {
+    const r = (i, k) => ((Math.sin(i * 12.9898 + k * 78.233) * 43758.5453) % 1 + 1) % 1
+    return {
+      outer: burst(14, 49, 30, 7), mid: burst(12, 40, 24, 19), core: burst(10, 30, 17, 31),
+      // dust puffs: position % of the board, size % of its width
+      puffs: Array.from({ length: 16 }, (_, i) => ({ x: 6 + r(i, 1) * 88, y: 6 + r(i, 2) * 88, s: 28 + r(i, 3) * 34, o: 0.3 + r(i, 4) * 0.3 })),
+    }
+  }, [])
   if (phase === 'exploding') {
+    // BOOM as hand-drawn cartoon lettering: a handwriting font, each letter with its own tilt, size and lift
+    const word = [...t('special.boom')]
     return (
       <div className="absolute z-30 flex items-center justify-center overflow-visible" style={place} aria-hidden="true">
         <div className="boom-flash absolute inset-0 rounded-xl" style={{ background: palette.boomFlash }} />
@@ -105,30 +112,36 @@ export function BoomOverlay({ phase, onRetry, boardRef, instance }) {
           <polygon points={shapes.outer} fill={palette.boomRed} stroke={palette.boomInk} strokeWidth="1.6" strokeLinejoin="round" />
           <polygon className="boom-flicker" points={shapes.mid} fill={palette.boomOrange} stroke={palette.boomInk} strokeWidth="1.2" strokeLinejoin="round" />
           <polygon points={shapes.core} fill={palette.boomYellow} stroke={palette.boomInk} strokeWidth="1" strokeLinejoin="round" />
-          <text x="50" y="57" textAnchor="middle" fontFamily='"Arial Black", Arial, sans-serif' fontWeight="900"
-                fontSize="19" fill={palette.boomYellow} stroke={palette.boomInk} strokeWidth="1.4" paintOrder="stroke"
-                transform="rotate(-8 50 50)">{t('special.boom')}</text>
+          <g transform="rotate(-9 50 50)">
+            {word.map((ch, i) => {
+              const n = word.length
+              const x = 50 + (i - (n - 1) / 2) * (60 / Math.max(4, n))
+              const tilt = [-14, 9, -6, 12, -10, 7, -4][i % 7]
+              const lift = [2, -3, 1, -2, 3, -1, 2][i % 7]
+              const size = [21, 19, 23, 20, 22, 18, 21][i % 7]
+              return (
+                <text key={i} x={x} y={58 + lift} textAnchor="middle" fontFamily={BOOM_FONT} fontWeight="900"
+                      fontSize={size} fill={palette.boomYellow} stroke={palette.boomInk} strokeWidth="1.6"
+                      strokeLinejoin="round" paintOrder="stroke" transform={`rotate(${tilt} ${x} ${58 + lift})`}>{ch}</text>
+              )
+            })}
+          </g>
         </svg>
       </div>
     )
   }
   return (
-    <div className="rubble-in absolute z-30 rounded-xl overflow-hidden flex items-center justify-center"
-         style={{ ...place, background: `radial-gradient(circle at 50% 45%, ${palette.rubbleDust}, ${palette.rubbleDark})` }}>
-      {/* viewBox in the board's aspect ratio, so the rocks keep their shape */}
-      <svg viewBox={`0 0 100 ${(100 * aspect).toFixed(1)}`} className="absolute inset-0 w-full h-full" aria-hidden="true">
-        {shapes.rocks.map((k, i) => (
-          <polygon key={i} transform={`translate(${k.x} ${(k.y * aspect).toFixed(1)}) rotate(${k.a})`}
-                   points={`${-k.s / 2},0 ${-k.s / 4},${-k.s / 2.6} ${k.s / 3},${-k.s / 2.2} ${k.s / 2},${k.s / 6} 0,${k.s / 2.4}`}
-                   fill={k.light ? palette.rubbleRockLight : palette.rubbleRock} stroke={palette.rubbleDark} strokeWidth="0.5" />
-        ))}
-        {[18, 50, 80].map((x, i) => (
-          <circle key={x} cx={x} cy={(30 + 20 * i) * aspect} r={9 + i * 2} fill={palette.rubbleSmoke} opacity="0.18" />
-        ))}
-      </svg>
+    <div className="rubble-in absolute z-30 overflow-visible flex items-center justify-center" style={place}>
+      {/* the grey dust cloud: soft translucent puffs over the wrecked board */}
+      {shapes.puffs.map((k, i) => (
+        <span key={i} aria-hidden="true" className="absolute rounded-full pointer-events-none"
+              style={{ left: `${k.x}%`, top: `${k.y}%`, width: `${k.s}%`, aspectRatio: '1', transform: 'translate(-50%, -50%)',
+                       background: palette.dustCloud, opacity: k.o, filter: 'blur(14px)' }} />
+      ))}
       <button onClick={onRetry}
-              className="pop-in relative h-16 px-7 rounded-2xl bg-game-btn hover:bg-game-btn-hover active:scale-95 transition-transform
-                         text-2xl font-black shadow-2xl flex items-center justify-center gap-2">
+              className="pop-in relative h-16 px-7 rounded-2xl active:scale-95 transition-transform text-2xl font-black
+                         flex items-center justify-center gap-2 backdrop-blur-[2px]"
+              style={{ background: `${palette.dustRetryBack}73`, color: palette.dustRetryInk, border: `2px solid ${palette.dustRetryInk}99` }}>
         <span aria-hidden="true">↻</span> {t('game.retry')}
       </button>
     </div>

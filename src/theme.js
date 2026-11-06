@@ -72,8 +72,8 @@ export const palette = {
   blockedHatch:    '#34344a',   // ... with diagonal hatching
   bombFill:        '#24161a',   // bomb cell
   bombBorder:      '#6b2f2f',
-  bombBadge:       '#f5f0e6',   // ring behind the trigger object in the bomb cell's corner
-  mirrorLink:      '#8fe3ff',   // frame around both mirror cells and the dashed line between them
+  mirrorLink:      '#8fe3ff',   // frame around both mirror cells, their tint and the line between them
+  mirrorGlint:     '#ffffff',   // the diagonal glints of the mirror sheen (drawn translucent)
   clockFace:       '#262a4a',   // clock cell background
   clockRing:       '#c9d4ff',   // the clock's ring of states
   boomRed:         '#e8341c',   // explosion (cartoon starburst, three layers)
@@ -81,11 +81,9 @@ export const palette = {
   boomYellow:      '#ffe23d',
   boomInk:         '#2a0d05',   // outline of the starburst and the BOOM letters
   boomFlash:       '#fff6d6',   // flash over the board at the bang
-  rubbleDust:      '#4d443d',   // destroyed board: dust layer ...
-  rubbleDark:      '#2b2521',
-  rubbleRock:      '#8a7f74',   // ... rocks
-  rubbleRockLight: '#b3a89b',
-  rubbleSmoke:     '#cfc8bf',
+  dustCloud:       '#3f3d3b',   // the dark grey dust cloud over the wrecked board (drawn translucent)
+  dustRetryBack:   '#1b1b1d',   // the Retry button on the dust (drawn translucent)
+  dustRetryInk:    '#d6d4d1',   // its text and frame, grey
   calloutBack:     '#fffbea',   // speech bubbles / callouts on the board
   calloutInk:      '#1a1a2e',
 

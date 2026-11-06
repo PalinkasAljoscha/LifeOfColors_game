@@ -179,14 +179,20 @@ tests/                    # engine vectors (generated), classic-rule test, catal
     `startState`); events `specialTap` (blocked / clock tap: ignored; bomb tap: warning) and `boom`
     (300 ms `BOOM_SHOW_MS` after a colour trigger, with the triggering colour shown; at once for the
     last bomb tap); after a boom the scene takes no taps -- React's Retry remounts it. Drawing:
-    blocked = dark hatched hole; bomb = 💣 with the trigger object in a corner badge; mirror = frames
-    on both cells + dashed line; clock = ring of its cycle, current state big at the top, the others
-    small and faded, turning counter-clockwise one step per move (`CLOCK_TURN_MS`).
+    blocked = dark hatched hole; bomb = 💣 only (never show the trigger -- the player must find it);
+    mirror = frames on both cells, a translucent mirror sheen over each whole cell (tint + diagonal
+    glints, the state stays visible) and a dashed straight line between them; clock = the cell bulges out (rounded square + a circle of
+    `CLOCK_BULGE` x its half side, drawn above its neighbours, may reach over them or off the board)
+    with the ring of its cycle, current state big at the top, the others small and faded, turning
+    counter-clockwise one step per move (`CLOCK_TURN_MS`). On `boom` the scene knocks every cell out
+    of line (`_wreck`: shifted, tilted, squeezed, overlapping; stepped, not smooth).
   - React (`GameScreen.jsx`, `components/SpecialOverlays.jsx`): bomb / mirror puzzles open with a
     short callout (each time opened, not on Retry; gone after 4.5 s or the first tap); the first tap
     on a blocked / clock cell per screen explains it; each bomb tap shows "Oh, careful!" with 😱 (2 s);
-    an explosion = cartoon BOOM starburst, the whole screen shakes, deliberately jerky (`steps()` in
-    `index.css`, 1 s), then rubble over the board with a Retry button (same as the top Retry). Texts
+    an explosion = cartoon starburst with hand-lettered BOOM (system handwriting / comic fonts,
+    each letter tilted and sized differently; no web font, for privacy), the whole screen shakes,
+    deliberately jerky (`steps()` in `index.css`, 1 s), then the real wrecked board under a grey
+    dust cloud with a transparent grey Retry button (same as the top Retry). Texts
     `special.*` in all locales (`special.bombIntro` says "objects"; the classic theme says "colors"
     via its `text` map). Colours in `theme.js` (Special cells section). Callouts are positioned from
     the canvas with `cellOnScreen` (they retry until the canvas is laid out).

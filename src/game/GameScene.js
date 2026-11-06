@@ -23,10 +23,13 @@ import { emojiTexture, emojiDisplaySize } from './emojiTexture.js'
 //                                                     and the rubble, and its Retry remounts the board.
 //
 // Special cells (src/engine/engine.js tap, schema board.special_cells): blocked cells are dark,
-// hatched holes; the bomb cell shows a bomb with its trigger object in a badge; both mirror cells
-// get a frame and a dashed line between them; the clock cell shows its colour cycle as a ring --
-// the current state big at the top, the others small and faded -- that turns counter-clockwise by
-// one step (CLOCK_TURN_MS) after every move.
+// hatched holes; the bomb cell shows a bomb (NOT which object sets it off -- that is for the player
+// to find out); both mirror cells get a frame, a translucent mirror sheen over the whole cell (the
+// state stays visible) and a dashed straight line between them; the clock cell bulges out (rounded square + a slightly larger circle,
+// drawn above its neighbours, may reach over them or off the board) and shows its colour cycle as a
+// ring -- the current state big at the top, the others small and faded -- that turns counter-
+// clockwise by one step (CLOCK_TURN_MS) after every move. When the bomb goes off the cells are
+// knocked out of line (_wreck: shifted, tilted, squeezed, overlapping).
 //
 // What a cell shows (colour, or an emoji on a background) comes from the game's look: the
 // active theme with its per-game choices drawn (src/themes.js drawLook, registry 'look'); the
@@ -47,9 +50,10 @@ const FRAME = 8            // width (and outer corner radius) of the golden fram
 const EMOJI_SIZE = 54      // size of a theme's cell emoji in px (cells are CELL - GAP = 90 px)
 const HOVER_ALPHA = 0.18   // training: white wash over the hovered cell's neighbours
 const BLINK_MS = 250       // training intro: one fade of the blinking goal object
-const CLOCK_R = 24         // radius of the clock's ring of states (cells are 90 px)
-const CLOCK_BIG = 32       // size of the current state on the ring
-const CLOCK_SMALL = 20     // size of the other states
+const CLOCK_BULGE = 1.2    // the clock cell's circle: this x the cell's half side as radius
+const CLOCK_R = 31         // radius of the clock's ring of states (cells are 90 px)
+const CLOCK_BIG = 38       // size of the current state on the ring
+const CLOCK_SMALL = 23     // size of the other states
 const CLOCK_TURN_MS = 450  // one step of the ring
 export const BOOM_SHOW_MS = 300   // the triggering colour is shown this long before the explosion
 
@@ -197,8 +201,10 @@ export default class GameScene extends Phaser.Scene {
       : kind === 'bomb' ? [C.bombFill, C.bombBorder] : [C.clockFace, C.clockRing]
     g.fillStyle(border)
     g.fillRoundedRect(-h, -h, s, s, RADIUS)
+    if (kind === 'clock') g.fillCircle(0, 0, h * CLOCK_BULGE)       // the bulge: square + circle
     g.fillStyle(fill)
     g.fillRoundedRect(-h + 3, -h + 3, s - 6, s - 6, RADIUS - 2)
+    if (kind === 'clock') g.fillCircle(0, 0, h * CLOCK_BULGE - 3)
     if (kind === 'blocked') {
       // diagonal hatching inside the cell: lines x - y = d, clipped to the inner square
       const lo = -h + 7, hi = h - 7
@@ -239,21 +245,12 @@ export default class GameScene extends Phaser.Scene {
       const cell = this.cells[r][c]
       const size = emojiDisplaySize(EMOJI_SIZE * 0.85)
       cell.label.setTexture(emojiTexture(this, '💣', EMOJI_SIZE)).setDisplaySize(size, size).setAlpha(1).setVisible(true)
-      cell.label.setPosition(-4, -4)
-      const ring = this.add.graphics()
-      ring.fillStyle(C.bombBadge, 0.92)
-      ring.fillCircle(0, 0, 15)
-      ring.lineStyle(2, C.bombBorder, 1)
-      ring.strokeCircle(0, 0, 15)
-      cell.add(this.add.container(h - 17, h - 17, [ring, item(sp.bomb.trigger, 22)]))
       this.bombCell = cell
     }
     if (sp.mirror) {
       const link = this.add.graphics().setDepth(5)
+      // the link: a dashed straight line between the two cells, from frame edge to frame edge
       const [a, b] = sp.mirror.map(([r, c]) => this._center(r, c))
-      link.lineStyle(4, C.mirrorLink, 0.95)
-      for (const p of [a, b]) link.strokeRoundedRect(p.x - h - 2, p.y - h - 2, s + 4, s + 4, RADIUS + 2)
-      // dashed line between the two cells, from frame edge to frame edge
       const dx = b.x - a.x, dy = b.y - a.y, len = Math.hypot(dx, dy)
       const ux = dx / len, uy = dy / len
       const t0 = Math.min(h / Math.max(Math.abs(ux), 1e-6), h / Math.max(Math.abs(uy), 1e-6)) + 4
@@ -261,6 +258,23 @@ export default class GameScene extends Phaser.Scene {
       for (let t = t0; t < len - t0; t += 16) {
         const t1 = Math.min(t + 8, len - t0)
         link.lineBetween(a.x + ux * t, a.y + uy * t, a.x + ux * t1, a.y + uy * t1)
+      }
+      link.lineStyle(4, C.mirrorLink, 0.95)
+      for (const [r, c] of sp.mirror) {
+        const p = this._center(r, c)
+        // mirror sheen over the whole cell: a light tint and two diagonal glints, clipped to the cell
+        const mask = this.make.graphics({ x: p.x, y: p.y }, false)
+        mask.fillStyle(C.white)
+        mask.fillRoundedRect(-h, -h, s, s, RADIUS)
+        const sheen = this.add.graphics({ x: p.x, y: p.y }).setDepth(4)
+        sheen.fillStyle(C.mirrorLink, 0.13)
+        sheen.fillRect(-h, -h, s, s)
+        sheen.fillStyle(C.mirrorGlint, 0.24)
+        sheen.fillPoints([{ x: -h - 10, y: h - 22 }, { x: h - 22, y: -h - 10 }, { x: h + 4, y: -h - 10 }, { x: -h - 10, y: h + 4 }], true)
+        sheen.fillStyle(C.mirrorGlint, 0.14)
+        sheen.fillPoints([{ x: -h + 14, y: h + 10 }, { x: h + 10, y: -h + 14 }, { x: h + 10, y: -h + 24 }, { x: -h + 24, y: h + 10 }], true)
+        sheen.setMask(mask.createGeometryMask())
+        link.strokeRoundedRect(p.x - h - 2, p.y - h - 2, s + 4, s + 4, RADIUS + 2)
       }
     }
     if (sp.clock) {
@@ -270,6 +284,7 @@ export default class GameScene extends Phaser.Scene {
       ring.lineStyle(2, C.clockRing, 0.45)
       ring.strokeCircle(0, 0, CLOCK_R)
       cell.add(ring)
+      cell.setDepth(3)            // the bulge reaches over the neighbouring cells
       this.clockCell = cell
       this.clockItems = sp.clock.cycle.map((v) => {
         const it = item(v, CLOCK_SMALL)
@@ -311,6 +326,29 @@ export default class GameScene extends Phaser.Scene {
       onComplete: () => { this.clockIndex = target; this.clockTurn = null; this._layoutClock(0) },
       onStop: () => { this.clockIndex = target; this._layoutClock(0) },
     })
+  }
+
+  // The bomb went off: every cell is knocked out of line -- shifted, tilted and squeezed, the more the
+  // nearer the blast at (br, bc), overlapping in a random order. Jerky on purpose
+  // (a few steps, no smooth tween); happens under the BOOM, so the player sees the result after it.
+  _wreck(br, bc) {
+    const rnd = (a, b) => a + Math.random() * (b - a)
+    const order = []
+    this.cells.forEach((row, r) => row.forEach((cell, c) => order.push({ cell, r, c })))
+    for (const { cell, r, c } of order) {
+      const near = Math.max(0, 1 - 0.28 * Math.max(Math.abs(r - br), Math.abs(c - bc)))
+      const push = 10 + 26 * near
+      const awayX = Math.sign(c - bc) || (Math.random() < 0.5 ? -1 : 1)
+      const awayY = Math.sign(r - br) || (Math.random() < 0.5 ? -1 : 1)
+      const to = {
+        x: cell.x + awayX * rnd(0.3, 1) * push + rnd(-6, 6),
+        y: cell.y + awayY * rnd(0.3, 1) * push + rnd(-6, 6),
+        angle: rnd(-1, 1) * (8 + 28 * near),
+        scaleX: rnd(0.78, 1.08), scaleY: rnd(0.72, 1.05),
+      }
+      this.tweens.add({ targets: cell, ...to, duration: 240, ease: 'Stepped', easeParams: [3] })
+      cell.setDepth(Math.random() * 2)
+    }
   }
 
   // Light reflection sweeping over the goal cell's golden frame, in a random direction,
@@ -482,7 +520,10 @@ export default class GameScene extends Phaser.Scene {
         }
         this.state = keep
       }
-      this.time.delayedCall(byTap ? 0 : BOOM_SHOW_MS, () => this.game.events.emit('boom', { r, c, byTap }))
+      this.time.delayedCall(byTap ? 0 : BOOM_SHOW_MS, () => {
+        this.game.events.emit('boom', { r, c, byTap })
+        this._wreck(r, c)
+      })
     }
   }
 }
