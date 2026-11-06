@@ -66,6 +66,29 @@ export const palette = {
   cellBlueFill:        '#3498db',
   cellBlueBorder:      '#217dbb',
 
+  // ── Special cells (src/game/GameScene.js, components/SpecialOverlays.jsx) ──
+  blockedFill:     '#0e0e18',   // blocked cell: an out-of-bounds hole ...
+  blockedBorder:   '#2a2a3c',
+  blockedHatch:    '#34344a',   // ... with diagonal hatching
+  bombFill:        '#24161a',   // bomb cell
+  bombBorder:      '#6b2f2f',
+  bombBadge:       '#f5f0e6',   // ring behind the trigger object in the bomb cell's corner
+  mirrorLink:      '#8fe3ff',   // frame around both mirror cells and the dashed line between them
+  clockFace:       '#262a4a',   // clock cell background
+  clockRing:       '#c9d4ff',   // the clock's ring of states
+  boomRed:         '#e8341c',   // explosion (cartoon starburst, three layers)
+  boomOrange:      '#ff8a1f',
+  boomYellow:      '#ffe23d',
+  boomInk:         '#2a0d05',   // outline of the starburst and the BOOM letters
+  boomFlash:       '#fff6d6',   // flash over the board at the bang
+  rubbleDust:      '#4d443d',   // destroyed board: dust layer ...
+  rubbleDark:      '#2b2521',
+  rubbleRock:      '#8a7f74',   // ... rocks
+  rubbleRockLight: '#b3a89b',
+  rubbleSmoke:     '#cfc8bf',
+  calloutBack:     '#fffbea',   // speech bubbles / callouts on the board
+  calloutInk:      '#1a1a2e',
+
   // ── Castle map (home screen, components/CastleMap.jsx) ──
   mapGrass:          '#3f6b3a',
   mapFieldGreen:     '#5b8a3c',

@@ -1,8 +1,8 @@
 import Phaser from 'phaser'
 import { phaser as C, palette } from '../theme.js'
 import { CELL_STATES, defaultLook } from '../themes.js'
-import { applyClick, clickRule, isWon } from '../engine/engine.js'
-import { startBoard } from './startBoard.js'
+import { tap, specials } from '../engine/engine.js'
+import { startState } from './startBoard.js'
 import { INTRO_MS, neighbourCells } from '../engine/training.js'
 import { emojiTexture, emojiDisplaySize } from './emojiTexture.js'
 
@@ -13,6 +13,20 @@ import { emojiTexture, emojiDisplaySize } from './emojiTexture.js'
 //                 taps); rule = rule-table index looked up, color = new colour (null if unchanged)
 //   'won'         { clicks }                          the goal cell reached its goal colour (emitted at once;
 //                                                     the React side delays the dialog briefly)
+//   'specialTap'  { kind, r, c, taps }                a tap on a blocked / clock cell (ignored) or on the
+//                                                     bomb below its taps_to_explode (kind 'bomb', taps =
+//                                                     taps so far); 'boardClick' (changed false) comes too
+//   'boom'        { r, c, byTap }                     the bomb went off -- emitted 300 ms after the tap when
+//                                                     a colour set it off (the triggering colour is shown
+//                                                     meanwhile), at once for the last tap on the bomb. The
+//                                                     scene takes no more taps; React shows the explosion
+//                                                     and the rubble, and its Retry remounts the board.
+//
+// Special cells (src/engine/engine.js tap, schema board.special_cells): blocked cells are dark,
+// hatched holes; the bomb cell shows a bomb with its trigger object in a badge; both mirror cells
+// get a frame and a dashed line between them; the clock cell shows its colour cycle as a ring --
+// the current state big at the top, the others small and faded -- that turns counter-clockwise by
+// one step (CLOCK_TURN_MS) after every move.
 //
 // What a cell shows (colour, or an emoji on a background) comes from the game's look: the
 // active theme with its per-game choices drawn (src/themes.js drawLook, registry 'look'); the
@@ -33,6 +47,27 @@ const FRAME = 8            // width (and outer corner radius) of the golden fram
 const EMOJI_SIZE = 54      // size of a theme's cell emoji in px (cells are CELL - GAP = 90 px)
 const HOVER_ALPHA = 0.18   // training: white wash over the hovered cell's neighbours
 const BLINK_MS = 250       // training intro: one fade of the blinking goal object
+const CLOCK_R = 24         // radius of the clock's ring of states (cells are 90 px)
+const CLOCK_BIG = 32       // size of the current state on the ring
+const CLOCK_SMALL = 20     // size of the other states
+const CLOCK_TURN_MS = 450  // one step of the ring
+export const BOOM_SHOW_MS = 300   // the triggering colour is shown this long before the explosion
+
+/** Screen geometry of cell (r, c) of the board canvas inside `boardEl` (its Board container):
+ *  { x, y } = centre and size = side in CSS pixels, relative to boardEl; null if not mounted. */
+export function cellOnScreen(boardEl, inst, r, c) {
+  const canvas = boardEl?.querySelector('canvas')
+  if (!canvas) return null
+  const rect = canvas.getBoundingClientRect()
+  const box = boardEl.getBoundingClientRect()
+  const k = rect.width / boardCanvasSize(inst).width
+  return {
+    x: rect.left - box.left + (PAD + c * CELL + CELL / 2) * k,
+    y: rect.top - box.top + (PAD + r * CELL + CELL / 2) * k,
+    size: (CELL - GAP) * k,
+    board: { left: rect.left - box.left, top: rect.top - box.top, width: rect.width, height: rect.height },
+  }
+}
 
 export function boardCanvasSize(inst) {
   const { rows, cols } = inst.board
@@ -49,7 +84,9 @@ export default class GameScene extends Phaser.Scene {
     const { rows, cols } = this.inst.board
     this.rows = rows
     this.cols = cols
-    this.board = startBoard(this.inst)
+    this.state = startState(this.inst)   // { board, bombTaps, hideStart } (src/engine/engine.js)
+    this.special = specials(this.inst)
+    this.locked = false                   // the bomb went off: no more taps
     const looks = this.registry.get('look') ?? defaultLook()
     this.cellLook = Object.fromEntries(CELL_STATES.map((v) => {
       const look = looks[v]
@@ -82,6 +119,7 @@ export default class GameScene extends Phaser.Scene {
       this.cells.push(row)
     }
     this._addGoalShine()
+    this._addSpecials()
 
     this.training = Boolean(this.registry.get('training'))
     if (this.training) {
@@ -93,6 +131,10 @@ export default class GameScene extends Phaser.Scene {
     this.game.events.emit('sceneReady', this)
   }
 
+  get board() {
+    return this.state.board
+  }
+
   _center(r, c) {
     return { x: PAD + c * CELL + CELL / 2, y: PAD + r * CELL + CELL / 2 }
   }
@@ -102,9 +144,23 @@ export default class GameScene extends Phaser.Scene {
     return r === gr && c === gc
   }
 
+  // 'blocked' | 'bomb' | 'clock' | null: the special cell drawn at (r, c) (mirror cells look normal).
+  _specialAt(r, c) {
+    const sp = this.special
+    if (sp.blocked.some(([x, y]) => x === r && y === c)) return 'blocked'
+    if (sp.bomb && sp.bomb.at[0] === r && sp.bomb.at[1] === c) return 'bomb'
+    if (sp.clock && sp.clock.at[0] === r && sp.clock.at[1] === c) return 'clock'
+    return null
+  }
+
   _drawCell(cell, r, c) {
     const s = CELL - GAP
     const h = s / 2
+    const kind = this._specialAt(r, c)
+    if (kind) {
+      this._drawSpecialCell(cell, kind)
+      return
+    }
     const v = this.board[r][c]
     const look = this.cellLook[v]
     const g = cell.g
@@ -129,6 +185,132 @@ export default class GameScene extends Phaser.Scene {
       const size = emojiDisplaySize(EMOJI_SIZE) * (o ? (s - 2 * o) / s : 1)
       cell.label.setTexture(look.emoji).setDisplaySize(size, size).setAlpha(look.alpha)
     }
+  }
+
+  // Blocked / bomb / clock cell background (their content: _addSpecials).
+  _drawSpecialCell(cell, kind) {
+    const s = CELL - GAP
+    const h = s / 2
+    const g = cell.g
+    g.clear()
+    const [fill, border] = kind === 'blocked' ? [C.blockedFill, C.blockedBorder]
+      : kind === 'bomb' ? [C.bombFill, C.bombBorder] : [C.clockFace, C.clockRing]
+    g.fillStyle(border)
+    g.fillRoundedRect(-h, -h, s, s, RADIUS)
+    g.fillStyle(fill)
+    g.fillRoundedRect(-h + 3, -h + 3, s - 6, s - 6, RADIUS - 2)
+    if (kind === 'blocked') {
+      // diagonal hatching inside the cell: lines x - y = d, clipped to the inner square
+      const lo = -h + 7, hi = h - 7
+      g.lineStyle(3, C.blockedHatch, 1)
+      for (let d = -(hi - lo) + 8; d < hi - lo; d += 14) {
+        const x1 = Math.max(lo, lo + d), x2 = Math.min(hi, hi + d)
+        g.lineBetween(x1, x1 - d, x2, x2 - d)
+      }
+    }
+    if (kind !== 'bomb') cell.label.setVisible(false)
+  }
+
+  // Special-cell decorations, once: bomb + trigger badge, mirror frames + link, the clock's ring.
+  _addSpecials() {
+    const sp = this.special
+    const s = CELL - GAP
+    const h = s / 2
+    const item = (v, size) => {
+      // one state as the board draws it: its emoji (or drawn object), else a small colour square
+      const look = this.cellLook[v]
+      if (look.emoji) {
+        const img = this.add.image(0, 0, look.emoji).setAlpha(look.alpha)
+        img.sizeTo = (px) => img.setDisplaySize(emojiDisplaySize(px), emojiDisplaySize(px))
+        img.sizeTo(size)
+        return img
+      }
+      const g = this.add.graphics()
+      g.fillStyle(look.border)
+      g.fillRoundedRect(-10, -10, 20, 20, 5)
+      g.fillStyle(look.fill)
+      g.fillRoundedRect(-8, -8, 16, 16, 4)
+      g.sizeTo = (px) => g.setScale(px / 20)
+      g.sizeTo(size)
+      return g
+    }
+    if (sp.bomb) {
+      const [r, c] = sp.bomb.at
+      const cell = this.cells[r][c]
+      const size = emojiDisplaySize(EMOJI_SIZE * 0.85)
+      cell.label.setTexture(emojiTexture(this, '💣', EMOJI_SIZE)).setDisplaySize(size, size).setAlpha(1).setVisible(true)
+      cell.label.setPosition(-4, -4)
+      const ring = this.add.graphics()
+      ring.fillStyle(C.bombBadge, 0.92)
+      ring.fillCircle(0, 0, 15)
+      ring.lineStyle(2, C.bombBorder, 1)
+      ring.strokeCircle(0, 0, 15)
+      cell.add(this.add.container(h - 17, h - 17, [ring, item(sp.bomb.trigger, 22)]))
+      this.bombCell = cell
+    }
+    if (sp.mirror) {
+      const link = this.add.graphics().setDepth(5)
+      const [a, b] = sp.mirror.map(([r, c]) => this._center(r, c))
+      link.lineStyle(4, C.mirrorLink, 0.95)
+      for (const p of [a, b]) link.strokeRoundedRect(p.x - h - 2, p.y - h - 2, s + 4, s + 4, RADIUS + 2)
+      // dashed line between the two cells, from frame edge to frame edge
+      const dx = b.x - a.x, dy = b.y - a.y, len = Math.hypot(dx, dy)
+      const ux = dx / len, uy = dy / len
+      const t0 = Math.min(h / Math.max(Math.abs(ux), 1e-6), h / Math.max(Math.abs(uy), 1e-6)) + 4
+      link.lineStyle(3, C.mirrorLink, 0.55)
+      for (let t = t0; t < len - t0; t += 16) {
+        const t1 = Math.min(t + 8, len - t0)
+        link.lineBetween(a.x + ux * t, a.y + uy * t, a.x + ux * t1, a.y + uy * t1)
+      }
+    }
+    if (sp.clock) {
+      const [r, c] = sp.clock.at
+      const cell = this.cells[r][c]
+      const ring = this.add.graphics()
+      ring.lineStyle(2, C.clockRing, 0.45)
+      ring.strokeCircle(0, 0, CLOCK_R)
+      cell.add(ring)
+      this.clockCell = cell
+      this.clockItems = sp.clock.cycle.map((v) => {
+        const it = item(v, CLOCK_SMALL)
+        cell.add(it)
+        return it
+      })
+      this.clockIndex = sp.clock.cycle.indexOf(this.board[r][c])
+      this._layoutClock(0)
+    }
+  }
+
+  // The clock's ring with the turn `t` (0..1) of the step to the next state done: the current
+  // state at the top, big and opaque; the others along the ring clockwise in cycle order, small
+  // and faded. Turning moves every state counter-clockwise by one place.
+  _layoutClock(t) {
+    const n = this.clockItems.length
+    let top = null
+    this.clockItems.forEach((it, k) => {
+      const slot = (((k - this.clockIndex - t) % n) + n) % n
+      const far = Math.min(1, Math.min(slot, n - slot))   // 0 at the top, 1 one place away or more
+      const a = -Math.PI / 2 + (slot * 2 * Math.PI) / n
+      it.setPosition(CLOCK_R * Math.cos(a), CLOCK_R * Math.sin(a))
+      it.sizeTo(CLOCK_BIG - (CLOCK_BIG - CLOCK_SMALL) * far)
+      it.setAlpha(1 - 0.45 * far)
+      if (far < 0.5) top = it
+    })
+    if (top) this.clockCell.bringToTop(top)
+  }
+
+  _turnClock() {
+    const [r, c] = this.special.clock.at
+    const target = this.special.clock.cycle.indexOf(this.board[r][c])
+    this.clockTurn?.stop()
+    this._layoutClock(0)
+    const turn = { t: 0 }
+    this.clockTurn = this.tweens.add({
+      targets: turn, t: 1, duration: CLOCK_TURN_MS, ease: 'Sine.easeInOut',
+      onUpdate: () => this._layoutClock(turn.t),
+      onComplete: () => { this.clockIndex = target; this.clockTurn = null; this._layoutClock(0) },
+      onStop: () => { this.clockIndex = target; this._layoutClock(0) },
+    })
   }
 
   // Light reflection sweeping over the goal cell's golden frame, in a random direction,
@@ -243,31 +425,64 @@ export default class GameScene extends Phaser.Scene {
   }
 
   _onPointerDown(pointer) {
-    if (this.won) return
+    if (this.won || this.locked) return
     const at = this._cellAt(pointer)
     if (!at) return
     const [r, c] = at
 
-    const rule = clickRule(this.board, r, c)
-    const next = applyClick(this.board, r, c, this.inst.rule.table)
+    const res = tap(this.inst, this.state, r, c)   // the full rule, incl. special cells
     const cell = this.cells[r][c]
     this.clicks += 1
-    if (next) {
-      this.board = next
-      this._drawCell(cell, r, c)
-      this.tweens.add({ targets: cell, scale: { from: 0.82, to: 1 }, duration: 160, ease: 'Back.easeOut' })
-    } else {
-      // No-op tap: tiny wiggle so the player sees the tap registered.
-      this.tweens.add({ targets: cell, angle: { from: -5, to: 0 }, duration: 160, ease: 'Sine.easeOut' })
-    }
-    this.game.events.emit('boardClick', {
-      r, c, changed: Boolean(next), board: this.board, clicks: this.clicks, rule, color: next ? next[r][c] : null,
+    const click = (changed) => this.game.events.emit('boardClick', {
+      r, c, changed, board: this.board, clicks: this.clicks, rule: res.rule, color: changed ? res.changed[0][2] : null,
     })
+    const pop = (x, y) => this.tweens.add({ targets: this.cells[x][y], scale: { from: 0.82, to: 1 }, duration: 160, ease: 'Back.easeOut' })
+    const wiggle = (target, deg = 5) => this.tweens.add({ targets: target, angle: { from: -deg, to: 0 }, duration: 160, ease: 'Sine.easeOut' })
 
-    if (next && isWon(this.inst, this.board)) {
-      this.won = true
+    if (res.event === 'move') {
+      this.state = res.state
+      for (const [x, y] of res.changed) {
+        if (this.special.clock && this.special.clock.at[0] === x && this.special.clock.at[1] === y) {
+          this._turnClock()
+        } else {
+          this._drawCell(this.cells[x][y], x, y)
+          pop(x, y)
+        }
+      }
+      click(true)
+      if (res.won) {
+        this.won = true
+        this.hover?.clear()
+        this.game.events.emit('won', { clicks: this.clicks })
+      }
+    } else if (res.event === 'noop') {
+      wiggle(cell)   // tiny wiggle so the player sees the tap registered
+      click(false)
+    } else if (res.event === 'ignored') {
+      click(false)   // blocked / clock cell: nothing happens (React explains it on the first tap)
+      this.game.events.emit('specialTap', { kind: this.special.type, r, c, taps: 0 })
+    } else if (res.event === 'bomb_warn') {
+      this.state = res.state
+      this.tweens.add({ targets: cell, angle: { from: -12, to: 0 }, duration: 260, ease: 'Elastic.easeOut' })
+      click(false)
+      this.game.events.emit('specialTap', { kind: 'bomb', r, c, taps: res.state.bombTaps })
+    } else if (res.event === 'boom') {
+      this.locked = true
       this.hover?.clear()
-      this.game.events.emit('won', { clicks: this.clicks })
+      click(false)   // the triggering tap is no move
+      const byTap = res.shown === this.board
+      if (!byTap) {
+        // show the triggering colour for a moment (the state itself is already back at the start)
+        const shownState = { ...this.state, board: res.shown }
+        const keep = this.state
+        this.state = shownState
+        for (const [x, y] of res.changed) {
+          this._drawCell(this.cells[x][y], x, y)
+          pop(x, y)
+        }
+        this.state = keep
+      }
+      this.time.delayedCall(byTap ? 0 : BOOM_SHOW_MS, () => this.game.events.emit('boom', { r, c, byTap }))
     }
   }
 }

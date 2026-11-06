@@ -116,5 +116,14 @@
     "start": "C'est parti !",
     "notes": "Les règles déjà observées sont notées ici.",
     "notesHint": "Consulte-les pour trouver un chemin qui amène {{goal}} dans le cadre doré."
+  },
+  "special": {
+    "blockedTap": "Cette case est hors jeu.",
+    "clockTap": "Tu ne peux rien faire ici. Elle avance quand tu transformes d'autres cases.",
+    "bombCareful": "Oh, attention !",
+    "bombIntro": "Attention ! L'un des objets fait exploser la bombe.",
+    "bombIntroColors": "Attention ! L'une des couleurs fait exploser la bombe.",
+    "mirrorIntro": "Les cases miroirs sont intriquées : transforme l'une, et l'autre change de la même façon.",
+    "boom": "BOUM !"
   }
 }

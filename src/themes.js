@@ -67,7 +67,7 @@ export const THEMES = {
     },
     cursor: null,
     cursorHotspot: null,
-    text: {},
+    text: { 'special.bombIntro': 'special.bombIntroColors' },   // plain colours, no objects
     tagline: null,
     decorations: null,
   },

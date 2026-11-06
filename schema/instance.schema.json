@@ -18,7 +18,8 @@
   "properties": {
     "schema_version": {
       "type": "string",
-      "pattern": "^1\\.[0-9]+$"
+      "pattern": "^1\\.[0-9]+$",
+      "description": "1.0 for core puzzles, 1.1 for puzzles with special cells (board.special_cells)."
     },
     "id": {
       "type": "string",
@@ -31,7 +32,7 @@
         "type": "string"
       },
       "minItems": 1,
-      "description": "Feature tags the engine must support. Known: core."
+      "description": "Feature tags the engine must support. Known: core; special-blocked, special-bomb, special-mirror, special-clock (exactly the one matching board.special_cells, in addition to core)."
     },
     "rule": {
       "type": "object",
@@ -96,8 +97,122 @@
         },
         "special_cells": {
           "type": "array",
-          "maxItems": 0,
-          "description": "Reserved for future variations (each entry {type, at, ...} with a feature tag). Must be empty for 'core'."
+          "maxItems": 1,
+          "description": "At most one entry (one special type per puzzle), hashed (part of board). Its cells are on the board, distinct, never a start cell or the goal. Rules: src/engine/engine.js tap() = factory instance.py tap(); see CLAUDE.md 'Special cells'. Changing an entry's meaning changes published puzzles -- never do it.",
+          "items": {
+            "oneOf": [
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "type",
+                  "cells"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "blocked"
+                  },
+                  "cells": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "$ref": "#/$defs/cell"
+                    },
+                    "description": "Sorted. Never coloured (uncolored for neighbours); taps are ignored."
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "type",
+                  "at",
+                  "trigger",
+                  "taps_to_explode"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "bomb"
+                  },
+                  "at": {
+                    "$ref": "#/$defs/cell"
+                  },
+                  "trigger": {
+                    "enum": [
+                      "O",
+                      "B",
+                      "G"
+                    ]
+                  },
+                  "taps_to_explode": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                },
+                "description": "Like a blocked cell for its neighbours. A tap that turns one of its 8 neighbours into `trigger`, or the taps_to_explode-th tap on the bomb since the last (re)start, sets it off = Retry (start state, moves reset; the triggering tap is no move)."
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "type",
+                  "cells"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "mirror"
+                  },
+                  "cells": {
+                    "type": "array",
+                    "minItems": 2,
+                    "maxItems": 2,
+                    "items": {
+                      "$ref": "#/$defs/cell"
+                    }
+                  }
+                },
+                "description": "Sorted. Tapping either cell gives both the new colour computed from the tapped cell's neighbours."
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "type",
+                  "at",
+                  "cycle",
+                  "start"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "clock"
+                  },
+                  "at": {
+                    "$ref": "#/$defs/cell"
+                  },
+                  "cycle": {
+                    "type": "array",
+                    "minItems": 2,
+                    "maxItems": 4,
+                    "uniqueItems": true,
+                    "items": {
+                      "enum": [
+                        "U",
+                        "O",
+                        "B",
+                        "G"
+                      ]
+                    }
+                  },
+                  "start": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                },
+                "description": "Not tappable. Shows cycle[start] at the start (also with a hidden start cell); steps to the next colour after every tap that changed the board."
+              }
+            ]
+          }
         }
       }
     },

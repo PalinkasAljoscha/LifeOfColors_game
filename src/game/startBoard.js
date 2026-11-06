@@ -1,7 +1,12 @@
 import { HIDE_START_CELL_IF_NOT_REQUIRED } from '../config.js'
-import { initialBoard, startHidden } from '../engine/engine.js'
+import { initialBoard, initialState, startHidden } from '../engine/engine.js'
 
 /** The board a puzzle starts from in this app build (start cell hidden or not, see config.js). */
 export function startBoard(inst) {
   return initialBoard(inst, { hideStart: startHidden(inst, HIDE_START_CELL_IF_NOT_REQUIRED) })
+}
+
+/** The play state a puzzle starts from (src/engine/engine.js initialState; same start-cell rule). */
+export function startState(inst) {
+  return initialState(inst, { hideStart: startHidden(inst, HIDE_START_CELL_IF_NOT_REQUIRED) })
 }

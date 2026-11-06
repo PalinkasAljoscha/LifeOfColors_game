@@ -10,7 +10,9 @@ import TrainingIntro, { INTRO_STEPS } from './TrainingIntro.jsx'
 import { markSolved } from '../engine/catalog.js'
 import { progressTotals } from '../engine/progress.js'
 import { minMovesOf, starsForWin } from '../engine/stars.js'
-import { drawLook } from '../themes.js'
+import { drawLook, themedKey } from '../themes.js'
+import { specials } from '../engine/engine.js'
+import { SpecialCallout, BoomOverlay, EXPLOSION_MS } from './SpecialOverlays.jsx'
 import { addObservation, observation } from '../engine/training.js'
 import * as telemetry from '../telemetry/telemetry.js'
 
@@ -27,8 +29,31 @@ import * as telemetry from '../telemetry/telemetry.js'
 // the win animation ("Passed training day X"; "Training complete" for the win that completes the plan).
 // A win plays the win animation (components/WinCelebration.jsx) over the board; afterwards the board
 // stays as it is and only Retry / Back go on. onHome is no longer used here (no win dialog).
+// Special cells (src/engine/engine.js, components/SpecialOverlays.jsx): a bomb / mirror puzzle opens
+// with a short callout at the special cell (each time it is opened, not on Retry; gone after
+// INTRO_CALLOUT_MS or the first tap); the first tap on a blocked / clock cell (per screen) explains
+// it; a tap on the bomb shows "Oh, careful!" with a scared face (BOMB_WARN_MS). When the bomb goes
+// off: the explosion (the whole screen shakes, EXPLOSION_MS), then the rubble with a Retry button --
+// the same as the Retry button on top (moves reset; telemetry: the triggering tap was a click that
+// changed nothing, the Retry a restart).
+const INTRO_CALLOUT_MS = 4500
+const TAP_CALLOUT_MS = 3500
+const BOMB_WARN_MS = 2000
+
 export default function GameScreen({ instance, place, training = null, pick, onPickNew, onHome }) {
   const { t } = useTranslation()
+  const special = specials(instance)
+  // special cells: the callout on the board ({ key, at, text, emoji, intro, ms }), the bomb's
+  // explosion (null | 'exploding' | 'rubble'), and which tap explanations were shown on this screen
+  const [callout, setCallout] = useState(() => {
+    if (special.type === 'bomb') return { key: 0, at: special.bomb.at, text: t(themedKey('special.bombIntro')), intro: true, ms: INTRO_CALLOUT_MS }
+    if (special.type === 'mirror') return { key: 0, at: special.mirror[0], text: t('special.mirrorIntro'), intro: true, ms: INTRO_CALLOUT_MS }
+    return null
+  })
+  const calloutKey = useRef(0)
+  const [boom, setBoom] = useState(null)
+  const explained = useRef(new Set())
+  const boomTimer = useRef(null)
   const [round, setRound] = useState(0)        // bumped by Retry -> remounts <Board>
   const [moves, setMoves] = useState(0)        // clicks that changed a cell
   const [won, setWon] = useState(false)        // the win animation is playing (components/WinCelebration.jsx)
@@ -87,7 +112,38 @@ export default function GameScreen({ instance, place, training = null, pick, onP
     movesRef.current = 0
     setWon(false)
     setResult(null)
+    setBoom(null)
+    clearTimeout(boomTimer.current)
   }, [round])
+
+  // Special cells: the callout disappears after its time.
+  useEffect(() => {
+    if (!callout) return undefined
+    const id = setTimeout(() => setCallout((c) => (c?.key === callout.key ? null : c)), callout.ms)
+    return () => clearTimeout(id)
+  }, [callout])
+  useEffect(() => () => clearTimeout(boomTimer.current), [])
+
+  function showCallout(c) {
+    calloutKey.current += 1
+    setCallout({ ...c, key: calloutKey.current })
+  }
+
+  function onSpecialTap({ kind, r, c }) {
+    if (kind === 'bomb') {
+      showCallout({ at: [r, c], text: t('special.bombCareful'), emoji: '😱', ms: BOMB_WARN_MS })
+    } else if ((kind === 'blocked' || kind === 'clock') && !explained.current.has(kind)) {
+      explained.current.add(kind)
+      showCallout({ at: [r, c], text: t(kind === 'blocked' ? 'special.blockedTap' : 'special.clockTap'), ms: TAP_CALLOUT_MS })
+    }
+  }
+
+  function onBoom() {
+    setCallout(null)
+    setBoom('exploding')
+    clearTimeout(boomTimer.current)
+    boomTimer.current = setTimeout(() => setBoom('rubble'), EXPLOSION_MS)
+  }
 
   // Page hidden -> snapshot and pause the play clock; visible again -> clock runs again.
   useEffect(() => {
@@ -121,6 +177,7 @@ export default function GameScreen({ instance, place, training = null, pick, onP
 
   function onClick({ r, c, changed, board, rule, color }) {
     telemetry.recordClick(r, c, changed, rule, color)
+    if (callout?.intro) setCallout(null)   // the opening callout goes with the first tap
     if (changed) {
       movesRef.current += 1
       setMoves(movesRef.current)
@@ -154,7 +211,7 @@ export default function GameScreen({ instance, place, training = null, pick, onP
   useEffect(() => () => clearTimeout(winTimer.current), [])
 
   return (
-    <div className="h-[100dvh] w-full flex flex-col bg-game-bg safe-pad">
+    <div className={`h-[100dvh] w-full flex flex-col bg-game-bg safe-pad${boom === 'exploding' ? ' boom-shake' : ''}`}>
       <div className="mx-auto w-full max-w-md flex gap-3">
         <button
           onClick={retry}
@@ -208,7 +265,14 @@ export default function GameScreen({ instance, place, training = null, pick, onP
       <div ref={boardBoxRef} className={training ? 'min-h-0 mt-2 relative w-full shrink' : 'flex-1 min-h-0 mt-2 relative'}
            style={training ? { aspectRatio: `${boardSize.width} / ${boardSize.height}`, maxWidth: '100%' } : undefined}>
         <Board key={round} instance={instance} look={look} training={training !== null}
-               goalIntro={!(training?.day === 1 && round === 0)} onClick={onClick} onWon={onWon} />
+               goalIntro={!(training?.day === 1 && round === 0)} onClick={onClick} onWon={onWon}
+               onSpecialTap={onSpecialTap} onBoom={onBoom} />
+        {/* special cells: callouts at a cell, and the bomb's explosion / rubble (with its Retry) */}
+        {callout && !boom && (
+          <SpecialCallout key={`callout-${callout.key}`} boardRef={boardBoxRef} instance={instance} at={callout.at}
+                          text={callout.text} emoji={callout.emoji ?? null} look={look} />
+        )}
+        {boom && <BoomOverlay phase={boom} onRetry={retry} boardRef={boardBoxRef} instance={instance} />}
         {/* training puzzle 1: the explanations come first; a tap on the board goes to the next one */}
         {introStep !== null && (
           <>

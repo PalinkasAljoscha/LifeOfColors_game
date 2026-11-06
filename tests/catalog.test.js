@@ -46,6 +46,7 @@ test('catalog is consistent and every instance is valid', () => {
     assert.ok(rows >= 1 && rows <= 9 && cols >= 1 && cols <= 6, `${inst.id}: board ${rows}x${cols} exceeds 9x6`)
     for (const s of start) assert.ok(s.at[0] < rows && s.at[1] < cols)
     assert.ok(inst.goal.at[0] < rows && inst.goal.at[1] < cols)
+    checkSpecialCells(inst)
     if (inst.retired) {
       assert.equal(inst.difficulty_ranking, undefined, `${inst.id}: retired with a ranking`)
       assert.equal(inst.training_position, undefined, `${inst.id}: retired in training`)
@@ -67,3 +68,41 @@ test('catalog is consistent and every instance is valid', () => {
   assert.equal(positions.length, index.training)
   assert.equal(names.size, Object.keys(index.names).length)
 })
+
+// board.special_cells: the same contract as the factory's instance.validate_instance.
+const SPECIAL_FEATURE = { blocked: 'special-blocked', bomb: 'special-bomb', mirror: 'special-mirror', clock: 'special-clock' }
+const SPECIAL_KEYS = { blocked: 'cells,type', mirror: 'cells,type', bomb: 'at,taps_to_explode,trigger,type', clock: 'at,cycle,start,type' }
+function checkSpecialCells(inst) {
+  const sc = inst.board.special_cells ?? []
+  const extra = inst.requires.filter((f) => f !== 'core')
+  if (!sc.length) {
+    assert.deepEqual(extra, [], `${inst.id}: special feature tag without special cells`)
+    return
+  }
+  assert.equal(sc.length, 1, `${inst.id}: at most one special-cell entry`)
+  const e = sc[0]
+  assert.ok(SPECIAL_FEATURE[e.type], `${inst.id}: unknown special type ${e.type}`)
+  assert.deepEqual(extra, [SPECIAL_FEATURE[e.type]], `${inst.id}: requires must name exactly its special type`)
+  assert.equal(Object.keys(e).sort().join(','), SPECIAL_KEYS[e.type], `${inst.id}: keys of the ${e.type} entry`)
+  assert.ok(Number(inst.schema_version.split('.')[1]) >= 1, `${inst.id}: special cells need schema_version >= 1.1`)
+  assert.equal(inst.training_position, undefined, `${inst.id}: special-cell puzzles are never in training`)
+  const cells = e.cells ?? [e.at]
+  const taken = new Set([...inst.board.start.map((s) => s.at.join(',')), inst.goal.at.join(',')])
+  const keys = cells.map((x) => x.join(','))
+  assert.equal(new Set(keys).size, keys.length, `${inst.id}: repeated special cell`)
+  for (const [r, c] of cells) {
+    assert.ok(r >= 0 && r < inst.board.rows && c >= 0 && c < inst.board.cols, `${inst.id}: special cell off the board`)
+    assert.ok(!taken.has(`${r},${c}`), `${inst.id}: special cell on a start cell or the goal`)
+  }
+  if (e.type === 'mirror') assert.equal(cells.length, 2, `${inst.id}: a mirror has two cells`)
+  if (e.type === 'bomb') {
+    assert.ok(['O', 'B', 'G'].includes(e.trigger), `${inst.id}: bomb trigger`)
+    assert.ok(Number.isInteger(e.taps_to_explode) && e.taps_to_explode >= 1, `${inst.id}: taps_to_explode`)
+  }
+  if (e.type === 'clock') {
+    assert.ok(e.cycle.length >= 2 && e.cycle.length <= 4 && new Set(e.cycle).size === e.cycle.length
+      && e.cycle.every((x) => 'UOBG'.includes(x)), `${inst.id}: clock cycle`)
+    assert.ok(Number.isInteger(e.start) && e.start >= 0 && e.start < e.cycle.length, `${inst.id}: clock start`)
+  }
+}
+

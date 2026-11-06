@@ -116,5 +116,14 @@
     "start": "Los geht's!",
     "notes": "Hier stehen die Regeln, die du schon beobachtet hast.",
     "notesHint": "Schau hinein, um einen Weg zu finden, auf dem {{goal}} in den goldenen Rahmen kommt."
+  },
+  "special": {
+    "blockedTap": "Dieses Feld ist außer Reichweite.",
+    "clockTap": "Hier kannst du nichts tun. Es dreht sich weiter, wenn du andere Felder verwandelst.",
+    "bombCareful": "Oh, Vorsicht!",
+    "bombIntro": "Achtung! Eines der Objekte bringt die Bombe zum Explodieren.",
+    "bombIntroColors": "Achtung! Eine der Farben bringt die Bombe zum Explodieren.",
+    "mirrorIntro": "Spiegelfelder sind verschränkt: Verwandle eines, und das andere verwandelt sich genauso.",
+    "boom": "BUMM!"
   }
 }

@@ -79,6 +79,15 @@ One-time setup:
 | `src/telemetry/telemetry.js` | Anonymous telemetry (see below). |
 | `telemetry/schema.sql` | Supabase tables (`screen_views`, `puzzle_plays`) and insert-only access policies. Run it in the SQL editor once, and again whenever it changes (safe to re-run). Run it before deploying an app version that sends new columns, otherwise those inserts are rejected. |
 
+## Special cells
+
+Puzzles can have one kind of special cell (schema 1.1, `board.special_cells`, feature tag in
+`requires`): blocked cells, a bomb with a trigger colour, a mirror pair, or a clock cell with a colour
+cycle. The rules are in `src/engine/engine.js` (`tap`) and must match the factory's `instance.py`
+exactly; `tests/engine.test.js` replays the factory's golden vectors to check that. The drawing and
+the animations are in `src/game/GameScene.js` and `src/components/SpecialOverlays.jsx`; see
+CLAUDE.md for the details and the rules that must never change.
+
 ## Telemetry and privacy
 
 The app records anonymous usage data to see how much the site is used and how the puzzles are

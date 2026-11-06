@@ -116,5 +116,14 @@
     "start": "Let's go!",
     "notes": "Rules you have already observed are noted here.",
     "notesHint": "Have a look to come up with a path that puts the {{goal}} into the golden frame."
+  },
+  "special": {
+    "blockedTap": "This cell is out of bounds.",
+    "clockTap": "You can't do anything here. This moves on as you transform other fields.",
+    "bombCareful": "Oh, careful!",
+    "bombIntro": "Watch out! One of the objects triggers the bomb.",
+    "bombIntroColors": "Watch out! One of the colors triggers the bomb.",
+    "mirrorIntro": "Mirror fields are entangled: transform one and the other changes the same way.",
+    "boom": "BOOM!"
   }
 }

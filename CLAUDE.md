@@ -28,7 +28,7 @@ package name, code comments, schema, telemetry) -- never show it to players.
 ```
 src/
   App.jsx                 # screens: Home (castle map) -> Castle (grid) -> Game; ?instance=<name or id> opens one puzzle
-  engine/engine.js        # THE rule engine (must match the factory's instance.py exactly)
+  engine/engine.js        # THE rule engine (must match the factory's instance.py exactly), incl. special cells (tap)
   engine/catalog.js       # loads public/catalog/{index,puzzles}.json (loadAll for the castle map)
   engine/castles.js       # the castle hierarchy: ranking -> castles, required stars, unlocking
   engine/progress.js      # tried/solved puzzles + best stars + per-castle star counters; saved only after opt-in
@@ -161,6 +161,37 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   scene takes no more taps after a win, and the player goes on with Retry or Back. Random within
   limits, drawn once per win. Colours `win*` in theme.js, keyframes `win-*` in index.css.
 - **Mobile first** -- portrait phones are the main target; boards up to 9 rows x 6 cols must fit.
+- **Special cells** (2026-11-06; schema 1.1, feature tags `special-blocked`, `special-bomb`,
+  `special-mirror`, `special-clock`, one entry in `board.special_cells`). CRITICAL: the rules live in
+  `engine.js` `tap(inst, state, r, c)` and must stay IDENTICAL to the factory's `instance.py` `tap`
+  (which the factory checks against its solver model on every export). `tests/engine.test.js` replays
+  the factory's special golden vectors (every tap's event, board and pre-explosion board); never
+  edit the vectors or relax that test -- a rule change needs the factory first, then a new export.
+  The entry is hashed into the id: a published rule can never change meaning (new behaviour = new
+  feature tag). Frozen details: blocked / bomb cells count as uncolored and ignore taps; the bomb goes
+  off when a tap turns a neighbour into its `trigger` colour, or on the `taps_to_explode`-th tap on it
+  since the last (re)start (earlier taps only warn); going off = Retry (moves reset, the triggering tap
+  is no move); mirror: the tapped cell's new colour (from ITS neighbours) goes to both cells, no
+  chain; clock: untappable, starts at `cycle[start]` (also with a hidden start cell), steps after
+  every tap that changed the board. The scene must call `tap` for every tap -- never `applyClick`
+  directly (that is the core rule only).
+  - Scene (`GameScene.js`): `this.state` = `{ board, bombTaps, hideStart }` (`startBoard.js`
+    `startState`); events `specialTap` (blocked / clock tap: ignored; bomb tap: warning) and `boom`
+    (300 ms `BOOM_SHOW_MS` after a colour trigger, with the triggering colour shown; at once for the
+    last bomb tap); after a boom the scene takes no taps -- React's Retry remounts it. Drawing:
+    blocked = dark hatched hole; bomb = 💣 with the trigger object in a corner badge; mirror = frames
+    on both cells + dashed line; clock = ring of its cycle, current state big at the top, the others
+    small and faded, turning counter-clockwise one step per move (`CLOCK_TURN_MS`).
+  - React (`GameScreen.jsx`, `components/SpecialOverlays.jsx`): bomb / mirror puzzles open with a
+    short callout (each time opened, not on Retry; gone after 4.5 s or the first tap); the first tap
+    on a blocked / clock cell per screen explains it; each bomb tap shows "Oh, careful!" with 😱 (2 s);
+    an explosion = cartoon BOOM starburst, the whole screen shakes, deliberately jerky (`steps()` in
+    `index.css`, 1 s), then rubble over the board with a Retry button (same as the top Retry). Texts
+    `special.*` in all locales (`special.bombIntro` says "objects"; the classic theme says "colors"
+    via its `text` map). Colours in `theme.js` (Special cells section). Callouts are positioned from
+    the canvas with `cellOnScreen` (they retry until the canvas is laid out).
+  - Telemetry unchanged: an explosion is a click with changed = false; the rubble's Retry is the
+    normal restart. Saved progress unchanged. Special puzzles are never in the training castle.
 
 ## Branching Strategy (as in Maze Inc.)
 
@@ -171,6 +202,6 @@ tests/                    # engine vectors (generated), classic-rule test, catal
 ## Phaser + React pattern
 
 - `Board` mounts `Phaser.Game` (scale FIT, internal size = board size) and destroys it on unmount.
-- The scene emits `boardClick` and `won` on `game.events`; React owns everything outside the canvas
+- The scene emits `boardClick`, `won`, `specialTap` and `boom` on `game.events`; React owns everything outside the canvas
   (buttons, counters, dialog, telemetry).
 - Retry = remount `Board` via a `key` change. Home = unmount.
