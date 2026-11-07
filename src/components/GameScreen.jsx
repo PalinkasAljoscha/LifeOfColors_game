@@ -15,6 +15,7 @@ import { specials } from '../engine/engine.js'
 import { SpecialCallout, BoomOverlay, EXPLOSION_MS } from './SpecialOverlays.jsx'
 import { addObservation, observation } from '../engine/training.js'
 import * as telemetry from '../telemetry/telemetry.js'
+import { SpecialTile, isSpecial } from './LevelScreen.jsx'
 
 // The goal colour as the board draws it in this game's look: its emoji, or a small colour square.
 
@@ -245,13 +246,15 @@ export default function GameScreen({ instance, place, training = null, pick, onP
         <span className="min-w-0 flex items-center gap-1.5">
           {place && <span className="text-game-silver shrink-0">{place}:</span>}
           {/* Puzzle name (the factory finds the puzzle by it), with its tile colour from the level grid. */}
-          {instance.name_color && (
+          {instance.name_color && (isSpecial(instance) ? (
+            <span className="relative w-5 h-3.5 shrink-0" aria-hidden="true"><SpecialTile color={instance.name_color} /></span>
+          ) : (
             <span
               className="w-3.5 h-3.5 rounded-sm ring-1 ring-inset ring-white/25 shrink-0"
               style={{ background: instance.name_color }}
               aria-hidden="true"
             />
-          )}
+          ))}
           <span className="truncate select-all text-white/90">{instance.name ?? instance.id}</span>
         </span>
         {/* Moves counter (the best-known move count is shown in the win dialog only). */}

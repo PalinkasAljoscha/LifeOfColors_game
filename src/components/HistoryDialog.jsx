@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { playState } from '../engine/catalog.js'
 import { bestStars } from '../engine/progress.js'
-import { TileMark } from './LevelScreen.jsx'
+import { SpecialTile, isSpecial, TileMark } from './LevelScreen.jsx'
 
 // History pop-up of the homepage: the recently played puzzles (engine/progress.js recentlyPlayed,
 // newest first, at most HISTORY_MAX), each a link that opens the puzzle again. `recent` =
@@ -44,9 +44,11 @@ export default function HistoryDialog({ recent, onPlay, onClose }) {
                     className="w-full flex items-center gap-3 rounded-xl px-2 py-1.5 text-left hover:bg-white/5
                                active:scale-[0.98] transition-transform"
                   >
-                    <span className="w-10 aspect-[4/3] shrink-0 rounded-md ring-1 ring-inset ring-white/20 flex items-center justify-center"
-                          style={{ background: inst.name_color }} aria-hidden="true">
-                      <TileMark state={state} best={best} />
+                    <span className={`relative w-10 aspect-[4/3] shrink-0 flex items-center justify-center
+                                      ${isSpecial(inst) ? '' : 'rounded-md ring-1 ring-inset ring-white/20'}`}
+                          style={isSpecial(inst) ? undefined : { background: inst.name_color }} aria-hidden="true">
+                      {isSpecial(inst) && <SpecialTile color={inst.name_color} />}
+                      <span className="relative"><TileMark state={state} best={best} /></span>
                     </span>
                     <span className="min-w-0">
                       <span className="block font-black leading-tight truncate">{inst.name}</span>

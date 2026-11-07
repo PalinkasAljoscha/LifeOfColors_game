@@ -33,6 +33,41 @@ function DownArrow({ color }) {
   )
 }
 
+// Puzzles with a special cell get a tile with a wavy white border, so players can find them.
+// Only the drawing changes: the button around it keeps the full tile as its tap area.
+export const isSpecial = (inst) => (inst.board?.special_cells?.length ?? 0) > 0
+
+// Outline of the tile (viewBox 40 x 30): each edge cut into equal steps that bulge out / in
+// alternately (quadratic curves), 6 along the long edges, 4 along the short ones.
+function wavyPath() {
+  const M = 2, AMP = 2.6, W = 40, H = 30
+  const corners = [[M, M], [W - M, M], [W - M, H - M], [M, H - M]]
+  const steps = [6, 4, 6, 4]
+  let d = `M${corners[0][0]},${corners[0][1]}`
+  let sign = 1
+  for (let e = 0; e < 4; e++) {
+    const [x0, y0] = corners[e], [x1, y1] = corners[(e + 1) % 4]
+    const n = steps[e], dx = (x1 - x0) / n, dy = (y1 - y0) / n
+    const len = Math.hypot(dx, dy), nx = dy / len, ny = -dx / len   // outward normal
+    for (let k = 0; k < n; k++) {
+      const cx = x0 + dx * (k + 0.5) + nx * AMP * sign, cy = y0 + dy * (k + 0.5) + ny * AMP * sign
+      d += ` Q${cx.toFixed(2)},${cy.toFixed(2)} ${(x0 + dx * (k + 1)).toFixed(2)},${(y0 + dy * (k + 1)).toFixed(2)}`
+      sign = -sign
+    }
+  }
+  return d + ' Z'
+}
+const WAVY = wavyPath()
+
+export function SpecialTile({ color }) {
+  return (
+    <svg className="absolute inset-0 w-full h-full overflow-visible" viewBox="0 0 40 30" preserveAspectRatio="none" aria-hidden="true">
+      <path d={WAVY} fill={color} stroke={palette.specialTileEdge} strokeOpacity="0.9" strokeWidth="1.5"
+            strokeLinejoin="round" style={{ vectorEffect: 'non-scaling-stroke' }} />
+    </svg>
+  )
+}
+
 // Star badge / check mark / dot on a tile (solved with rating / solved / only opened).
 export function TileMark({ state, best }) {
   if (state === 'solved' && best > 0) {
@@ -178,20 +213,22 @@ export default function LevelScreen({ title, nextTitle, state, pool, onPick, onB
 
       <div className="flex-1 min-h-0 overflow-y-auto">
         {training ? <TrainingPath pool={pool} states={states} onPick={onPick} /> : (
-        <div className="mx-auto w-full max-w-md grid grid-cols-10 gap-1.5 pb-4">
+        <div className="mx-auto w-full max-w-md grid grid-cols-10 gap-1.5 pt-1 pb-4">
           {pool.map((inst, i) => {
             const best = states[i] === 'solved' ? bestStars(inst.id) : null
+            const special = isSpecial(inst)
             return (
             <button
               key={inst.id}
               onClick={() => onPick(inst)}
-              className="aspect-[4/3] rounded-md ring-1 ring-inset ring-white/20 active:scale-90 transition-transform
-                         flex items-center justify-center"
-              style={{ background: inst.name_color }}
+              className={`relative aspect-[4/3] active:scale-90 transition-transform flex items-center justify-center
+                          ${special ? '' : 'rounded-md ring-1 ring-inset ring-white/20'}`}
+              style={special ? undefined : { background: inst.name_color }}
               aria-label={states[i] === 'solved' ? `${inst.name} ✓${best ? ` ${'★'.repeat(best)}` : ''}` : inst.name}
               title={inst.name}
             >
-              <TileMark state={states[i]} best={best} />
+              {special && <SpecialTile color={inst.name_color} />}
+              <span className="relative"><TileMark state={states[i]} best={best} /></span>
             </button>
             )
           })}

@@ -196,6 +196,12 @@ tests/                    # engine vectors (generated), classic-rule test, catal
     `special.*` in all locales (`special.bombIntro` says "objects"; the classic theme says "colors"
     via its `text` map). Colours in `theme.js` (Special cells section). Callouts are positioned from
     the canvas with `cellOnScreen` (they retry until the canvas is laid out).
+  - Castle grid: a special puzzle's tile has a wavy white border (`SpecialTile` / `isSpecial` in
+    `LevelScreen.jsx`, colour `specialTileEdge`) instead of the plain rounded rectangle, so players
+    can find the special puzzles. Only the drawing changes; the button keeps the full tile as its
+    tap area (the grid has `pt-1` so the top row's waves are not clipped). The same tile is used in
+    the history dialog and as the name swatch on the game screen. `isSpecial` = the instance has a
+    `board.special_cells` entry.
   - Telemetry unchanged: an explosion is a click with changed = false; the rubble's Retry is the
     normal restart. Saved progress unchanged. Special puzzles are never in the training castle.
 

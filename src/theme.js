@@ -76,6 +76,7 @@ export const palette = {
   mirrorGlint:     '#ffffff',   // the diagonal glints of the mirror sheen (drawn translucent)
   clockFace:       '#262a4a',   // clock cell background
   clockRing:       '#c9d4ff',   // the clock's ring of states
+  specialTileEdge: '#ffffff',   // castle grid: wavy border of a special-cell puzzle's tile
   boomRed:         '#e8341c',   // explosion (cartoon starburst, three layers)
   boomOrange:      '#ff8a1f',
   boomYellow:      '#ffe23d',
