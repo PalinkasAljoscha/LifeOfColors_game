@@ -1,7 +1,7 @@
 {
  "schema_version": "1.1",
- "catalog_version": "20261108-574df4a6",
- "generated_at": "2026-11-08T20:43:55+00:00",
+ "catalog_version": "20261109-c6942409",
+ "generated_at": "2026-11-09T20:38:50+00:00",
  "features": [
   "core",
   "special-blocked",
@@ -10,8 +10,8 @@
   "special-mirror"
  ],
  "file": "puzzles.json",
- "count": 1033,
- "ranked": 1033,
+ "count": 980,
+ "ranked": 980,
  "training": 6,
  "names": {
   "ghostlyarc": "loc_0008b5cd8324925c",
