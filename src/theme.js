@@ -74,8 +74,6 @@ export const palette = {
   bombBorder:      '#6b2f2f',
   mirrorLink:      '#8fe3ff',   // frame around both mirror cells, their tint and the line between them
   mirrorGlint:     '#ffffff',   // the diagonal glints of the mirror sheen (drawn translucent)
-  clockFace:       '#262a4a',   // clock cell background
-  clockRing:       '#c9d4ff',   // the clock's ring of states
   specialTileEdge: '#ffffff',   // castle grid: wavy border of a special-cell puzzle's tile
   boomRed:         '#e8341c',   // explosion (cartoon starburst, three layers)
   boomOrange:      '#ff8a1f',

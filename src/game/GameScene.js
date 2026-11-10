@@ -50,7 +50,8 @@ const FRAME = 8            // width (and outer corner radius) of the golden fram
 const EMOJI_SIZE = 54      // size of a theme's cell emoji in px (cells are CELL - GAP = 90 px)
 const HOVER_ALPHA = 0.18   // training: white wash over the hovered cell's neighbours
 const BLINK_MS = 250       // training intro: one fade of the blinking goal object
-const CLOCK_BULGE = 1.34   // the clock cell's circle: this x the cell's half side as radius (covers the square's corners)
+const CLOCK_BULGE = 1.28   // the clock cell's circle: this x the cell's half side as radius
+const CLOCK_SQUARE_RADIUS = 16  // corner radius of the clock's square: round enough to stay inside the circle
 const CLOCK_R = 31         // radius of the clock's ring of states (cells are 90 px)
 const CLOCK_BIG = 38       // size of the current state on the ring
 const CLOCK_SMALL = 23     // size of the other states
@@ -198,12 +199,14 @@ export default class GameScene extends Phaser.Scene {
     const g = cell.g
     g.clear()
     const [fill, border] = kind === 'blocked' ? [C.blockedFill, C.blockedBorder]
-      : kind === 'bomb' ? [C.bombFill, C.bombBorder] : [C.clockFace, C.clockRing]
+      : kind === 'bomb' ? [C.bombFill, C.bombBorder]
+      : [this.cellLook.U.fill, this.cellLook.U.border]   // clock: the same colours as a normal (uncoloured) cell
+    const rad = kind === 'clock' ? CLOCK_SQUARE_RADIUS : RADIUS
     g.fillStyle(border)
-    g.fillRoundedRect(-h, -h, s, s, RADIUS)
+    g.fillRoundedRect(-h, -h, s, s, rad)
     if (kind === 'clock') g.fillCircle(0, 0, h * CLOCK_BULGE)       // the bulge: square + circle
     g.fillStyle(fill)
-    g.fillRoundedRect(-h + 3, -h + 3, s - 6, s - 6, RADIUS - 2)
+    g.fillRoundedRect(-h + 3, -h + 3, s - 6, s - 6, rad - 2)
     if (kind === 'clock') g.fillCircle(0, 0, h * CLOCK_BULGE - 3)
     if (kind === 'blocked') {
       // diagonal hatching inside the cell: lines x - y = d, clipped to the inner square
