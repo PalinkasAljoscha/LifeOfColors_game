@@ -182,7 +182,10 @@ tests/                    # engine vectors (generated), classic-rule test, catal
     mirror = frames on both cells, a translucent mirror sheen over each whole cell (tint + diagonal
     glints, the state stays visible) and a dashed straight line between them; clock = the cell bulges out (rounded square + a circle of
     `CLOCK_BULGE` x its half side; the square's corners are rounded (`CLOCK_SQUARE_RADIUS`) so they
-    stay hidden inside the circle; same fill and outline as a normal uncoloured cell; drawn above its
+    stay hidden inside the circle; a normal uncoloured cell's fill, its outline a little lighter
+    (`CLOCK_OUTLINE_LIGHTEN`); a circle of that outline around the active (top) state, touching the
+    outer circle at the top; an arrowhead on the outer circle at 3 o'clock pointing up (the turning
+    direction); drawn above its
     neighbours, may reach over them or off the board) with its cycle's states on a circle (no ring
     line drawn), current state big at the top, the others small and faded, turning
     counter-clockwise one step per move (`CLOCK_TURN_MS`). On `boom` the scene knocks every cell out

@@ -52,6 +52,7 @@ const HOVER_ALPHA = 0.18   // training: white wash over the hovered cell's neigh
 const BLINK_MS = 250       // training intro: one fade of the blinking goal object
 const CLOCK_BULGE = 1.28   // the clock cell's circle: this x the cell's half side as radius
 const CLOCK_SQUARE_RADIUS = 16  // corner radius of the clock's square: round enough to stay inside the circle
+const CLOCK_OUTLINE_LIGHTEN = 18 // the clock's outline: the normal cell outline, this much lighter (Phaser lighten %)
 const CLOCK_R = 31         // radius of the clock's ring of states (cells are 90 px)
 const CLOCK_BIG = 38       // size of the current state on the ring
 const CLOCK_SMALL = 23     // size of the other states
@@ -200,14 +201,26 @@ export default class GameScene extends Phaser.Scene {
     g.clear()
     const [fill, border] = kind === 'blocked' ? [C.blockedFill, C.blockedBorder]
       : kind === 'bomb' ? [C.bombFill, C.bombBorder]
-      : [this.cellLook.U.fill, this.cellLook.U.border]   // clock: the same colours as a normal (uncoloured) cell
+      // clock: a normal (uncoloured) cell's fill, its outline a little lighter to set it apart
+      : [this.cellLook.U.fill, Phaser.Display.Color.ValueToColor(this.cellLook.U.border).lighten(CLOCK_OUTLINE_LIGHTEN).color]
     const rad = kind === 'clock' ? CLOCK_SQUARE_RADIUS : RADIUS
     g.fillStyle(border)
     g.fillRoundedRect(-h, -h, s, s, rad)
     if (kind === 'clock') g.fillCircle(0, 0, h * CLOCK_BULGE)       // the bulge: square + circle
     g.fillStyle(fill)
     g.fillRoundedRect(-h + 3, -h + 3, s - 6, s - 6, rad - 2)
-    if (kind === 'clock') g.fillCircle(0, 0, h * CLOCK_BULGE - 3)
+    if (kind === 'clock') {
+      const R = h * CLOCK_BULGE
+      g.fillCircle(0, 0, R - 3)
+      // a circle around the active (top) state, touching the outer circle at the top
+      const r = R - CLOCK_R
+      g.lineStyle(3, border, 1)
+      g.strokeCircle(0, -CLOCK_R, r - 1.5)
+      // an arrowhead on the outer circle at 3 o'clock pointing up: the ring turns counter-clockwise
+      const x = R - 1.5
+      g.fillStyle(border)
+      g.fillTriangle(x - 7, 4, x + 7, 4, x, -8)
+    }
     if (kind === 'blocked') {
       // diagonal hatching inside the cell: lines x - y = d, clipped to the inner square
       const lo = -h + 7, hi = h - 7
