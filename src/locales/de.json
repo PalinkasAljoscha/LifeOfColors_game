@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "Zauber­lehrling"
+    "title": "Life of Colors"
   },
   "home": {
     "description": "Das Ziel: 🟩 auf dem gold umrandeten Feld. Tippe auf ein Feld um es zu verwandeln - oder auch nicht - je nachdem, welche Farben drumherum sind. Die versteckten Regeln sind bei jedem Puzzle anders.",
@@ -91,7 +91,7 @@
     "close": "Los geht's"
   },
   "training": {
-    "notes": "Regel-Beobachtungen",
+    "notes": "Beobachtungen",
     "nothing": "keine farbigen Nachbarn"
   },
   "castles": {
@@ -123,7 +123,6 @@
     "bombCareful": "Oh, Vorsicht!",
     "bombIntro": "Achtung! Eines der Objekte bringt die Bombe zum Explodieren.",
     "bombIntroColors": "Achtung! Eine der Farben bringt die Bombe zum Explodieren.",
-    "mirrorIntro": "Spiegelfelder sind verschränkt: Verwandle eines, und das andere verwandelt sich genauso.",
-    "boom": "BUMM!"
+    "mirrorIntro": "Spiegelfelder sind verschränkt: Verwandle eines, und das andere verwandelt sich genauso."
   }
 }

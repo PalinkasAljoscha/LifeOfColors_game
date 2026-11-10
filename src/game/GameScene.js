@@ -25,9 +25,9 @@ import { emojiTexture, emojiDisplaySize } from './emojiTexture.js'
 // Special cells (src/engine/engine.js tap, schema board.special_cells): blocked cells are dark,
 // hatched holes; the bomb cell shows a bomb (NOT which object sets it off -- that is for the player
 // to find out); both mirror cells get a frame, a translucent mirror sheen over the whole cell (the
-// state stays visible) and a dashed straight line between them; the clock cell bulges out (rounded square + a slightly larger circle,
-// drawn above its neighbours, may reach over them or off the board) and shows its colour cycle as a
-// ring -- the current state big at the top, the others small and faded -- that turns counter-
+// state stays visible) and a dashed straight line between them; the clock cell bulges out (rounded square + a circle big enough to hide the
+// square's corners, drawn above its neighbours, may reach over them or off the board) and shows its
+// colour cycle as states placed on a circle (no ring line drawn) -- the current state big at the top, the others small and faded -- that turns counter-
 // clockwise by one step (CLOCK_TURN_MS) after every move. When the bomb goes off the cells are
 // knocked out of line (_wreck: shifted, tilted, squeezed, overlapping).
 //
@@ -50,7 +50,7 @@ const FRAME = 8            // width (and outer corner radius) of the golden fram
 const EMOJI_SIZE = 54      // size of a theme's cell emoji in px (cells are CELL - GAP = 90 px)
 const HOVER_ALPHA = 0.18   // training: white wash over the hovered cell's neighbours
 const BLINK_MS = 250       // training intro: one fade of the blinking goal object
-const CLOCK_BULGE = 1.2    // the clock cell's circle: this x the cell's half side as radius
+const CLOCK_BULGE = 1.34   // the clock cell's circle: this x the cell's half side as radius (covers the square's corners)
 const CLOCK_R = 31         // radius of the clock's ring of states (cells are 90 px)
 const CLOCK_BIG = 38       // size of the current state on the ring
 const CLOCK_SMALL = 23     // size of the other states
@@ -280,10 +280,6 @@ export default class GameScene extends Phaser.Scene {
     if (sp.clock) {
       const [r, c] = sp.clock.at
       const cell = this.cells[r][c]
-      const ring = this.add.graphics()
-      ring.lineStyle(2, C.clockRing, 0.45)
-      ring.strokeCircle(0, 0, CLOCK_R)
-      cell.add(ring)
       cell.setDepth(3)            // the bulge reaches over the neighbouring cells
       this.clockCell = cell
       this.clockItems = sp.clock.cycle.map((v) => {

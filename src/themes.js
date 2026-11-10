@@ -110,7 +110,7 @@ export const THEMES = {
       'home.chooseLevel': 'themes.sorcerer.chooseLevel',
       'win.title': 'themes.sorcerer.winTitle',
     },
-    tagline: null,   // the game itself is "Sorcerer's Apprentice": no "edition" line
+    tagline: null,   // no "edition" line under the title
     decorations: 'sorcerer',
   },
 }

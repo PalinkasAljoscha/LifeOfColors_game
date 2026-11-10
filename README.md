@@ -1,8 +1,7 @@
-# Sorcerer's Apprentice (Life of Colors)
+# Life of Colors
 
-The game is presented to players as **Sorcerer's Apprentice** (German: *Zauberlehrling*, French:
-*L'Apprenti sorcier*). *Life of Colors* remains the project's internal name: the repositories,
-the GitHub Pages URL, code and telemetry keep it.
+The game is presented to players as **Life of Colors** in every language (it was called
+*Sorcerer's Apprentice* from 2026-11-02 to 2026-11-10). The sorcerer theme stays as the look.
 
 A logic puzzle with secret rules. When you tap a cell, its new colour depends on the colours of its
 neighbours. Every puzzle has its own hidden rules. Work them out, then turn the goal cell green.

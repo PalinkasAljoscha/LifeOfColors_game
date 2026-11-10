@@ -171,17 +171,11 @@ body {
    The explosion is deliberately NOT smooth (cartoon): steps(1) jumps between the keyframes. */
 @keyframes boomShake {
   0% { transform: translate(0, 0); }
-  8% { transform: translate(-9px, 5px) rotate(-1deg); }
-  16% { transform: translate(8px, -6px) rotate(1deg); }
-  24% { transform: translate(-7px, -4px); }
-  32% { transform: translate(9px, 6px) rotate(-1deg); }
-  40% { transform: translate(-6px, 7px) rotate(1deg); }
-  48% { transform: translate(7px, -7px); }
-  56% { transform: translate(-8px, 3px) rotate(-1deg); }
-  64% { transform: translate(5px, 6px); }
-  72% { transform: translate(-4px, -5px) rotate(1deg); }
-  80% { transform: translate(4px, 3px); }
-  90% { transform: translate(-2px, -2px); }
+  12% { transform: translate(-2px, 1px); }
+  24% { transform: translate(2px, -1px); }
+  36% { transform: translate(-1px, -1px); }
+  48% { transform: translate(1px, 1px); }
+  60% { transform: translate(-1px, 0); }
   100% { transform: translate(0, 0); }
 }
 .boom-shake { animation: boomShake 1s steps(1, end) both; }
@@ -200,6 +194,12 @@ body {
 .boom-flash { animation: boomFlash 1s steps(4, end) both; }
 @keyframes rubbleIn { from { opacity: 0; } to { opacity: 1; } }
 .rubble-in { animation: rubbleIn 0.25s steps(3, end) both; }
+/* the dust cloud drifts slowly off the board in one direction (--drift: the board's width in px) */
+@keyframes dustDrift {
+  from { transform: translate(-50%, -50%); }
+  to { transform: translate(calc(-50% + var(--drift)), calc(-50% - var(--drift) * 0.12)); }
+}
+.dust-drift { animation: dustDrift var(--drift-time) linear both; }
 @keyframes calloutIn { from { opacity: 0; transform: translate(-50%, 6px) scale(0.9); } to { opacity: 1; transform: translate(-50%, 0) scale(1); } }
 .callout-in { animation: calloutIn 0.18s ease-out both; }
 @keyframes scaredPop {
@@ -211,6 +211,6 @@ body {
 }
 .scared-pop { animation: scaredPop 2s ease-in-out both; }
 @media (prefers-reduced-motion: reduce) {
-  .boom-shake, .boom-pop, .boom-flicker { animation: none; }
+  .boom-shake, .boom-pop, .boom-flicker, .dust-drift { animation: none; }
 }
 

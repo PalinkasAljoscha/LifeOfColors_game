@@ -5,11 +5,10 @@ on 2026-10-18). Public repo, deployed to GitHub Pages. The puzzle factory (gener
 analysis) lives in the separate PRIVATE repo `LifeOfColors_factory`; this repo contains only what is
 needed to run the app and to receive telemetry. See README.md for the full workflow.
 
-**Player-facing name: "Sorcerer's Apprentice"** (de "Zauberlehrling", fr "L'Apprenti sorcier"):
-`app.title` in the locales (home heading, browser tab via `src/i18n.js`; the German one has a soft
-hyphen so it breaks as Zauber-/lehrling in the home header), `index.html` title and meta tags. The
-sorcerer theme has no "edition" tagline any more. "Life of Colors" stays only as the internal name (repos, Pages URL `/LifeOfColors_game/`,
-package name, code comments, schema, telemetry) -- never show it to players.
+**Player-facing name: "Life of Colors"** in all languages (it was "Sorcerer's Apprentice" /
+"Zauberlehrling" / "L'Apprenti sorcier" until 2026-11-10): `app.title` in the locales (home heading,
+browser tab via `src/i18n.js`), `index.html` title and meta tags. The sorcerer theme (the look) stays;
+it has no "edition" tagline.
 
 ## Tech Stack (same as Maze Inc.)
 
@@ -182,17 +181,20 @@ tests/                    # engine vectors (generated), classic-rule test, catal
     blocked = dark hatched hole; bomb = 💣 only (never show the trigger -- the player must find it);
     mirror = frames on both cells, a translucent mirror sheen over each whole cell (tint + diagonal
     glints, the state stays visible) and a dashed straight line between them; clock = the cell bulges out (rounded square + a circle of
-    `CLOCK_BULGE` x its half side, drawn above its neighbours, may reach over them or off the board)
-    with the ring of its cycle, current state big at the top, the others small and faded, turning
+    `CLOCK_BULGE` x its half side, big enough to hide the square's corners, drawn above its
+    neighbours, may reach over them or off the board) with its cycle's states on a circle (no ring
+    line drawn), current state big at the top, the others small and faded, turning
     counter-clockwise one step per move (`CLOCK_TURN_MS`). On `boom` the scene knocks every cell out
     of line (`_wreck`: shifted, tilted, squeezed, overlapping; stepped, not smooth).
   - React (`GameScreen.jsx`, `components/SpecialOverlays.jsx`): bomb / mirror puzzles open with a
     short callout (each time opened, not on Retry; gone after 4.5 s or the first tap); the first tap
     on a blocked / clock cell per screen explains it; each bomb tap shows "Oh, careful!" with 😱 (2 s);
-    an explosion = cartoon starburst with hand-lettered BOOM (system handwriting / comic fonts,
-    each letter tilted and sized differently; no web font, for privacy), the whole screen shakes,
-    deliberately jerky (`steps()` in `index.css`, 1 s), then the real wrecked board under a grey
-    dust cloud with a transparent grey Retry button (same as the top Retry). Texts
+    an explosion = cartoon starburst with BAM drawn into it as letter shapes (SVG paths
+    `BAM_LETTERS`, no font, the same in every language; each letter tilted and sized differently),
+    the screen trembles only slightly (1-2 px), deliberately jerky (`steps()` in `index.css`, 1 s),
+    then the real wrecked board under a grey dust cloud that drifts slowly off the board in one
+    direction (`dust-drift`, ~40 s, clipped at the board's edge) with a transparent grey Retry
+    button (same as the top Retry). Texts
     `special.*` in all locales (`special.bombIntro` says "objects"; the classic theme says "colors"
     via its `text` map). Colours in `theme.js` (Special cells section). Callouts are positioned from
     the canvas with `cellOnScreen` (they retry until the canvas is laid out).

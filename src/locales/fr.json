@@ -1,6 +1,6 @@
 {
   "app": {
-    "title": "L'Apprenti sorcier"
+    "title": "Life of Colors"
   },
   "home": {
     "description": "Ton but : mettre 🟩 sur la case au cadre doré. Comment ? Touche une case : elle peut se transformer, selon les couleurs qui l'entourent. Les règles cachées changent à chaque puzzle.",
@@ -91,7 +91,7 @@
     "close": "Compris"
   },
   "training": {
-    "notes": "Observations des règles",
+    "notes": "Observations",
     "nothing": "aucun voisin coloré"
   },
   "castles": {
@@ -123,7 +123,6 @@
     "bombCareful": "Oh, attention !",
     "bombIntro": "Attention ! L'un des objets fait exploser la bombe.",
     "bombIntroColors": "Attention ! L'une des couleurs fait exploser la bombe.",
-    "mirrorIntro": "Les cases miroirs sont intriquées : transforme l'une, et l'autre change de la même façon.",
-    "boom": "BOUM !"
+    "mirrorIntro": "Les cases miroirs sont intriquées : transforme l'une, et l'autre change de la même façon."
   }
 }
