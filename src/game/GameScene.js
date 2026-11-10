@@ -213,10 +213,10 @@ export default class GameScene extends Phaser.Scene {
     if (kind === 'clock') {
       const R = h * CLOCK_BULGE
       g.fillCircle(0, 0, R - 3)
-      // a circle around the active (top) state, touching the outer circle at the top
-      const r = R - CLOCK_R
+      // a circle around the active (top) state: diameter = the outer circle's radius, so it touches
+      // the outer circle at the top and the clock's centre at its bottom
       g.lineStyle(3, border, 1)
-      g.strokeCircle(0, -CLOCK_R, r - 1.5)
+      g.strokeCircle(0, -R / 2, R / 2 - 1.5)
       // an arrowhead on the outer circle at half past 10, pointing along it counter-clockwise (the
       // ring's turning direction)
       const a = CLOCK_ARROW_AT, rr = R - 1.5

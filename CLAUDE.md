@@ -183,8 +183,8 @@ tests/                    # engine vectors (generated), classic-rule test, catal
     glints, the state stays visible) and a dashed straight line between them; clock = the cell bulges out (rounded square + a circle of
     `CLOCK_BULGE` x its half side; the square's corners are rounded (`CLOCK_SQUARE_RADIUS`) so they
     stay hidden inside the circle; a normal uncoloured cell's fill, its outline a little lighter
-    (`CLOCK_OUTLINE_LIGHTEN`); a circle of that outline around the active (top) state, touching the
-    outer circle at the top; an arrowhead on the outer circle at half past 10 (`CLOCK_ARROW_AT`) pointing
+    (`CLOCK_OUTLINE_LIGHTEN`); a circle of that outline around the active (top) state, its diameter =
+    the outer circle's radius (touches the outer circle at the top and the centre at its bottom); an arrowhead on the outer circle at half past 10 (`CLOCK_ARROW_AT`) pointing
     counter-clockwise (the turning direction); drawn above its
     neighbours, may reach over them or off the board) with its cycle's states on a circle (no ring
     line drawn), current state big at the top, the others small and faded, turning
