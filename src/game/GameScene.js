@@ -52,7 +52,7 @@ const HOVER_ALPHA = 0.18   // training: white wash over the hovered cell's neigh
 const BLINK_MS = 250       // training intro: one fade of the blinking goal object
 const CLOCK_BULGE = 1.28   // the clock cell's circle: this x the cell's half side as radius
 const CLOCK_SQUARE_RADIUS = 16  // corner radius of the clock's square: round enough to stay inside the circle
-const CLOCK_ARROW_AT = -Math.PI * 5 / 6   // the turning arrow's place on the outer circle: 10 o'clock
+const CLOCK_ARROW_AT = -Math.PI * 3 / 4   // the turning arrow's place on the outer circle: half past 10
 const CLOCK_OUTLINE_LIGHTEN = 18 // the clock's outline: the normal cell outline, this much lighter (Phaser lighten %)
 const CLOCK_R = 31         // radius of the clock's ring of states (cells are 90 px)
 const CLOCK_BIG = 38       // size of the current state on the ring
@@ -217,7 +217,7 @@ export default class GameScene extends Phaser.Scene {
       const r = R - CLOCK_R
       g.lineStyle(3, border, 1)
       g.strokeCircle(0, -CLOCK_R, r - 1.5)
-      // an arrowhead on the outer circle at 10 o'clock, pointing along it counter-clockwise (the
+      // an arrowhead on the outer circle at half past 10, pointing along it counter-clockwise (the
       // ring's turning direction)
       const a = CLOCK_ARROW_AT, rr = R - 1.5
       const px = rr * Math.cos(a), py = rr * Math.sin(a)
