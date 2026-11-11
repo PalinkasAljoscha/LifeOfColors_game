@@ -6,8 +6,16 @@ import { ConsentBannerSpacer } from './ConsentBanner.jsx'
 import { inkOn, mixHex, palette } from '../theme.js'
 import { HANDWRITING } from './TrainingNotes.jsx'
 import { playableUpTo } from '../engine/castles.js'
+import { placePuzzles, workshopFor } from '../workshops.js'
+import Workshop from './Workshop.jsx'
 
-// One level: every puzzle of the level as a tile in its name's
+// One castle. Every castle except the training castle shows its puzzles as potions in a painted
+// sorcerer's workshop (components/Workshop.jsx, one of the scenes in src/workshops.js per castle):
+// a test tube per puzzle in the puzzle's colour, a round flask for a special puzzle, a copper
+// medal with the best stars on a solved one. Tapping a potion starts that puzzle.
+// Only if a castle ever holds more puzzles than its scene has places, the plain tile grid below
+// is shown instead:
+// every puzzle of the level as a tile in its name's
 // colour (10 columns, publication order, so new puzzles appear at the end). Tapping a tile
 // starts that puzzle. Tiles carry no label; the name is shown on the game screen.
 // Solved puzzles show their best star rating (a check mark if the puzzle has no rating),
@@ -167,6 +175,17 @@ export default function LevelScreen({ title, nextTitle, state, pool, onPick, onB
   const { stars, solved, required, done, training } = state
   const have = training ? solved : stars          // training: won puzzles; else stars
   const share = Math.min(1, have / required)
+
+  // The workshop scene (not for the training castle; null if the scene has too few places).
+  const scene = training ? null : workshopFor(state.castle)
+  const placed = scene && placePuzzles(scene, pool, isSpecial)
+  if (placed) {
+    const stateOf = new Map(pool.map((inst, i) => [inst.id, states[i]]))
+    return (
+      <Workshop scene={scene} placed={placed} playStates={placed.map(({ inst }) => stateOf.get(inst.id))} isSpecial={isSpecial}
+                title={title} nextTitle={nextTitle} state={state} onPick={onPick} onBack={onBack} nudging={nudging} />
+    )
+  }
 
   return (
     <div className="h-[100dvh] w-full flex flex-col bg-game-bg safe-pad">

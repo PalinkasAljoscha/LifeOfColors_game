@@ -53,6 +53,9 @@ uncolored cells, a witch-hand mouse cursor, its own homepage texts and decoratio
 - A theme only changes the look: rules, puzzle ids, the catalog and telemetry are the same in
   every theme. Telemetry doesn't record the theme.
 - Theme colours live in `src/theme.js`; themed texts in the locale files under `themes.<name>`.
+- A castle's puzzles are picked in a painted workshop scene: one potion per puzzle (test tube, or a
+  round flask for a special puzzle). Scenes, their pictures and potion places: `src/workshops.js`,
+  `src/assets/workshops/`, `src/components/Workshop.jsx`. Fonts are bundled (`src/assets/fonts`).
   `tests/themes.test.js` checks that every theme is complete.
 - Emojis are drawn by the player's device, so they look a little different on iPhone, Android and
   Windows. The cursor only appears with a mouse.

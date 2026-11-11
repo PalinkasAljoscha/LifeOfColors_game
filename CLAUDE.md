@@ -36,7 +36,9 @@ src/
   game/GameScene.js       # Phaser scene: draws the board, turns taps into engine calls
   hooks/usePhaserGame.js  # Phaser mount/unmount (from Maze Inc., takes width/height/registry/events)
   components/             # HomeScreen (CastleMap: scrollable SVG map of castles), LevelScreen (one castle:
-                          # progress bar to the next castle + 10-column tile grid in seq order; the
+                          # its puzzles as potions in a painted workshop scene (Workshop, see "Workshop
+                          # scenes" below); the old progress bar + 10-column tile grid is only the
+                          # fallback when a castle has more puzzles than its scene has places; the
                           # training castle instead: centred title under the Home button, no hint
                           # or puzzle-count line, and a vertical path of bars in the puzzles' colours -- a big title
                           # ("Introduction", then "Day One".."Day Five", levelScreen.days) over the
@@ -49,6 +51,9 @@ src/
                           # ConsentBanner (opt-in for saved progress; the home footer's "opt in/out" link reopens it)
                           # HistoryDialog (home header, circled-arrow button left of "?": the last 20
                           # played puzzles, each opens the puzzle again in its castle; pick = 'grid')
+  workshops.js            # the workshop scenes: which castle shows which picture, where its potions stand,
+                          # how each potion looks (no React, tested)
+  assets/workshops/*.jpg  # the scenes' painted backdrops (390 x 844 units at 2x); assets/fonts: bundled fonts
   theme.js                # all colours
   themes.js               # visual themes (classic, halloween, sorcerer): cell looks, cursor, texts, decorations;
                           # ACTIVE_THEME or ?theme=<name>. Appearance only, never rules/ids/telemetry
@@ -159,6 +164,30 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   training-complete message, moves and "Best: X". Afterwards only the board is left as it is: the
   scene takes no more taps after a win, and the player goes on with Retry or Back. Random within
   limits, drawn once per win. Colours `win*` in theme.js, keyframes `win-*` in index.css.
+- **Workshop scenes** (2026-11-11) -- every castle except the training castle picks its puzzles in
+  a painted sorcerer's workshop instead of a tile grid (`components/Workshop.jsx`, data in
+  `src/workshops.js`). Six scenes (hut, cupboard, lab, tower, study, crypt); castle n uses scene
+  `(n - 1) mod 6` (`workshopFor`), so neighbouring castles differ. A scene = a nearly monochrome
+  picture `src/assets/workshops/<key>.jpg` plus, in workshops.js, its potion places (`slots`), rack
+  rails, flame / twinkle spots and where the "Pick your poison" line (`levelScreen.choose`) sits.
+  Everything that changes is drawn over the picture as SVG in the picture's 390 x 844 units:
+  one potion per puzzle in its `name_color` -- a **test tube for a base puzzle, a round-bottomed
+  flask for a special puzzle** (`isSpecial`); solved = copper medal at the neck with the best stars
+  (check mark without a rating); only opened = stopper off, a little vapour now and then; untouched =
+  stoppered. The hanging copper plate shows the castle's stars / required stars and the line to the
+  next castle; the castle title, puzzle count and the "Home" sign sit in the dark top of the picture.
+  A potion's lean, shift, fill level, stopper (cork, dark cork, wooden plug, wax, linen cap, glass
+  ball) and its rare life (bubbles, or a small electric flash) come from its puzzle id
+  (`potionLook`, seeded), so a potion looks the same every time. Most potions are still; no motion
+  at all with "reduce motion". The picture is shown whole (never cropped), the rest of the screen
+  shows a blurred dark copy. In the tower some places lie on a table: special puzzles get standing
+  places first (`placePuzzles`). If a castle holds more puzzles than its scene has places (34-35),
+  LevelScreen falls back to the tile grid. The pictures and the numbers in workshops.js come from
+  one drawing script (not in this repo) -- a new picture needs new numbers. Decoration in the
+  pictures is sparse and from a fixed list: mice, spider, roots, toad, mushrooms, gold coins, dried
+  herbs, corkscrew (plus books, candles, mortar, retort); no skulls. Colours: `ws*` in theme.js.
+  Fonts: Cinzel, Cinzel Decorative, Pirata One, bundled in `src/assets/fonts` (SIL OFL) and declared
+  in index.css -- never load fonts (or anything else) from another server.
 - **Mobile first** -- portrait phones are the main target; boards up to 9 rows x 6 cols must fit.
 - **Special cells** (2026-11-06; schema 1.1, feature tags `special-blocked`, `special-bomb`,
   `special-mirror`, `special-clock`, one entry in `board.special_cells`). CRITICAL: the rules live in
@@ -202,7 +231,8 @@ tests/                    # engine vectors (generated), classic-rule test, catal
     `special.*` in all locales (`special.bombIntro` says "objects"; the classic theme says "colors"
     via its `text` map). Colours in `theme.js` (Special cells section). Callouts are positioned from
     the canvas with `cellOnScreen` (they retry until the canvas is laid out).
-  - Castle grid: a special puzzle's tile has a wavy white border (`SpecialTile` / `isSpecial` in
+  - Workshop: a special puzzle is a round-bottomed flask instead of a test tube (see Workshop scenes).
+  - Tiles (history dialog, game screen name swatch, fallback grid): a special puzzle's tile has a wavy white border (`SpecialTile` / `isSpecial` in
     `LevelScreen.jsx`, colour `specialTileEdge`) instead of the plain rounded rectangle, so players
     can find the special puzzles. Only the drawing changes; the button keeps the full tile as its
     tap area (the grid has `pt-1` so the top row's waves are not clipped). The same tile is used in

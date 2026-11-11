@@ -132,6 +132,98 @@ export const palette = {
   scPotionVapour:   '#e2dcf5',
   scPotionShine:    '#ffffff',
   scPotionOutline:  '#141428',
+
+  // ── Workshops: the painted puzzle-selection scenes (src/workshops.js, components/Workshop.jsx) ──
+  // Potion glass, stoppers, the copper plate and the medals (the same in every scene).
+  wsGlass:          '#e9eef2',   // glass outline of test tubes and flasks
+  wsGlassDark:      '#0b0b0d',   // the dark inside of an empty part
+  wsCork1:          '#9c8a70',   // light cork: left edge, middle, right edge
+  wsCork2:          '#cdbb9c',
+  wsCork3:          '#5d5041',
+  wsCorkSpeck:      '#4a4138',
+  wsCorkEdge:       '#1d1a17',
+  wsCorkShine:      '#f1e9da',
+  wsDarkCork1:      '#4b3f33',   // dark (burnt) cork
+  wsDarkCork2:      '#75634f',
+  wsDarkCork3:      '#251e18',
+  wsDarkCorkSpeck:  '#b9a88f',
+  wsWood1:          '#5e4a3a',   // turned wooden plug
+  wsWood2:          '#9a7c5e',
+  wsWood3:          '#33271e',
+  wsWoodGrain:      '#1c1612',
+  wsWax1:           '#7d2f2a',   // sealing wax, muted so the potions stay the colourful part
+  wsWax2:           '#8a6a2c',
+  wsWax3:           '#3f4f63',
+  wsWax4:           '#5b3d5e',
+  wsWax5:           '#2f5a4a',
+  wsCloth1:         '#a39a8a',   // tied linen cap
+  wsCloth2:         '#8f8a80',
+  wsCloth3:         '#7c6f66',
+  wsCloth4:         '#6f7a80',
+  wsCloth5:         '#8a7a62',
+  wsTwine:          '#3b2f22',
+  wsTwineLight:     '#cdbb97',
+  wsMedalHi:        '#f3bd86',   // copper medal on a solved potion
+  wsMedalMid:       '#b87333',
+  wsMedalLo:        '#6a3513',
+  wsMedalEdge:      '#4a230c',
+  wsMedalRing:      '#f6c996',
+  wsMedalInk:       '#2f1405',
+  wsMedalString:    '#d9c7a4',
+  wsPlateInk:       '#3a1b0a',   // engraving on the hanging copper plate (star count)
+  wsPlateGold:      '#f7d08a',   // its star and the filled part of the progress groove
+  wsFlameMid:       '#e9e2d2',   // candle / lantern flame (monochrome)
+  wsFlameEdge:      '#b9ae98',
+  // Per scene: letterbox background, rack rail (+ its lit edge), castle title, puzzle count,
+  // Home sign text, the "Pick your poison" line and its shade.
+  wsCupboardBg:          '#0f0d0a',
+  wsCupboardRail:        '#3d3229',
+  wsCupboardRailLight:   '#ad9885',
+  wsCupboardTitle:       '#e6dbd1',
+  wsCupboardSub:         '#baa797',
+  wsCupboardSign:        '#dad0c8',
+  wsCupboardBanner:      '#cabcaf',
+  wsCupboardBannerShade: '#000000',
+  wsTowerBg:             '#0a0c0f',
+  wsTowerRail:           '#2d3743',
+  wsTowerRailLight:      '#97a6ba',
+  wsTowerTitle:          '#d1dae6',
+  wsTowerSub:            '#97a6ba',
+  wsTowerSign:           '#c8d0da',
+  wsTowerBanner:         '#14191f',
+  wsTowerBannerShade:    '#c2cbd6',
+  wsCryptBg:             '#0b0e0d',
+  wsCryptRail:           '#2c3a33',
+  wsCryptRailLight:      '#8ca699',
+  wsCryptTitle:          '#d1e6db',
+  wsCryptSub:            '#9db4a8',
+  wsCryptSign:           '#cbd7d1',
+  wsCryptBanner:         '#101412',
+  wsCryptBannerShade:    '#aec1b8',
+  wsHutBg:               '#120e09',
+  wsHutRail:             '#54432d',
+  wsHutRailLight:        '#d1c0a9',
+  wsHutTitle:            '#efe9e2',
+  wsHutSub:              '#c9b59b',
+  wsHutSign:             '#e8dfd4',
+  wsHutBanner:           '#efe9e2',
+  wsHutBannerShade:      '#000000',
+  wsLabBg:               '#0c0a10',
+  wsLabRail:             '#483a5f',
+  wsLabRailLight:        '#c9c0d8',
+  wsLabTitle:            '#d8d1e6',
+  wsLabSub:              '#a393bd',
+  wsLabSign:             '#cec6dc',
+  wsLabBanner:           '#181320',
+  wsLabBannerShade:      '#e4dfec',
+  wsStudyBg:             '#091011',
+  wsStudyRail:           '#243f42',
+  wsStudyRailLight:      '#7ab1b8',
+  wsStudyTitle:          '#d1e4e6',
+  wsStudySub:            '#8ebdc2',
+  wsStudySign:           '#c3dcdf',
+  wsStudyBanner:         '#e8f6f7',
+  wsStudyBannerShade:    '#7ddde8',
 }
 
 // Phaser uses 0xRRGGBB integers -- derived from the palette strings above.
