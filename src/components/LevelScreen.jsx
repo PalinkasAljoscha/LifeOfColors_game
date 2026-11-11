@@ -9,7 +9,7 @@ import { playableUpTo } from '../engine/castles.js'
 import { placePuzzles, workshopFor } from '../workshops.js'
 import Workshop from './Workshop.jsx'
 
-// One castle. Every castle except the training castle shows its puzzles as potions in a painted
+// One castle. Every castle except the training castle shows its puzzles as potions in a
 // sorcerer's workshop (components/Workshop.jsx, one of the scenes in src/workshops.js per castle):
 // a test tube per puzzle in the puzzle's colour, a round flask for a special puzzle, a copper
 // medal with the best stars on a solved one. Tapping a potion starts that puzzle.

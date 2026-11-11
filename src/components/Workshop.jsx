@@ -1,33 +1,36 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { bestStars } from '../engine/progress.js'
 import { mixHex, palette } from '../theme.js'
 import { WORKSHOP_WIDTH as W, WORKSHOP_HEIGHT as H, isLying, potionLook } from '../workshops.js'
 import { ConsentBannerSpacer } from './ConsentBanner.jsx'
 
-// One castle's puzzles as potions in a painted sorcerer's workshop (scenes: src/workshops.js).
+// One castle's puzzles as potions in a sorcerer's workshop (scenes: src/workshops.js).
 //
-// The picture (src/assets/workshops/<key>.jpg) is nearly monochrome; everything that changes is
+// The picture (src/assets/workshops/<key>.svg) is flat, in the look of the home map and the game
+// screen: the app's navy wall, plain two-tone shapes, no textures. Everything that changes is
 // drawn over it as SVG in the picture's own 390 x 844 units, so it scales with the picture:
 //   * one potion per puzzle, filled with the puzzle's colour (instance.name_color): a test tube,
 //     or a round-bottomed flask for a special puzzle (LevelScreen isSpecial);
-//   * solved: a small copper medal at the neck with the best stars (a check mark if the puzzle
-//     has no rating); only opened: the stopper is off and a little vapour rises now and then;
-//   * the copper plate top left: the castle's stars / required and the way to the next castle;
-//   * the castle title, the puzzle count, the "Home" sign and the "Pick your poison" line.
+//   * solved: a copper medal at the neck with the best stars (a check mark if the puzzle has no
+//     rating); only opened: the stopper is off and a little vapour rises now and then;
+//   * the hanging copper plate top left: the castle's stars / required and the way to the next
+//     castle; the castle title, the puzzle count and the "Home" button (the game screen's button
+//     look); "Pick your poison" only where the scene has a place for it (the crypt's lintel).
 // A potion's lean, stopper, fill level and rare life (bubbles, an electric flash) come from its
-// puzzle id (workshops.js potionLook), so it looks the same each time. Nothing moves with
-// "reduce motion" switched on.
+// puzzle id (workshops.js potionLook), so it looks the same each time. Tapping a potion lifts it
+// up and brings it forward a little (PICK_MS), then the puzzle opens. In the tower a bat passes
+// outside the window at random times. Nothing moves with "reduce motion" switched on.
 // The picture keeps its proportions and is shown whole (never cropped: every potion must stay
-// reachable); what is left of the screen shows a blurred, darkened copy of it.
+// reachable); what is left of the screen is the same navy as the picture's wall.
 
-const PICTURES = import.meta.glob('../assets/workshops/*.jpg', { eager: true, import: 'default' })
-const pictureOf = (key) => PICTURES[`../assets/workshops/${key}.jpg`]
+const PICTURES = import.meta.glob('../assets/workshops/*.svg', { eager: true, import: 'default' })
+const pictureOf = (key) => PICTURES[`../assets/workshops/${key}.svg`]
 
-// Fonts: bundled files (src/assets/fonts, @font-face in index.css) -- nothing is loaded from elsewhere.
-const TITLE_FONT = '"Cinzel Decorative", Cinzel, Georgia, serif'
-const TEXT_FONT = 'Cinzel, Georgia, serif'
-const BANNER_FONT = '"Pirata One", "Cinzel Decorative", Georgia, serif'
+const GAME_FONT = '"Arial Black", Arial, sans-serif'     // the app's font (tailwind font-game)
+const TEXT_FONT = 'Arial, sans-serif'
+const MEDAL_SCALE = 1.6
+const PICK_MS = 340          // how long a tapped potion lifts and comes forward before its puzzle opens
 
 const STAR = 'M0,-1 L0.29,-0.31 L0.95,-0.31 L0.42,0.12 L0.59,0.81 L0,0.42 L-0.59,0.81 L-0.42,0.12 L-0.95,-0.31 L-0.29,-0.31 Z'
 const TUBE = 'M-9.6,-72 V-9.6 A9.6,9.6 0 0 0 9.6,-9.6 V-72'
@@ -118,12 +121,12 @@ function Stopper({ look, cw, top }) {
 // ---- the copper medal of a solved potion: "3★", or a check mark without a rating ------------------
 function Medal({ y, best, turn }) {
   return (
-    <g transform={`translate(0,${y}) rotate(${-turn})`}>
+    <g transform={`translate(0,${y}) rotate(${-turn}) scale(${MEDAL_SCALE})`}>
       <circle r="9.6" cy="1" fill={palette.overlayBlack} opacity="0.5" />
       <circle r="9.2" fill="url(#ws-medal)" stroke={palette.wsMedalEdge} strokeWidth="1" />
       <circle r="7.1" fill="none" stroke={palette.wsMedalRing} strokeOpacity="0.7" strokeWidth="0.6" />
       {best > 0 ? <>
-        <text x="-2.9" y="3.9" textAnchor="middle" fontFamily={TEXT_FONT} fontWeight="900" fontSize="11" fill={palette.wsMedalInk}>{best}</text>
+        <text x="-2.9" y="3.9" textAnchor="middle" fontFamily={GAME_FONT} fontWeight="900" fontSize="11" fill={palette.wsMedalInk}>{best}</text>
         <path d={STAR} transform="translate(4.2,.4) scale(3.6)" fill={palette.wsMedalInk} />
       </> : (
         <path d="M-4,0 l3,3.4 l5.4,-6.6" fill="none" stroke={palette.wsMedalInk} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -155,7 +158,7 @@ function Life({ life, level }) {
 }
 
 // ---- one potion ---------------------------------------------------------------------------------
-function Potion({ slot, look, colour, special, state, best, glowId, moving, floating, label, onPick }) {
+function Potion({ slot, look, colour, special, state, best, glowId, moving, floating, picked, label, onPick }) {
   const [x, y, rot] = slot
   const lying = isLying(slot)
   const angle = lying ? rot + look.tilt : look.tilt
@@ -182,18 +185,19 @@ function Potion({ slot, look, colour, special, state, best, glowId, moving, floa
       </ellipse>
     )
   }
-  const potion = (
+  const bottle = (
     <g className="ws-potion" transform={place} role="button" tabIndex={0} aria-label={label} {...activate(onPick)}>
       <title>{label}</title>
       <g className="ws-press">
+        {/* the glow reaches over the neighbours: it must not take their taps */}
         <radialGradient id={glowId}>
           <stop offset="0" stopColor={dark ? mixHex(colour, palette.white, 0.25) : colour} stopOpacity={dark ? 0.7 : 0.6} />
           <stop offset="0.55" stopColor={dark ? mixHex(colour, palette.white, 0.25) : colour} stopOpacity="0.22" />
           <stop offset="1" stopColor={colour} stopOpacity="0" />
         </radialGradient>
         {special
-          ? <ellipse cx="0" cy="-22" rx="38" ry="38" fill={`url(#${glowId})`} />
-          : <ellipse cx="0" cy="-30" rx="27" ry="46" fill={`url(#${glowId})`} />}
+          ? <ellipse cx="0" cy="-22" rx="38" ry="38" fill={`url(#${glowId})`} pointerEvents="none" />
+          : <ellipse cx="0" cy="-30" rx="27" ry="46" fill={`url(#${glowId})`} pointerEvents="none" />}
         <path d={`${body} Z`} fill={palette.wsGlassDark} fillOpacity="0.45" />
         <g clipPath={special ? 'url(#ws-in-flask)' : 'url(#ws-in-tube)'}>
           {lying && <rect x="-22" y="-74" width="44" height="78" fill={colour} opacity="0.22" />}
@@ -233,6 +237,8 @@ function Potion({ slot, look, colour, special, state, best, glowId, moving, floa
       </g>
     </g>
   )
+  // picked: the whole bottle lifts straight up and comes forward, whichever way it lies
+  const potion = <g className={picked ? 'ws-lifted' : undefined}>{bottle}</g>
   if (!floating) return potion
   return (
     <g>
@@ -249,45 +255,71 @@ function Potion({ slot, look, colour, special, state, best, glowId, moving, floa
   )
 }
 
-function Rail({ rail, colours }) {
-  const body = palette[`${colours}Rail`]
-  const lit = palette[`${colours}RailLight`]
+function Rail({ rail, colour }) {
   if (rail.arc) {
-    const d = (dy) => `M${rail.x0},${rail.y + dy} Q${(rail.x0 + rail.x1) / 2},${rail.y + dy - rail.rise} ${rail.x1},${rail.y + dy}`
-    return <>
-      <path d={d(0)} fill="none" stroke={palette.overlayBlack} strokeOpacity="0.7" strokeWidth="6.6" />
-      <path d={d(0)} fill="none" stroke={body} strokeWidth="5" />
-      <path d={d(-1.6)} fill="none" stroke={lit} strokeOpacity="0.6" strokeWidth="0.8" />
-    </>
+    return <path d={`M${rail.x0},${rail.y} Q${(rail.x0 + rail.x1) / 2},${rail.y - rail.rise} ${rail.x1},${rail.y}`}
+                 fill="none" stroke={colour} strokeWidth="6" />
   }
   return (
-    <g transform={rail.a ? `rotate(${rail.a} ${rail.cx} ${rail.cy})` : undefined}>
-      <rect x={rail.x} y={rail.y} width={rail.w} height={rail.h} rx="1.5" fill={body} stroke={palette.overlayBlack} strokeOpacity="0.7" strokeWidth="0.8" />
-      <path d={`M${rail.x + 1},${rail.y + 0.8} H${rail.x + rail.w - 1}`} stroke={lit} strokeOpacity="0.55" strokeWidth="0.8" />
-    </g>
+    <rect x={rail.x} y={rail.y} width={rail.w} height={rail.h} rx="2" fill={colour}
+          transform={rail.a ? `rotate(${rail.a} ${rail.cx} ${rail.cy})` : undefined} />
   )
 }
 
 function Flame({ x, y, moving }) {
   return (
     <g transform={`translate(${x},${y})`}>
-      <circle r="26" fill="url(#ws-puff)" opacity="0.4">
-        {moving && <animate attributeName="opacity" values=".4;.5;.32;.45;.4" dur="2.3s" repeatCount="indefinite" />}
-      </circle>
-      <path d="M0,-11 Q4.6,-3 2.8,1.6 Q0,4 -2.8,1.6 Q-4.6,-3 0,-11 Z" fill="url(#ws-flame)">
+      <path d="M0,-12 Q5,-3 3,2 Q0,5 -3,2 Q-5,-3 0,-12 Z" fill={palette.scoreYellow}>
         {moving && <animateTransform attributeName="transform" type="scale" values="1 1;1.08 .9;.94 1.1;1.04 .96;1 1" dur="1.7s" repeatCount="indefinite" />}
       </path>
+      <path d="M0,-5 Q2,-1 1.2,1.4 Q0,2.6 -1.2,1.4 Q-2,-1 0,-5 Z" fill={palette.white} />
     </g>
   )
 }
 
-function Twinkle({ x, y, k }) {
+// The tower's bat: at random times (every 6 to 30 s) it crosses the sky behind the window's bars,
+// from one side to the other, with one or two abrupt turns. Each flight is drawn anew.
+function Bat({ window: win }) {
+  const ref = useRef(null)
+  useEffect(() => {
+    const bat = ref.current
+    if (!bat?.animate) return undefined
+    const [x0, y0, x1, y1] = win.sky
+    const between = (a, b) => a + (b - a) * Math.random()
+    let timer = null
+    let flight = null
+    const wait = () => { timer = setTimeout(fly, between(6000, 30000)) }
+    const fly = () => {
+      const turns = Math.random() < 0.5 ? 1 : 2
+      const leftToRight = Math.random() < 0.5
+      const xs = [x0 - 24, ...Array.from({ length: turns }, (_, k) => x0 + ((x1 - x0) * (k + 1)) / (turns + 1) + between(-14, 14)), x1 + 24]
+      if (!leftToRight) xs.reverse()
+      // every turn changes the height sharply, up then down (or the other way round)
+      let up = Math.random() < 0.5
+      const ys = xs.map(() => { up = !up; return up ? between(y0 + 10, y0 + 55) : between(y0 + 75, y1 - 10) })
+      flight = bat.animate(xs.map((x, k) => ({ transform: `translate(${x}px, ${ys[k]}px)` })), { duration: between(1300, 2300), easing: 'linear' })
+      flight.onfinish = wait
+    }
+    wait()
+    return () => { clearTimeout(timer); flight?.cancel() }
+  }, [win])
   return (
-    <g transform={`translate(${x},${y})`} opacity="0">
-      <circle r="10" fill="url(#ws-puff)" />
-      <path d="M0,-7 L1.1,-1.1 L7,0 L1.1,1.1 L0,7 L-1.1,1.1 L-7,0 L-1.1,-1.1 Z" fill={palette.white} />
-      <animate attributeName="opacity" values="0;0;.9;0;0" keyTimes="0;.78;.84;.92;1" dur={`${(11 + k * 3.7).toFixed(1)}s`}
-               begin={`${(k * 2.9).toFixed(1)}s`} repeatCount="indefinite" />
+    <g pointerEvents="none">
+      <clipPath id="ws-window"><path d={win.opening} /></clipPath>
+      <g clipPath="url(#ws-window)">
+        <g ref={ref} style={{ transform: 'translate(-60px, -60px)' }} fill={palette.wsBat}>
+          <g>
+            <animateTransform attributeName="transform" type="scale" values="1 1;1 -.55;1 1" dur=".24s" repeatCount="indefinite" />
+            <path d="M-2,0 L-13,-7 L-11,-1.5 L-8,-3 L-6,2 Z" />
+            <path d="M2,0 L13,-7 L11,-1.5 L8,-3 L6,2 Z" />
+          </g>
+          <ellipse cx="0" cy="0" rx="2.6" ry="4" />
+          <path d="M-2.2,-3 l.6,-3.4 l1.6,2.6 z M2.2,-3 l-.6,-3.4 l-1.6,2.6 z" />
+        </g>
+      </g>
+      {/* the window's bars and frame again, in front of the bat (the same as in the picture) */}
+      <path d={win.bars} stroke={palette.castleLockedShade} strokeWidth="4" fill="none" />
+      <path d={win.opening} stroke={palette.castleLockedWall} strokeWidth="8" fill="none" />
     </g>
   )
 }
@@ -300,32 +332,45 @@ function Twinkle({ x, y, k }) {
  * title / nextTitle / state: as LevelScreen
  */
 export default function Workshop({ scene, placed, playStates, isSpecial, title, nextTitle, state, onPick, onBack, nudging = false }) {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const moving = useMemo(() => !reducedMotion(), [])
   const looks = useMemo(
     () => placed.map(({ inst, slot }) => potionLook(inst.id, scene, isLying(slot), isSpecial(inst))),
     [placed, scene, isSpecial],
   )
-  const c = (name) => palette[`${scene.colours}${name}`]
+  // A tapped potion lifts up and comes forward (CSS .ws-picked), then its puzzle opens.
+  const [picked, setPicked] = useState(null)
+  const timer = useRef(null)
+  useEffect(() => () => clearTimeout(timer.current), [])
+  const pick = (k) => {
+    if (picked !== null) return
+    if (!moving) { onPick(placed[k].inst); return }
+    setPicked(k)
+    timer.current = setTimeout(() => onPick(placed[k].inst), PICK_MS)
+  }
   const picture = pictureOf(scene.key)
   const { stars, required, done } = state
   const share = Math.min(1, stars / required)
-  const upper = (s) => s.toLocaleUpperCase(i18n.language)
-  const nextLine = nextTitle ? upper(t(done ? 'castles.nextOpen' : 'castles.toOpen', { name: nextTitle })) : null
-  const count = upper(t('home.puzzleCount', { count: placed.length }))
+  const nextLine = nextTitle ? t(done ? 'castles.nextOpen' : 'castles.toOpen', { name: nextTitle }) : null
+  const count = t('home.puzzleCount', { count: placed.length })
   const choose = t('levelScreen.choose')
   const back = t('levelScreen.back')
   const banner = scene.banner
-  const bannerSize = fitSize(choose, banner.size, banner.maxW, 0.45)
-  const bannerText = { fontFamily: BANNER_FONT, fontSize: bannerSize, textAnchor: 'middle', letterSpacing: 1.2, x: banner.x, y: banner.y }
-  const titleSize = fitSize(title, 25, 168, 0.72)
-  const starsText = (
-    <>{stars}<tspan fontSize="14" dx="2">/ {required}</tspan></>
-  )
+  const potion = (k) => {
+    const { inst, slot } = placed[k]
+    const solved = playStates[k] === 'solved'
+    const best = solved ? bestStars(inst.id) : null
+    return (
+      <Potion key={inst.id} slot={slot} look={looks[k]} colour={inst.name_color} special={isSpecial(inst)}
+              state={playStates[k]} best={best} glowId={`ws-glow-${k}`} moving={moving} floating={scene.floating}
+              picked={picked === k}
+              label={solved ? `${inst.name} ✓${best ? ` ${'★'.repeat(best)}` : ''}` : inst.name}
+              onPick={() => pick(k)} />
+    )
+  }
 
   return (
-    <div className="relative h-[100dvh] w-full overflow-hidden flex flex-col" style={{ background: c('Bg') }}>
-      <div className="ws-backdrop absolute inset-0" style={{ backgroundImage: `url(${picture})` }} aria-hidden="true" />
+    <div className="relative h-[100dvh] w-full overflow-hidden flex flex-col bg-game-bg">
       <div className="ws-safe relative flex-1 min-h-0">
         <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet" className="block w-full h-full">
           <defs>
@@ -347,11 +392,6 @@ export default function Workshop({ scene, placed, playStates, isSpecial, title, 
               <stop offset="0.5" stopColor={palette.wsMedalMid} />
               <stop offset="1" stopColor={palette.wsMedalLo} />
             </radialGradient>
-            <radialGradient id="ws-flame" cx="0.5" cy="0.7" r="0.6">
-              <stop offset="0" stopColor={palette.white} />
-              <stop offset="0.5" stopColor={palette.wsFlameMid} />
-              <stop offset="1" stopColor={palette.wsFlameEdge} stopOpacity="0.2" />
-            </radialGradient>
             <radialGradient id="ws-puff">
               <stop offset="0" stopColor={palette.white} stopOpacity="0.8" />
               <stop offset="0.5" stopColor={palette.white} stopOpacity="0.3" />
@@ -362,68 +402,53 @@ export default function Workshop({ scene, placed, playStates, isSpecial, title, 
           </defs>
 
           <image href={picture} x="0" y="0" width={W} height={H} preserveAspectRatio="none" aria-hidden="true" />
+          {moving && scene.window && <Bat window={scene.window} />}
 
-          {placed.map(({ inst, slot }, k) => {
-            const solved = playStates[k] === 'solved'
-            const best = solved ? bestStars(inst.id) : null
-            return (
-              <Potion key={inst.id} slot={slot} look={looks[k]} colour={inst.name_color} special={isSpecial(inst)}
-                      state={playStates[k]} best={best} glowId={`ws-glow-${k}`} moving={moving} floating={scene.floating}
-                      label={solved ? `${inst.name} ✓${best ? ` ${'★'.repeat(best)}` : ''}` : inst.name}
-                      onPick={() => onPick(inst)} />
-            )
-          })}
+          {placed.map((_, k) => (k === picked ? null : potion(k)))}
           {/* the rack rail stands in front of the potions (taps go through it) */}
-          <g pointerEvents="none">{scene.rails.map((rail, k) => <Rail key={k} rail={rail} colours={scene.colours} />)}</g>
+          <g pointerEvents="none">{scene.rails.map((rail, k) => <Rail key={k} rail={rail} colour={palette[scene.rail]} />)}</g>
           <g pointerEvents="none">
             {scene.flames.map(([x, y]) => <Flame key={`${x},${y}`} x={x} y={y} moving={moving} />)}
-            {moving && scene.twinkles.map(([x, y], k) => <Twinkle key={k} x={x} y={y} k={k} />)}
           </g>
+          {/* the picked potion comes forward: in front of the rail and its neighbours */}
+          {picked !== null && potion(picked)}
 
           {/* the hanging copper plate: stars collected in this castle / stars that open the next */}
-          <g fontFamily={TEXT_FONT} fontWeight="900" textAnchor="middle" role="img"
-             aria-label={`★ ${stars} / ${required}${nextLine ? ` · ${nextLine}` : ''}`}>
-            <path d={STAR} transform="translate(40,66) scale(11.5)" fill={palette.wsPlateInk} />
-            <path d={STAR} transform="translate(39.4,65.3) scale(9.6)" fill={palette.wsPlateGold} />
-            <text x="86.6" y="74.6" fontSize="22" fill={palette.wsMedalRing} fillOpacity="0.55">{starsText}</text>
-            <text x="86" y="74" fontSize="22" fill={palette.wsPlateInk}>{starsText}</text>
-            <rect x="28" y="82" width="88" height="5" rx="2.5" fill={palette.wsPlateInk} opacity="0.85" />
-            <rect x="29" y="83" width={86 * share} height="3" rx="1.5" fill={done ? palette.correctGreen : palette.wsPlateGold} />
+          <g textAnchor="middle" role="img" aria-label={`★ ${stars} / ${required}${nextLine ? ` · ${nextLine}` : ''}`}>
+            <path d="M32,0 V42 M112,0 V42" stroke={palette.castleLockedShade} strokeWidth="2.4" strokeDasharray="5 3" />
+            <rect x="16" y="40" width="112" height="64" rx="8" fill={palette.wsPlate} />
+            <path d="M16,92 h112 v4 a8,8 0 0 1 -8,8 h-96 a8,8 0 0 1 -8,-8 z" fill={palette.wsPlateShade} />
+            <circle cx="24" cy="48" r="2" fill={palette.wsPlateRivet} />
+            <circle cx="120" cy="48" r="2" fill={palette.wsPlateRivet} />
+            <path d={STAR} transform="translate(40,65) scale(11)" fill={palette.starGold} />
+            <text x="88" y="73" fontFamily={GAME_FONT} fontWeight="900" fontSize="21" fill={palette.gameBg}>
+              {stars}<tspan fontSize="13" dx="2">/ {required}</tspan>
+            </text>
+            <rect x="28" y="80" width="88" height="6" rx="3" fill={palette.wsPlateShade} />
+            <rect x="28" y="80" width={88 * share} height="6" rx="3" fill={done ? palette.correctGreen : palette.starGold} />
             {nextLine && (
-              <text x="72" y="97.4" fontSize={fitSize(nextLine, 7.2, 86, 0.7)} fontWeight="700" fill={palette.wsPlateInk}>{nextLine}</text>
+              <text x="72" y="100.4" fontFamily={TEXT_FONT} fontWeight="700" fontSize={fitSize(nextLine, 8, 100, 0.56)} fill={palette.white}>{nextLine}</text>
             )}
           </g>
 
-          {/* the wooden "Home" sign */}
+          {/* "Home": the game screen's rounded button */}
           <g className="ws-sign" role="button" tabIndex={0} aria-label={back} {...activate(onBack)}>
-            <g fontFamily={TEXT_FONT} fontWeight="900" fontSize={fitSize(back, 15, 46, 0.72)} textAnchor="middle">
-              <text x="347" y="67.4" fill={palette.overlayBlack} opacity="0.8">{back}</text>
-              <text x="346.4" y="66.6" fill={c('Sign')}>{back}</text>
-            </g>
-            <path d="M321,61 l-6,0 m0,0 l4,-4 m-4,4 l4,4" stroke={c('Sign')} strokeWidth="1.8" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-            <rect x="298" y="36" width="86" height="52" fill={palette.white} fillOpacity="0" />
-            <rect className="ws-focus" x="302" y="40" width="78" height="42" rx="6" fill="none" stroke={palette.white} strokeWidth="2" />
+            <rect x="296" y="42" width="80" height="44" rx="14" fill={palette.panel} stroke={palette.white} strokeOpacity="0.15" strokeWidth="2" />
+            <text x="336" y="69.6" textAnchor="middle" fontFamily={GAME_FONT} fontWeight="900" fontSize={fitSize(back, 15, 66, 0.68)} fill={palette.white}>{back}</text>
+            <rect className="ws-focus" x="293" y="39" width="86" height="50" rx="16" fill="none" stroke={palette.white} strokeWidth="2" />
           </g>
 
-          {/* castle title and puzzle count, in the dark top of the picture */}
+          {/* castle title and puzzle count */}
           <g textAnchor="middle" pointerEvents="none">
-            <text x="217" y="64" fontFamily={TITLE_FONT} fontSize={titleSize} fontWeight="900" fill={palette.overlayBlack} opacity="0.9" aria-hidden="true">{title}</text>
-            <text x="216" y="62.6" fontFamily={TITLE_FONT} fontSize={titleSize} fontWeight="900" fill={c('Title')} role="heading" aria-level="1">{title}</text>
-            <path d="M168,74 h36 m24,0 h36" stroke={c('Sub')} strokeWidth="1" />
-            <path d="M216,69.5 l4.5,4.5 l-4.5,4.5 l-4.5,-4.5 z" fill={c('Sub')} />
-            <text x="216" y="93" fontFamily={TEXT_FONT} fontSize="10.5" fontWeight="700" letterSpacing="1.4" fill={c('Sub')}>{count}</text>
+            <text x="212" y="66" fontFamily={GAME_FONT} fontWeight="900" fontSize={fitSize(title, 23, 160, 0.66)} fill={palette.white} role="heading" aria-level="1">{title}</text>
+            <text x="212" y="84" fontFamily={TEXT_FONT} fontWeight="700" fontSize="11.5" fill={palette.silverGray}>{count}</text>
           </g>
 
-          {/* "Pick your poison", on the sign / scroll / stone the picture has for it */}
-          <g pointerEvents="none">
-            {banner.glow ? <>
-              <text {...bannerText} className="ws-glow-text" fill={c('BannerShade')} style={{ '--glow': c('BannerShade') }} aria-hidden="true">{choose}</text>
-              <text {...bannerText} fill={c('Banner')}>{choose}</text>
-            </> : <>
-              <text {...bannerText} x={banner.x + 1} y={banner.y + 1.2} fill={c('BannerShade')} opacity="0.85" aria-hidden="true">{choose}</text>
-              <text {...bannerText} fill={c('Banner')}>{choose}</text>
-            </>}
-          </g>
+          {/* "Pick your poison", where the picture has a place for it (the crypt's lintel) */}
+          {banner && (
+            <text x={banner.x} y={banner.y} textAnchor="middle" pointerEvents="none" fontFamily={GAME_FONT} fontWeight="900"
+                  fontSize={fitSize(choose, banner.size, banner.maxW, 0.64)} fill={palette.gameBg}>{choose}</text>
+          )}
         </svg>
       </div>
       <ConsentBannerSpacer nudge={nudging} />

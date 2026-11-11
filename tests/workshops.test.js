@@ -9,19 +9,19 @@ import { palette } from '../src/theme.js'
 
 const isSpecial = (inst) => (inst.board?.special_cells?.length ?? 0) > 0
 
-test('every scene has its picture, its colours and places inside the picture', () => {
+test('every scene has its picture, its rail colour and places inside the picture', () => {
   assert.equal(new Set(WORKSHOPS.map((s) => s.key)).size, WORKSHOPS.length)
   for (const scene of WORKSHOPS) {
-    assert.ok(existsSync(new URL(`../src/assets/workshops/${scene.key}.jpg`, import.meta.url)), `${scene.key}: picture missing`)
-    for (const part of ['Bg', 'Rail', 'RailLight', 'Title', 'Sub', 'Sign', 'Banner', 'BannerShade']) {
-      assert.match(palette[`${scene.colours}${part}`] ?? '', /^#[0-9a-f]{6}$/, `${scene.colours}${part}`)
-    }
+    assert.ok(existsSync(new URL(`../src/assets/workshops/${scene.key}.svg`, import.meta.url)), `${scene.key}: picture missing`)
+    assert.match(palette[scene.rail] ?? '', /^#[0-9a-f]{6}$/, `${scene.key}: rail colour ${scene.rail}`)
     assert.ok(scene.slots.length >= 30, `${scene.key}: slots`)
     for (const [x, y] of scene.slots) {
       assert.ok(x > 20 && x < WORKSHOP_WIDTH - 20 && y > 200 && y < WORKSHOP_HEIGHT, `${scene.key}: slot ${x},${y}`)
     }
-    assert.ok(scene.banner.maxW > 100 && scene.banner.size > 10)
+    if (scene.banner) assert.ok(scene.banner.maxW > 100 && scene.banner.size > 10)
   }
+  assert.equal(WORKSHOPS.filter((s) => s.banner).length, 1, 'only one scene carries the "Pick your poison" line')
+  assert.equal(WORKSHOPS.filter((s) => s.window).length, 1, 'one scene has a window for the bat')
   for (let k = 1; k <= STOPPER_SHADES; k++) assert.ok(palette[`wsWax${k}`] && palette[`wsCloth${k}`], `shade ${k}`)
 })
 

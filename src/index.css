@@ -215,29 +215,21 @@ body {
 }
 
 
-/* Workshop scenes (components/Workshop.jsx): the castles' puzzle selection as potions in a
-   painted picture. Fonts are bundled (src/assets/fonts, SIL Open Font License) -- no font server. */
-@font-face { font-family: 'Cinzel'; font-weight: 700; font-style: normal; font-display: swap;
-  src: url('./assets/fonts/cinzel-latin-700-normal.woff2') format('woff2'); }
-@font-face { font-family: 'Cinzel'; font-weight: 900; font-style: normal; font-display: swap;
-  src: url('./assets/fonts/cinzel-latin-900-normal.woff2') format('woff2'); }
-@font-face { font-family: 'Cinzel Decorative'; font-weight: 900; font-style: normal; font-display: swap;
-  src: url('./assets/fonts/cinzel-decorative-latin-900-normal.woff2') format('woff2'); }
-@font-face { font-family: 'Pirata One'; font-weight: 400; font-style: normal; font-display: swap;
-  src: url('./assets/fonts/pirata-one-latin-400-normal.woff2') format('woff2'); }
-
-/* What the picture leaves free of the screen: a blurred, darkened copy of it. */
-.ws-backdrop { background-size: cover; background-position: center; filter: blur(22px) brightness(0.45); transform: scale(1.15); }
+/* Workshop scenes (components/Workshop.jsx): the castles' puzzle selection as potions in a flat picture. */
 /* Keep the picture clear of notches and the home indicator. */
 .ws-safe {
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 .ws-potion, .ws-sign { cursor: pointer; outline: none; }
-.ws-press { transform-box: fill-box; transform-origin: 50% 60%; transition: transform 120ms ease-out, filter 120ms ease-out; }
-.ws-potion:active .ws-press { transform: scale(0.9); }
+.ws-press { transform-box: fill-box; transform-origin: 50% 50%; transition: transform 120ms ease-out, filter 120ms ease-out; }
+.ws-potion:active .ws-press { transform: scale(1.06); }
 @media (hover: hover) { .ws-potion:hover .ws-press, .ws-sign:hover { filter: brightness(1.25); } }
 .ws-focus { opacity: 0; pointer-events: none; }
 .ws-potion:focus-visible .ws-focus, .ws-sign:focus-visible .ws-focus { opacity: 0.9; }
-/* Letters of light (the levitation study's "Pick your poison"). */
-.ws-glow-text { filter: drop-shadow(0 0 3px var(--glow)) drop-shadow(0 0 9px var(--glow)); }
-@media (prefers-reduced-motion: reduce) { .ws-press { transition: none; } }
+/* A picked potion lifts up and comes forward a little before its puzzle opens (Workshop PICK_MS). */
+.ws-lifted { transform-box: fill-box; transform-origin: 50% 70%; animation: ws-lift 340ms cubic-bezier(0.2, 0.8, 0.3, 1) forwards; }
+@keyframes ws-lift {
+  from { transform: translateY(0) scale(1); filter: drop-shadow(0 0 0 rgb(0 0 0 / 0)); }
+  to   { transform: translateY(-16px) scale(1.22); filter: drop-shadow(0 10px 6px rgb(0 0 0 / 0.5)); }
+}
+@media (prefers-reduced-motion: reduce) { .ws-press { transition: none; } .ws-lifted { animation: none; } }
