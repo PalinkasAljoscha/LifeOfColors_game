@@ -2,15 +2,18 @@ import { useLayoutEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { palette } from '../theme.js'
 import { CASTLE_COUNT, TUTORIAL_CASTLE, highestUnlocked } from '../engine/castles.js'
+import { LAND_BOX, SITE_BOX, siteFor } from '../sites.js'
 
-// The home-screen map: castles in a landscape of fields and trees, joined by a path, stacked from
-// bottom (castle 0) to top. Shown: every open castle plus the next locked one (grey, dashed path);
+// The home-screen map: the levels ("castles" in the code) as different places -- a castle, a forest
+// hut, a tavern, ... (src/sites.js: which level is which place) -- each with its own bit of
+// landscape, joined by a path, stacked from bottom (castle 0, the training castle) to top. Shown: every open castle plus the next locked one (grey, dashed path);
 // everything above fades into fog. The map scrolls vertically (no visible scroll bar) and one
 // screen holds about three castles; it opens with the player's current castle (the highest open
 // one) in the middle of the screen -- for castle 0 extra landscape below it makes that possible.
 // Each castle where stars were collected shows "stars / required" (the training castle: puzzles
 // won / all of them).
-// Drawing is SVG (decoration only); the castles themselves are HTML buttons laid over it.
+// Drawing is SVG (decoration only, nothing moves); the places themselves are HTML buttons laid over
+// it. A place's label is its name with the level number: "Forest hut (1)".
 
 const FLAG_COLORS = [palette.cellOrangeFill, palette.cellGreenFill, palette.cellBlueFill]
 const FIELD_COLORS = [palette.mapFieldGreen, palette.mapFieldWheat, palette.mapFieldEarth]
@@ -29,49 +32,33 @@ function rng(seed) {
 let savedScroll = null
 let savedTop = null
 
-function Castle({ x, y, size, locked, flag }) {
-  const w = size, h = size * 0.8
-  const wall = locked ? palette.castleLockedWall : palette.castleWall
-  const shade = locked ? palette.castleLockedShade : palette.castleShade
-  const roof = locked ? palette.castleLockedRoof : palette.castleRoof
-  const left = x - w / 2, base = y + h / 2
-  const tw = w * 0.26, th = h * 0.95                 // towers
-  const mw = w * 0.56, mh = h * 0.62                 // main wall
-  const merlons = (x0, width, top) =>
-    Array.from({ length: 3 }, (_, i) => (
-      <rect key={i} x={x0 + (i * width) / 2.5} y={top - size * 0.07} width={width / 5} height={size * 0.08} fill={wall} />
-    ))
+// The pictures of the places: <site>.svg (open), <site>-locked.svg (grey, padlock), <site>-land.svg.
+const PICTURES = import.meta.glob('../assets/sites/*.svg', { eager: true, import: 'default' })
+const picture = (name) => PICTURES[`../assets/sites/${name}.svg`]
+
+// A box of a picture (sites.js SITE_BOX / LAND_BOX, in units of size / 100) on the map: x, y is the
+// place's centre as the map lays it out; its ground line lies 0.4 size below.
+const placed = (box, x, y, size) => {
+  const k = size / 100
+  return { x: x + box.x * k, y: y + size * 0.4 + box.y * k, width: box.w * k, height: box.h * k }
+}
+
+// The bit of landscape around a place (hedges and statues at the manor, a pond at the tower, ...).
+function Land({ x, y, size, site }) {
+  return <image href={picture(`${site}-land`)} {...placed(LAND_BOX, x, y, size)} />
+}
+
+// One place. The castle's flag is drawn here because its colour changes from castle to castle.
+function Site({ x, y, size, site, locked, flag }) {
+  const k = size / 100, ground = y + size * 0.4
+  const fx = x + 37 * k, fy = ground - 109.6 * k
   return (
     <g>
-      <ellipse cx={x} cy={base + 2} rx={w * 0.62} ry={size * 0.09} fill={palette.mapFurrow} opacity="0.6" />
-      {/* main wall with battlements and gate */}
-      <rect x={x - mw / 2} y={base - mh} width={mw} height={mh} fill={wall} />
-      <rect x={x - mw / 2} y={base - mh * 0.25} width={mw} height={mh * 0.25} fill={shade} />
-      {merlons(x - mw / 2, mw, base - mh)}
-      <path d={`M ${x - w * 0.1} ${base} v ${-h * 0.22} a ${w * 0.1} ${w * 0.1} 0 0 1 ${w * 0.2} 0 v ${h * 0.22} z`}
-            fill={palette.castleGate} />
-      {/* towers with pointed roofs */}
-      {[left, left + w - tw].map((tx, i) => (
-        <g key={i}>
-          <rect x={tx} y={base - th} width={tw} height={th} fill={wall} />
-          <rect x={tx + tw * 0.6} y={base - th} width={tw * 0.4} height={th} fill={shade} />
-          <rect x={tx + tw * 0.38} y={base - th * 0.68} width={tw * 0.24} height={th * 0.16} rx={tw * 0.12} fill={palette.castleGate} />
-          <path d={`M ${tx - tw * 0.12} ${base - th} L ${tx + tw / 2} ${base - th - h * 0.42} L ${tx + tw * 1.12} ${base - th} Z`} fill={roof} />
-        </g>
-      ))}
-      {/* flag on the right tower (a puzzle colour), or a padlock while locked */}
-      {!locked && (
+      <image href={picture(locked ? `${site}-locked` : site)} {...placed(SITE_BOX, x, y, size)} />
+      {site === 'castle' && !locked && (
         <g>
-          <line x1={left + w - tw / 2} y1={base - th - h * 0.42} x2={left + w - tw / 2} y2={base - th - h * 0.68}
-                stroke={palette.castleGate} strokeWidth="1.5" />
-          <path d={`M ${left + w - tw / 2} ${base - th - h * 0.68} l ${w * 0.2} ${h * 0.07} l ${-w * 0.2} ${h * 0.07} z`} fill={flag} />
-        </g>
-      )}
-      {locked && (
-        <g transform={`translate(${x} ${base - mh * 0.62})`}>
-          <path d={`M ${-size * 0.07} 0 v ${-size * 0.06} a ${size * 0.07} ${size * 0.07} 0 0 1 ${size * 0.14} 0 v ${size * 0.06}`}
-                fill="none" stroke={palette.goalGoldDark} strokeWidth={size * 0.035} />
-          <rect x={-size * 0.11} y={0} width={size * 0.22} height={size * 0.17} rx={size * 0.03} fill={palette.goalGold} />
+          <line x1={fx} y1={fy} x2={fx} y2={fy - 21 * k} stroke={palette.castleGate} strokeWidth="1.5" />
+          <path d={`M ${fx} ${fy - 21 * k} l ${20 * k} ${5.6 * k} l ${-20 * k} ${5.6 * k} z`} fill={flag} />
         </g>
       )}
     </g>
@@ -145,9 +132,11 @@ export default function CastleMap({ states, loadingCastle, onSelect }) {
     return `M ${a.x} ${a.y} C ${a.x} ${a.y + dy}, ${b.x} ${b.y - dy}, ${b.x} ${b.y}`
   }
 
-  // Landscape: per band between two castles a couple of fields and trees, kept off the path.
+  // Landscape: every place brings its own (Land). Only the stretch below the training castle, where
+  // no place stands, gets a couple of fields and trees per band, kept off the path.
   const scenery = []
-  const bands = Math.ceil(H / seg) + 1
+  const bands = Math.ceil(bottomPad / seg)
+  const below = pos(0).y + size * 1.1            // clear of the training castle and its own landscape
   for (let b = 0; b < bands; b++) {
     const r = rng(b + 11)
     const yBase = H - b * seg
@@ -156,14 +145,18 @@ export default function CastleMap({ states, loadingCastle, onSelect }) {
       const leftSide = (k === 0) === (px > W / 2)
       const fw = 60 + r() * 50, fh = 30 + r() * 26
       const fx = leftSide ? 6 + r() * Math.max(0, W * 0.32 - fw) : W * 0.66 + r() * Math.max(0, W * 0.32 - fw)
-      scenery.push(<Field key={`f${b}-${k}`} x={fx} y={yBase - seg * (0.25 + 0.45 * r())} w={fw} h={fh}
-                          angle={-12 + r() * 24} color={FIELD_COLORS[Math.floor(r() * 3)]} />)
+      const fy = yBase - seg * (0.25 + 0.45 * r())
+      const field = <Field key={`f${b}-${k}`} x={fx} y={fy} w={fw} h={fh}
+                           angle={-12 + r() * 24} color={FIELD_COLORS[Math.floor(r() * 3)]} />
+      if (fy > below) scenery.push(field)
     }
     const trees = 2 + Math.floor(r() * 2)
     for (let k = 0; k < trees; k++) {
       const leftSide = r() < 0.5
       const tx = leftSide ? 14 + r() * W * 0.2 : W * 0.8 + r() * W * 0.15
-      scenery.push(<Tree key={`t${b}-${k}`} x={tx} y={yBase - seg * r()} r={7 + r() * 5} light={r() < 0.5} />)
+      const ty = yBase - seg * r()
+      const tree = <Tree key={`t${b}-${k}`} x={tx} y={ty} r={7 + r() * 5} light={r() < 0.5} />
+      if (ty > below) scenery.push(tree)
     }
   }
 
@@ -175,6 +168,7 @@ export default function CastleMap({ states, loadingCastle, onSelect }) {
         <div className="relative" style={{ height: H }}>
           <svg width={W} height={H} className="absolute inset-0" aria-hidden="true">
             {scenery}
+            {Array.from({ length: shown }, (_, i) => <Land key={i} {...pos(i)} size={size} site={siteFor(i)} />)}
             {/* path on into the fog above the last shown castle */}
             {shown < CASTLE_COUNT && (
               <path d={path(pos(shown - 1), { x: W * 0.5, y: 0 })} fill="none" stroke={palette.mapPathLocked}
@@ -193,7 +187,7 @@ export default function CastleMap({ states, loadingCastle, onSelect }) {
               )
             })}
             {Array.from({ length: shown }, (_, i) => (
-              <Castle key={i} {...pos(i)} size={size} locked={!states[i].unlocked} flag={FLAG_COLORS[i % 3]} />
+              <Site key={i} {...pos(i)} size={size} site={siteFor(i)} locked={!states[i].unlocked} flag={FLAG_COLORS[i % 3]} />
             ))}
           </svg>
 
@@ -204,7 +198,7 @@ export default function CastleMap({ states, loadingCastle, onSelect }) {
           {Array.from({ length: shown }, (_, i) => {
             const s = states[i]
             const { x, y } = pos(i)
-            const name = i === TUTORIAL_CASTLE ? t('castles.tutorial') : t('castles.name', { n: i })
+            const name = i === TUTORIAL_CASTLE ? t('castles.tutorial') : t('castles.name', { site: t(`sites.${siteFor(i)}`), n: i })
             const label = s.unlocked
               ? `${name}: ${t(s.training ? 'castles.progressTraining' : 'castles.progress',
                   { stars: s.stars, solved: s.solved, required: s.required })}`

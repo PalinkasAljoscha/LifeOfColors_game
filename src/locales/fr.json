@@ -94,14 +94,24 @@
     "notes": "Observations",
     "nothing": "aucun voisin coloré"
   },
+  "sites": {
+    "castle": "Château",
+    "forestHut": "Cabane en forêt",
+    "manor": "Manoir",
+    "tavern": "Taverne hantée",
+    "wizardTower": "Tour du sorcier",
+    "windmill": "Vieux moulin",
+    "yurt": "Yourte",
+    "forestLodge": "Maison forestière"
+  },
   "castles": {
-    "name": "Château {{n}}",
+    "name": "{{site}} ({{n}})",
     "tutorial": "Château d’entraînement",
     "progress": "{{stars}} sur {{required}} étoiles",
     "progressTraining": "{{solved}} puzzles résolus sur {{required}}",
     "locked": "verrouillé",
-    "toOpen": "pour ouvrir le {{name}}",
-    "nextOpen": "Le {{name}} est ouvert !"
+    "toOpen": "pour ouvrir : {{name}}",
+    "nextOpen": "{{name}} : ouvert !"
   },
   "history": {
     "title": "Joués récemment",

@@ -94,8 +94,18 @@
     "notes": "Observations",
     "nothing": "no coloured neighbours"
   },
+  "sites": {
+    "castle": "Castle",
+    "forestHut": "Forest hut",
+    "manor": "Manor",
+    "tavern": "Spooky tavern",
+    "wizardTower": "Wizard's tower",
+    "windmill": "Old windmill",
+    "yurt": "Yurt",
+    "forestLodge": "Forest lodge"
+  },
   "castles": {
-    "name": "Castle {{n}}",
+    "name": "{{site}} ({{n}})",
     "tutorial": "Training castle",
     "progress": "{{stars}} of {{required}} stars",
     "progressTraining": "{{solved}} of {{required}} puzzles won",

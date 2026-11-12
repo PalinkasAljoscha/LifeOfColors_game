@@ -35,7 +35,8 @@ src/
   telemetry/telemetry.js  # anonymous screen-view and puzzle-play telemetry (see privacy rule below)
   game/GameScene.js       # Phaser scene: draws the board, turns taps into engine calls
   hooks/usePhaserGame.js  # Phaser mount/unmount (from Maze Inc., takes width/height/registry/events)
-  components/             # HomeScreen (CastleMap: scrollable SVG map of castles), LevelScreen (one castle:
+  components/             # HomeScreen (CastleMap: scrollable SVG map of the levels as different sites,
+                          # see "Map sites" below), LevelScreen (one castle:
                           # its puzzles as potions in a workshop scene (Workshop, see "Workshop
                           # scenes" below); the old progress bar + 10-column tile grid is only the
                           # fallback when a castle has more puzzles than its scene has places; the
@@ -51,6 +52,8 @@ src/
                           # ConsentBanner (opt-in for saved progress; the home footer's "opt in/out" link reopens it)
                           # HistoryDialog (home header, circled-arrow button left of "?": the last 20
                           # played puzzles, each opens the puzzle again in its castle; pick = 'grid')
+  sites.js                # the places on the home map: which level is which site (castle, forest hut, tavern, ...)
+  assets/sites/*.svg      # the sites' pictures: open, locked and their landscape
   workshops.js            # the workshop scenes: which castle shows which picture, where its potions stand,
                           # how each potion looks (no React, tested)
   assets/workshops/*.svg  # the scenes' flat pictures (390 x 844 units)
@@ -164,6 +167,23 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   training-complete message, moves and "Best: X". Afterwards only the board is left as it is: the
   scene takes no more taps after a win, and the player goes on with Retry or Back. Random within
   limits, drawn once per win. Colours `win*` in theme.js, keyframes `win-*` in index.css.
+- **Map sites** (2026-11-12) -- on the home map a level is no longer always a castle
+  (`src/sites.js`, drawn in `components/CastleMap.jsx`). The training level (castle 0) is a castle;
+  levels 1, 2, 3, ... walk through `SITE_ORDER` in a loop: forest hut, spooky tavern, manor, castle,
+  wizard's tower, old windmill, yurt, forest lodge (`siteFor`). In the code a level is still a
+  "castle" (engine, progress, telemetry: unchanged); a site is only a look and a name. A level's
+  name is its site with the level number, "Forest hut (1)" (`castles.name` = `{{site}} ({{n}})`,
+  site names in the locales under `sites.*`; the training level stays `castles.tutorial`); the
+  same name is used as the workshop's title, in the "to open ..." lines and in the history.
+  Pictures in `src/assets/sites/`: `<site>.svg` (open), `<site>-locked.svg` (the same in grey with a
+  padlock, windows dark, no smoke) and `<site>-land.svg` (its own bit of landscape: castle and
+  windmill fields and trees; manor hedges, statues and clipped trees; forest hut and forest lodge
+  firs and bushes; tavern trees and a lit lantern; wizard's tower dead trees and a pond; yurt only
+  grass tufts). Flat like the rest of the map, a little magic and spooky, and STILL: no animation
+  in any map picture (tested). Only the castle's flag is drawn by the app (its colour changes from
+  castle to castle). The random fields and trees remain only below the training castle, where no
+  site stands. The pictures come from the same drawing script as the workshop scenes (not in this
+  repo).
 - **Workshop scenes** (2026-11-11, flat look 2026-11-12) -- every castle except the training castle
   picks its puzzles in a sorcerer's workshop instead of a tile grid (`components/Workshop.jsx`, data
   in `src/workshops.js`). Six scenes (hut, cupboard, lab, tower, study, crypt); castle n uses scene

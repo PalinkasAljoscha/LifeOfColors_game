@@ -94,8 +94,18 @@
     "notes": "Beobachtungen",
     "nothing": "keine farbigen Nachbarn"
   },
+  "sites": {
+    "castle": "Burg",
+    "forestHut": "Waldhütte",
+    "manor": "Herrenhaus",
+    "tavern": "Spukschenke",
+    "wizardTower": "Zaubererturm",
+    "windmill": "Alte Windmühle",
+    "yurt": "Jurte",
+    "forestLodge": "Waldhaus"
+  },
   "castles": {
-    "name": "Burg {{n}}",
+    "name": "{{site}} ({{n}})",
     "tutorial": "Übungsburg",
     "progress": "{{stars}} von {{required}} Sternen",
     "progressTraining": "{{solved}} von {{required}} Puzzles gelöst",

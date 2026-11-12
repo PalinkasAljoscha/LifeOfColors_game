@@ -10,6 +10,7 @@ import {
 } from './engine/castles.js'
 import { castleStars, progressTotals, recentlyPlayed, seedCastleStars, storageConsent, CONSENT_GRANTED } from './engine/progress.js'
 import { useProgress } from './hooks/useProgress.js'
+import { siteFor } from './sites.js'
 import { setCatalogVersion, screenView } from './telemetry/telemetry.js'
 
 // Three screens: Home (castle map, engine/castles.js) -> Castle (grid of its puzzles; the
@@ -86,7 +87,8 @@ export default function App() {
       .catch((e) => setError(String(e)))
   }, [])
 
-  const castleName = (c) => (c === TUTORIAL_CASTLE ? t('castles.tutorial') : t('castles.name', { n: c }))
+  // A level's name: "Training castle", then its site on the map with the level number, e.g. "Forest hut (1)".
+  const castleName = (c) => (c === TUTORIAL_CASTLE ? t('castles.tutorial') : t('castles.name', { site: t(`sites.${siteFor(c)}`), n: c }))
   const pool = castle !== null ? castles?.[castle]?.pool ?? [] : []
 
   function playPicked(inst) {
