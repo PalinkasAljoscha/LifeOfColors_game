@@ -111,7 +111,10 @@
     "progressTraining": "{{solved}} von {{required}} Puzzles gelöst",
     "locked": "gesperrt",
     "toOpen": "um {{name}} zu öffnen",
-    "nextOpen": "{{name}} ist offen!"
+    "nextOpen": "{{name}} ist offen!",
+    "toOpenMany": "um die Stufen {{list}} zu öffnen",
+    "nextOpenMany": "Stufen {{list}} sind offen!",
+    "review": "Ansicht: alle Stufen offen"
   },
   "history": {
     "title": "Zuletzt gespielt",

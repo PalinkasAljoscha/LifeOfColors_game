@@ -3,7 +3,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync, existsSync } from 'node:fs'
-import { WORKSHOPS, WORKSHOP_WIDTH, WORKSHOP_HEIGHT, STOPPERS, STOPPER_SHADES, workshopFor, placePuzzles, potionLook, isLying } from '../src/workshops.js'
+import { WORKSHOPS, WORKSHOP_WIDTH, WORKSHOP_HEIGHT, STOPPERS, STOPPER_SHADES, workshopFor, placePuzzles, potionLook, isLying, spreadSlots, emptySlots } from '../src/workshops.js'
 import { assignCastles, CASTLE_COUNT, TUTORIAL_CASTLE } from '../src/engine/castles.js'
 import { palette } from '../src/theme.js'
 
@@ -44,6 +44,22 @@ test('every castle of the current catalog fits its scene, each puzzle exactly on
     assert.deepEqual(placed.map((p) => p.inst), pool)
     assert.equal(new Set(placed.map((p) => p.slot)).size, pool.length)
   }
+})
+
+test('fewer puzzles than places: spread over the scene, the rest are empty test tubes', () => {
+  const scene = WORKSHOPS[0]
+  const pool = Array.from({ length: 18 }, (_, k) => ({ id: `p${k}`, board: {} }))
+  const placed = placePuzzles(scene, pool, isSpecial, 7)
+  assert.deepEqual(placed.map((p) => p.inst), pool)
+  const order = placed.map((p) => scene.slots.indexOf(p.slot))
+  assert.deepEqual(order, [...order].sort((a, b) => a - b), 'puzzles keep the slot order')
+  assert.equal(new Set(order).size, 18)
+  assert.ok(order[0] < scene.slots.length / 18 + 1 && order[17] >= scene.slots.length - scene.slots.length / 18 - 1, 'spread to both ends')
+  const empty = emptySlots(scene, placed)
+  assert.equal(empty.length, scene.slots.length - 18)
+  assert.ok(empty.every((s) => !placed.some((p) => p.slot === s)))
+  assert.deepEqual(placePuzzles(scene, pool, isSpecial, 7), placed, 'the same castle looks the same every visit')
+  assert.deepEqual(spreadSlots(scene, scene.slots.length, 3), scene.slots)
 })
 
 test('placePuzzles: too many puzzles -> null; flasks stand before test tubes do', () => {

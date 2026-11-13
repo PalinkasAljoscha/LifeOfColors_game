@@ -1,24 +1,30 @@
 // Castles: the level hierarchy shown as a map on the home screen.
 //
-// CASTLE_COUNT castles (src/config.js), stacked bottom to top. Castle 0 is the training castle:
+// The castles and the paths between them come from the level graph (engine/levelGraph.js, shipped
+// by the factory as public/catalog/level_graph.json; without one: CASTLE_COUNT castles in a line,
+// src/config.js). Castle 0 is the training castle:
 // open from the start, played in a fixed order (puzzle k can only be played once puzzles 1..k-1
 // are won: playableUpTo), and done once EVERY puzzle is won (stars do not count). Castle 1 is
-// open from the start too: it does not wait for the training castle. Castle n >= 2 opens once
-// castle n-1 is open AND done: the player has collected its required stars there
-// (UNLOCK_STARS, 20, however many puzzles it holds).
+// open from the start too: it does not wait for the training castle. Every other castle opens
+// once ANY castle with a path into it (its parents in the graph) is open AND done: the player has
+// collected its required stars there (UNLOCK_STARS, 20, however many puzzles it holds).
+// Review: castleStates(..., { allOpen: true }) opens every castle (App: ?map=all in the URL).
 // Unlocking is derived from the per-castle star counters (engine/progress.js castleStars), not
 // from the stars of the puzzles currently in a castle: a counter only grows, so a castle stays
 // done when puzzles move between castles after a new catalog.
 //
 // Which puzzles belong to which castle (assignCastles) -- the factory ships an order, not levels:
 //   * castle 0: every playable instance with a training_position, in that order;
-//   * castles 1..CASTLE_COUNT-1: every other playable instance with a difficulty_ranking, in
-//     ranking order (1 = easiest), cut into CASTLE_COUNT - 1 consecutive castles of nearly equal
-//     size (sizes differ by at most one). Inside a castle the puzzles stay in ranking order.
+//   * castles 1..count-1 (count = the graph's sites): every other playable instance with a
+//     difficulty_ranking, in ranking order (1 = easiest), cut into count - 1 consecutive castles
+//     of nearly equal size (sizes differ by at most one), in castle-number order -- the graph's
+//     ids grow from the bottom of the map to the top. Inside a castle the puzzles stay in
+//     ranking order.
 // A new catalog can move puzzles to another castle; their own best stars go with them.
 // Pure functions (no React, no fetch) so the tests can use them.
 
 import { CASTLE_COUNT, UNLOCK_STARS } from '../config.js'
+import { chainGraph } from './levelGraph.js'
 
 export { CASTLE_COUNT, UNLOCK_STARS }
 export const TUTORIAL_CASTLE = 0
@@ -47,11 +53,12 @@ export function requiredStars() {
 }
 
 /** State of every castle: [{ castle, count, stars, required, done, unlocked, fromStart, training,
- *  solved }]. `totalsIn(pool, castle)` returns { stars, solved }: stars = the castle's star counter
+ *  solved, parents, children }]. `graph` (engine/levelGraph.js) says which castles lead into which
+ *  (default: one line); allOpen = every castle with puzzles is open (review). `totalsIn(pool, castle)` returns { stars, solved }: stars = the castle's star counter
  *  (engine/progress.js castleStars), solved = solved puzzles of the pool (progressTotals). Castle 0
  *  is the training castle: required = every puzzle, done = all solved. Castles 0 and 1 are open
  *  from the start (castle 1 does not wait for training). fromStart = open without having earned it. */
-export function castleStates(castles, totalsIn) {
+export function castleStates(castles, totalsIn, graph = chainGraph(Math.max(2, castles.length)), { allOpen = false } = {}) {
   const out = []
   const openAtStart = 2                       // castles 0 (training) and 1
   for (const { castle, pool } of castles) {
@@ -59,10 +66,14 @@ export function castleStates(castles, totalsIn) {
     const isTraining = castle === TUTORIAL_CASTLE
     const required = isTraining ? pool.length : requiredStars()
     const done = isTraining ? pool.length > 0 && solved >= pool.length : stars >= required
-    const prev = out[castle - 1]
+    const parents = graph.parents[castle] ?? []
     const fromStart = castle < openAtStart
-    const unlocked = pool.length > 0 && (fromStart || (prev?.unlocked === true && prev.done === true))
-    out.push({ castle, count: pool.length, stars, solved, required, done, unlocked, fromStart, training: isTraining })
+    const unlocked = pool.length > 0 && (fromStart || allOpen
+      || parents.some((p) => out[p]?.unlocked === true && out[p].done === true))
+    out.push({
+      castle, count: pool.length, stars, solved, required, done, unlocked, fromStart, training: isTraining,
+      parents, children: graph.children[castle] ?? [],
+    })
   }
   return out
 }

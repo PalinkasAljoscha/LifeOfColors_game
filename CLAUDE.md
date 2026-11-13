@@ -28,8 +28,9 @@ it has no "edition" tagline.
 src/
   App.jsx                 # screens: Home (castle map) -> Castle (grid) -> Game; ?instance=<name or id> opens one puzzle
   engine/engine.js        # THE rule engine (must match the factory's instance.py exactly), incl. special cells (tap)
-  engine/catalog.js       # loads public/catalog/{index,puzzles}.json (loadAll for the castle map)
-  engine/castles.js       # the castle hierarchy: ranking -> castles, required stars, unlocking
+  engine/catalog.js       # loads public/catalog/{index,puzzles,level_graph}.json (loadAll, loadLevelGraph)
+  engine/castles.js       # the castle hierarchy: ranking -> castles, required stars, unlocking (ANY parent done)
+  engine/levelGraph.js    # the level graph (public/catalog/level_graph.json): which castles lead into which
   engine/progress.js      # tried/solved puzzles + best stars + per-castle star counters; saved only after opt-in
   engine/stars.js         # star rating of a win (1-5) from moves and moves_to_win_min
   telemetry/telemetry.js  # anonymous screen-view and puzzle-play telemetry (see privacy rule below)
@@ -109,20 +110,31 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   lives in memory for the visit. Total stars = sum of each puzzle's best rating (max 5 each).
   Progress is never sent anywhere (not in telemetry). Every storage access is try/catch: blocked
   storage must never break the game. A new stored field needs the same opt-in.
-- **Castles** -- `src/engine/castles.js`, settings in `src/config.js`: `CASTLE_COUNT` castles
-  (0..N-1), shown bottom to top on the home map. The catalog has NO levels: castle 0 = every
-  playable instance with `training_position` (in that order; played in order, done when all are
-  won); the remaining instances with `difficulty_ranking` are cut, in ranking order, into
-  `CASTLE_COUNT - 1` castles of nearly equal size. Changing the number of castles = changing
-  `CASTLE_COUNT`, no factory export. `assignCastles` sets `instance.level` = castle number (app
-  field). Castle 1 opens when castle 0 is done (open from the start if there are no training
-  puzzles); castle n >= 2 when castle n-1 is open and its STAR COUNTER reaches `UNLOCK_STARS`
-  (20, the same for every castle, independent of its number of puzzles). Star counters (engine/progress.js castleStars):
-  each gain in a puzzle's best rating is added to the castle it is in at that moment; they never go
-  down and are independent of which puzzles a castle holds now (puzzles can move after a new
-  export; their own stars move with them). When play opens a castle and progress is not saved,
-  the consent banner reappears once per visit (`nudge`). Telemetry `level` = castle number, on the
-  castle screen and in a game.
+- **Castles** -- `src/engine/castles.js` + `src/engine/levelGraph.js`, settings in `src/config.js`.
+  Since 2026-11-13 the castles and the paths between them come from the **level graph** the factory
+  ships next to the catalog: `public/catalog/level_graph.json` (factory `export_level_graph.py`,
+  from a graph saved by its `level_graph.ipynb`; don't edit). Node id = castle number (0 = the
+  training castle T, ids grow with the graph's layer), `layer` = row on the map, `col` = column,
+  every path goes one layer up. `parseLevelGraph` checks it (a broken file is a load error);
+  without the file the castles form one line of `CASTLE_COUNT` (`chainGraph`, the old map).
+  The catalog has NO levels: castle 0 = every playable instance with `training_position` (in that
+  order; played in order, done when all are won); the remaining instances with
+  `difficulty_ranking` are cut, in ranking order, into castles 1..n-1 of nearly equal size, in
+  castle-number order (so harder puzzles lie further up the map). `assignCastles` sets
+  `instance.level` = castle number (app field). Castles 0 and 1 are open from the start; any other
+  castle opens when ANY castle with a path into it (its graph parents) is open and its STAR COUNTER
+  reaches `UNLOCK_STARS` (20, the same for every castle, independent of its number of puzzles).
+  Star counters (engine/progress.js castleStars): each gain in a puzzle's best rating is added to
+  the castle it is in at that moment; they never go down and are independent of which puzzles a
+  castle holds now (puzzles can move after a new export; their own stars move with them -- the
+  switch from 30 castles to the graph's 55 left old counters as they were: no real players yet,
+  user decision). The castle screen names what finishing it opens: its graph children (one name,
+  or "levels 12, 13 and 14": `castles.toOpenMany` / `nextOpenMany`). When play opens a castle and
+  progress is not saved, the consent banner reappears once per visit (`nudge`). Telemetry
+  `level` = castle number (= graph node id; the factory keeps a snapshot of every exported graph
+  in `exports/level_graphs/<graph_version>.json` to read it), on the castle screen and in a game.
+  **Review:** `?map=all` in the URL opens every castle (any build, saves nothing; a note over the
+  map says so; the training castle's own order still applies).
 - **Start cell switch** -- `src/config.js` `HIDE_START_CELL_IF_NOT_REQUIRED`: puzzles with
   `start_cell_required: false` start all-uncolored (`src/game/startBoard.js`); same id either way.
 - **Game screen** -- top row: Retry, Back, and an info button (circled "i") that opens the
@@ -167,6 +179,17 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   training-complete message, moves and "Best: X". Afterwards only the board is left as it is: the
   scene takes no more taps after a win, and the player goes on with Retry or Back. Random within
   limits, drawn once per win. Colours `win*` in theme.js, keyframes `win-*` in index.css.
+- **Map layout** (2026-11-13) -- `components/CastleMap.jsx` draws the level graph: one band per
+  graph row from the bottom (training castle) up, the graph's columns spread over the map's width.
+  Inside a band the places are staggered by column (`stagger`: the order of heights that keeps
+  neighbouring columns furthest apart, also across bands), so no two places stand at the same
+  height and neighbours are at least a picture plus label apart; that sets the band height. Place
+  pictures are 56-72 px (`size`, from the width). The WHOLE map is shown: open places in colour,
+  locked ones grey with a padlock (no fog). A path is solid once the place it leads to is open
+  through it (start done, or the path to castle 1), dashed otherwise. A place's label is
+  "Name (n)", plus "★ stars/required" (✓ when done; framed gold / green) once stars were collected
+  there; labels are kept inside the map's width. Pictures are drawn top-down so lower places
+  overlap higher ones.
 - **Map sites** (2026-11-12) -- on the home map a level is no longer always a castle
   (`src/sites.js`, drawn in `components/CastleMap.jsx`). The training level (castle 0) is a castle;
   levels 1, 2, 3, ... walk through `SITE_ORDER` in a loop: forest hut, spooky tavern, manor, castle,
@@ -194,6 +217,10 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   dropped as not coherent with the rest of the app) -- plus, in workshops.js, its potion places
   (`slots`), rack rails, flame spots and, for the crypt only, where the "Pick your poison" line
   (`levelScreen.choose`) sits (on its stone lintel; the other scenes have no such line).
+  A castle with fewer puzzles than its scene has places (since the level graph: about 18 per
+  castle) spreads them over the scene (`spreadSlots`: the slots cut into equal runs, one random slot
+  per run, seeded by the castle number, puzzles kept in slot order); every other place shows an
+  EMPTY test tube (just glass, no stopper, not tappable; `emptySlots`, `EmptyTube`).
   Everything that changes is drawn over the picture as SVG in the picture's 390 x 844 units:
   one potion per puzzle in its `name_color` -- a **test tube for a base puzzle, a round-bottomed
   flask for a special puzzle** (`isSpecial`); solved = copper medal at the neck with the best stars

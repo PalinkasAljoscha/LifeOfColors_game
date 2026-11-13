@@ -6,7 +6,7 @@ import { ConsentBannerSpacer } from './ConsentBanner.jsx'
 import { inkOn, mixHex, palette } from '../theme.js'
 import { HANDWRITING } from './TrainingNotes.jsx'
 import { playableUpTo } from '../engine/castles.js'
-import { placePuzzles, workshopFor } from '../workshops.js'
+import { emptySlots, placePuzzles, workshopFor } from '../workshops.js'
 import Workshop from './Workshop.jsx'
 
 // One castle. Every castle except the training castle shows its puzzles as potions in a
@@ -22,7 +22,9 @@ import Workshop from './Workshop.jsx'
 // puzzles only opened a small dot (engine/progress.js: this visit, or saved if the player
 // opted in).
 // Used for one castle (engine/castles.js): `state` = { stars, required, done }, shown as a bar
-// towards opening `nextTitle` (the castle above; null for the last one).
+// towards opening `next` (App opensNext: { one: name } or { list: '12, 13 and 14' }, the castles
+// its paths lead to; null where none lead on). Empty test tubes fill the places the castle's
+// puzzles leave free (workshops.js placePuzzles); they cannot be tapped.
 // Training castle (state.training): the puzzles are a path to follow in order (TrainingPath):
 // one bar per puzzle in the puzzle's colour (text dark or white, theme.js inkOn), one below the
 // other, joined by down arrows -- a big title ("Introduction", then "Day One" .. "Day Five") over
@@ -168,7 +170,15 @@ function TrainingPath({ pool, states, onPick }) {
   )
 }
 
-export default function LevelScreen({ title, nextTitle, state, pool, onPick, onBack, nudging = false }) {
+/** The line about what this castle opens: "to open Manor (12)" / "Levels 12, 13 and 14 are open!". */
+export function openLine(t, next, done) {
+  if (!next) return null
+  return next.one
+    ? t(done ? 'castles.nextOpen' : 'castles.toOpen', { name: next.one })
+    : t(done ? 'castles.nextOpenMany' : 'castles.toOpenMany', { list: next.list })
+}
+
+export default function LevelScreen({ title, next, state, pool, onPick, onBack, nudging = false }) {
   const { t } = useTranslation()
   useProgress()
   const states = pool.map(playState)
@@ -178,12 +188,13 @@ export default function LevelScreen({ title, nextTitle, state, pool, onPick, onB
 
   // The workshop scene (not for the training castle; null if the scene has too few places).
   const scene = training ? null : workshopFor(state.castle)
-  const placed = scene && placePuzzles(scene, pool, isSpecial)
+  const placed = scene && placePuzzles(scene, pool, isSpecial, state.castle)
   if (placed) {
     const stateOf = new Map(pool.map((inst, i) => [inst.id, states[i]]))
     return (
       <Workshop scene={scene} placed={placed} playStates={placed.map(({ inst }) => stateOf.get(inst.id))} isSpecial={isSpecial}
-                title={title} nextTitle={nextTitle} state={state} onPick={onPick} onBack={onBack} nudging={nudging} />
+                empty={emptySlots(scene, placed)}
+                title={title} nextLine={openLine(t, next, state.done)} state={state} onPick={onPick} onBack={onBack} nudging={nudging} />
     )
   }
 
@@ -207,7 +218,7 @@ export default function LevelScreen({ title, nextTitle, state, pool, onPick, onB
           </button>
         </div>
 
-        {nextTitle && !training && (
+        {next && !training && (
           <div className="mt-3">
             <p className="text-sm font-sans font-bold">
               {training
@@ -215,7 +226,7 @@ export default function LevelScreen({ title, nextTitle, state, pool, onPick, onB
                 : <span className="text-game-star">★ {stars}</span>}
               <span className="text-game-silver"> / {required} · </span>
               <span className={done ? 'text-white' : 'text-game-silver'}>
-                {t(done ? 'castles.nextOpen' : 'castles.toOpen', { name: nextTitle })}
+                {openLine(t, next, done)}
               </span>
             </p>
             <div className="mt-1.5 h-2.5 rounded-full bg-game-track overflow-hidden"

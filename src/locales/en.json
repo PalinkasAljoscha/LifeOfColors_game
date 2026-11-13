@@ -111,7 +111,10 @@
     "progressTraining": "{{solved}} of {{required}} puzzles won",
     "locked": "locked",
     "toOpen": "to open {{name}}",
-    "nextOpen": "{{name}} is open!"
+    "nextOpen": "{{name}} is open!",
+    "toOpenMany": "to open levels {{list}}",
+    "nextOpenMany": "Levels {{list}} are open!",
+    "review": "Review: every level open"
   },
   "history": {
     "title": "Recently played",

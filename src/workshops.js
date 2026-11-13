@@ -127,13 +127,34 @@ export function workshopFor(castle) {
 
 export const isLying = (slot) => Math.abs(slot[2]) > 30
 
+/** Which `n` of the scene's slots hold puzzles, in slot order: spread over the whole scene (the
+ *  slots cut into n runs of nearly equal length, one slot picked at random in each), so a castle
+ *  with fewer puzzles than places shows gaps here and there, not one full and one empty shelf.
+ *  `seed` (the castle number) makes the pick the same on every visit. */
+export function spreadSlots(scene, n, seed = 0) {
+  const total = scene.slots.length
+  if (n >= total) return scene.slots.slice()
+  const rnd = seededRandom(`${scene.key}:${seed}`)
+  return Array.from({ length: n }, (_, k) => {
+    const lo = Math.floor((k * total) / n), hi = Math.floor(((k + 1) * total) / n)
+    return scene.slots[lo + Math.floor(rnd() * (hi - lo))]
+  })
+}
+
+/** The scene's slots that hold no puzzle (an empty test tube each): every slot not in `placed`. */
+export function emptySlots(scene, placed) {
+  const used = new Set(placed.map(({ slot }) => slot))
+  return scene.slots.filter((slot) => !used.has(slot))
+}
+
 /** Which puzzle goes into which slot: [{ inst, slot }] in pool order, or null when the scene has
- *  too few slots (the caller then falls back to the plain tile grid). Puzzles fill the slots in
- *  order; only where a scene has lying slots, special puzzles (round flasks) get standing ones
- *  first, so a flask lies down only when there are more specials than standing slots. */
-export function placePuzzles(scene, pool, isSpecial) {
+ *  too few slots (the caller then falls back to the plain tile grid). Puzzles take the slots
+ *  spreadSlots picks, in order; only where a scene has lying slots, special puzzles (round flasks)
+ *  get standing ones first, so a flask lies down only when there are more specials than standing
+ *  slots. */
+export function placePuzzles(scene, pool, isSpecial, seed = 0) {
   if (pool.length > scene.slots.length) return null
-  const used = scene.slots.slice(0, pool.length)
+  const used = spreadSlots(scene, pool.length, seed)
   if (!used.some(isLying)) return pool.map((inst, k) => ({ inst, slot: used[k] }))
   const standing = used.filter((s) => !isLying(s))
   const lying = used.filter(isLying)

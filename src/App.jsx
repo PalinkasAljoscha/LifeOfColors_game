@@ -4,10 +4,11 @@ import HomeScreen from './components/HomeScreen.jsx'
 import LevelScreen from './components/LevelScreen.jsx'
 import GameScreen from './components/GameScreen.jsx'
 import ConsentBanner from './components/ConsentBanner.jsx'
-import { loadIndex, loadAll, markPlayed, findById } from './engine/catalog.js'
+import { loadIndex, loadAll, loadLevelGraph, markPlayed, findById } from './engine/catalog.js'
 import {
-  assignCastles, castleStates as computeStates, earnedUnlocks, highestUnlocked, TUTORIAL_CASTLE,
+  assignCastles, castleStates as computeStates, earnedUnlocks, highestUnlocked, CASTLE_COUNT, TUTORIAL_CASTLE,
 } from './engine/castles.js'
+import { chainGraph, parseLevelGraph } from './engine/levelGraph.js'
 import { castleStars, progressTotals, recentlyPlayed, seedCastleStars, storageConsent, CONSENT_GRANTED } from './engine/progress.js'
 import { useProgress } from './hooks/useProgress.js'
 import { siteFor } from './sites.js'
@@ -16,13 +17,18 @@ import { setCatalogVersion, screenView } from './telemetry/telemetry.js'
 // Three screens: Home (castle map, engine/castles.js) -> Castle (grid of its puzzles; the
 // LevelScreen component) -> Game (one instance). Back in the game returns to the castle's grid.
 // `pick` records how the puzzle was chosen (telemetry): 'grid' | 'link' (?instance=).
-// Castles come from the catalog's difficulty_ranking / training_position (engine/castles.js, number
-// of castles in src/config.js). Telemetry `level`: the castle number, on the castle screen and in a
-// game (instance.level is set to its castle by assignCastles).
+// Castles: the level graph shipped with the catalog (engine/levelGraph.js: how many castles there
+// are and which lead into which) and the catalog's difficulty_ranking / training_position
+// (engine/castles.js). Telemetry `level`: the castle number (= the graph's node id), on the castle
+// screen and in a game (instance.level is set to its castle by assignCastles).
+// Review: ?map=all in the URL opens every castle (nothing is saved for it; reload without it to
+// play normally).
 export default function App() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [index, setIndex] = useState(null)
   const [castles, setCastles] = useState(null)   // [{ castle, pool }] once the catalog is loaded
+  const [graph, setGraph] = useState(null)       // engine/levelGraph.js, once loaded
+  const [review] = useState(() => new URLSearchParams(window.location.search).get('map') === 'all')
   const [error, setError] = useState(null)
   const [castle, setCastle] = useState(null)     // number of the open castle, or null on the map
   const [game, setGame] = useState(null)         // { instance, pick } while playing
@@ -32,9 +38,9 @@ export default function App() {
     () => castles && computeStates(castles, (pool, c) => ({
       solved: progressTotals(pool.map((i) => i.id)).solved,
       stars: castleStars(c),                      // the castle's own counter (engine/progress.js)
-    })),
+    }), graph, { allOpen: review }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [castles, progressVersion],
+    [castles, graph, progressVersion],
   )
 
   // Nudge the opt-in once per visit when play opens a new castle and progress is not being saved
@@ -69,7 +75,10 @@ export default function App() {
       .then(async (idx) => {
         setIndex(idx)
         setCatalogVersion(idx.catalog_version)
-        const all = assignCastles(await loadAll())
+        const [instances, graphData] = await Promise.all([loadAll(), loadLevelGraph()])
+        const g = graphData ? parseLevelGraph(graphData) : chainGraph(CASTLE_COUNT)
+        const all = assignCastles(instances, g.count)
+        setGraph(g)
         seedCastleStars(all)                        // once, for progress saved before castle counters
         setCastles(all)
         // ?instance=<name or id> opens one specific puzzle (testing, sharing), even in a locked castle.
@@ -90,6 +99,15 @@ export default function App() {
   // A level's name: "Training castle", then its site on the map with the level number, e.g. "Forest hut (1)".
   const castleName = (c) => (c === TUTORIAL_CASTLE ? t('castles.tutorial') : t('castles.name', { site: t(`sites.${siteFor(c)}`), n: c }))
   const pool = castle !== null ? castles?.[castle]?.pool ?? [] : []
+  // What finishing a castle opens: its children in the graph -- one name ("Manor (12)"), or the
+  // level numbers when there are several ("levels 12, 13 and 14"). Null when it leads nowhere.
+  const opensNext = (c) => {
+    const next = states?.[c]?.children ?? []
+    if (next.length === 0) return null
+    if (next.length === 1) return { one: castleName(next[0]) }
+    const list = new Intl.ListFormat(i18n.language, { type: 'conjunction' }).format(next.map(String))
+    return { list }
+  }
 
   function playPicked(inst) {
     markPlayed(inst)
@@ -134,7 +152,7 @@ export default function App() {
         training={states?.[castle]?.training ? {
           day: pool.findIndex((i) => i.id === game.instance.id) + 1 || null,   // position in the training plan
           ids: pool.map((i) => i.id),
-          next: castle + 1 < states.length ? castleName(castle + 1) : null,
+          next: opensNext(castle)?.one ?? null,
         } : null}
         pick={game.pick}
         onPickNew={leaveGame}
@@ -148,7 +166,7 @@ export default function App() {
       {banner}
       <LevelScreen
         title={castleName(castle)}
-        nextTitle={castle + 1 < states.length ? castleName(castle + 1) : null}
+        next={opensNext(castle)}
         state={states[castle]}
         pool={pool}
         onPick={playPicked}
@@ -164,6 +182,8 @@ export default function App() {
     {banner}
     <HomeScreen
       castleStates={states}
+      graph={graph}
+      review={review}
       error={error}
       loadingCastle={null}
       onSelectCastle={setCastle}

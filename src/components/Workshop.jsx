@@ -255,6 +255,23 @@ function Potion({ slot, look, colour, special, state, best, glowId, moving, floa
   )
 }
 
+// ---- an empty test tube: a place without a puzzle (just glass; it cannot be tapped) --------------
+function EmptyTube({ slot, look }) {
+  const [x, y, rot] = slot
+  const lying = isLying(slot)
+  const angle = lying ? rot + look.tilt : look.tilt
+  const place = lying ? `translate(${x},${y}) rotate(${angle}) translate(0,36)` : `translate(${x + look.dx},${y}) rotate(${angle})`
+  return (
+    <g transform={place} pointerEvents="none" aria-hidden="true" opacity="0.8">
+      <path d={`${TUBE} Z`} fill={palette.wsGlassDark} fillOpacity="0.35" />
+      <rect x="-9" y="-72" width="18" height="74" fill="url(#ws-round)" clipPath="url(#ws-in-tube)" opacity="0.7" />
+      <path d={TUBE} fill="none" stroke={palette.wsGlass} strokeOpacity="0.55" strokeWidth="1.15" />
+      <path d="M-6,-66 V-16" stroke={palette.white} strokeOpacity="0.35" strokeWidth="1.5" strokeLinecap="round" />
+      <ellipse cx="0" cy="-72" rx="10.8" ry="2.4" fill={palette.wsGlassDark} fillOpacity="0.5" stroke={palette.wsGlass} strokeOpacity="0.6" strokeWidth="1.1" />
+    </g>
+  )
+}
+
 function Rail({ rail, colour }) {
   if (rail.arc) {
     return <path d={`M${rail.x0},${rail.y} Q${(rail.x0 + rail.x1) / 2},${rail.y - rail.rise} ${rail.x1},${rail.y}`}
@@ -329,14 +346,19 @@ function Bat({ window: win }) {
  * placed     [{ inst, slot }] (workshops.js placePuzzles)
  * playStates [state] per placed puzzle: 'solved' | 'played' | anything else = untouched
  * isSpecial  (inst) -> round flask instead of a test tube
- * title / nextTitle / state: as LevelScreen
+ * empty      [slot] places without a puzzle: an empty test tube each (cannot be tapped)
+ * title / state: as LevelScreen; nextLine = the line about what this castle opens (LevelScreen openLine)
  */
-export default function Workshop({ scene, placed, playStates, isSpecial, title, nextTitle, state, onPick, onBack, nudging = false }) {
+export default function Workshop({ scene, placed, playStates, isSpecial, empty = [], title, nextLine, state, onPick, onBack, nudging = false }) {
   const { t } = useTranslation()
   const moving = useMemo(() => !reducedMotion(), [])
   const looks = useMemo(
     () => placed.map(({ inst, slot }) => potionLook(inst.id, scene, isLying(slot), isSpecial(inst))),
     [placed, scene, isSpecial],
+  )
+  const emptyLooks = useMemo(
+    () => empty.map((slot, k) => potionLook(`${scene.key}-${state.castle}-empty-${k}`, scene, isLying(slot), false)),
+    [empty, scene, state.castle],
   )
   // A tapped potion lifts up and comes forward (CSS .ws-picked), then its puzzle opens.
   const [picked, setPicked] = useState(null)
@@ -351,7 +373,6 @@ export default function Workshop({ scene, placed, playStates, isSpecial, title, 
   const picture = pictureOf(scene.key)
   const { stars, required, done } = state
   const share = Math.min(1, stars / required)
-  const nextLine = nextTitle ? t(done ? 'castles.nextOpen' : 'castles.toOpen', { name: nextTitle }) : null
   const count = t('home.puzzleCount', { count: placed.length })
   const choose = t('levelScreen.choose')
   const back = t('levelScreen.back')
@@ -404,6 +425,7 @@ export default function Workshop({ scene, placed, playStates, isSpecial, title, 
           <image href={picture} x="0" y="0" width={W} height={H} preserveAspectRatio="none" aria-hidden="true" />
           {moving && scene.window && <Bat window={scene.window} />}
 
+          {empty.map((slot, k) => <EmptyTube key={`e${k}`} slot={slot} look={emptyLooks[k]} />)}
           {placed.map((_, k) => (k === picked ? null : potion(k)))}
           {/* the rack rail stands in front of the potions (taps go through it) */}
           <g pointerEvents="none">{scene.rails.map((rail, k) => <Rail key={k} rail={rail} colour={palette[scene.rail]} />)}</g>

@@ -111,7 +111,10 @@
     "progressTraining": "{{solved}} puzzles résolus sur {{required}}",
     "locked": "verrouillé",
     "toOpen": "pour ouvrir : {{name}}",
-    "nextOpen": "{{name}} : ouvert !"
+    "nextOpen": "{{name}} : ouvert !",
+    "toOpenMany": "pour ouvrir les niveaux {{list}}",
+    "nextOpenMany": "Niveaux {{list}} : ouverts !",
+    "review": "Revue : tous les niveaux ouverts"
   },
   "history": {
     "title": "Joués récemment",

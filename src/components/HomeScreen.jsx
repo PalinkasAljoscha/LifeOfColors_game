@@ -35,9 +35,10 @@ function Logo() {
 }
 
 // castleStates: per castle { castle, count, stars, required, done, unlocked } (engine/castles.js),
-// or null while the catalog loads. recent(): the recently played puzzles for the history pop-up
+// or null while the catalog loads; graph: the level graph (engine/levelGraph.js) the map is drawn
+// from; review: every castle opened by ?map=all (a small note says so over the map). recent(): the recently played puzzles for the history pop-up
 // ([{ inst, castleName }], newest first); onPlayRecent(inst) opens one of them.
-export default function HomeScreen({ castleStates, error, loadingCastle, onSelectCastle, recent, onPlayRecent, nudging = false }) {
+export default function HomeScreen({ castleStates, graph, review = false, error, loadingCastle, onSelectCastle, recent, onPlayRecent, nudging = false }) {
   const { t, i18n } = useTranslation()
   const [showRules, setShowRules] = useState(false)
   const [showHistory, setShowHistory] = useState(false)
@@ -101,8 +102,11 @@ export default function HomeScreen({ castleStates, error, loadingCastle, onSelec
           <p className="rounded-xl bg-red-900/60 p-3 text-sm font-sans mb-3">{t('home.loadError')}</p>
         )}
         {!castleStates && !error && <p className="text-game-silver font-sans">{t('home.loading')}</p>}
-        {castleStates && (
-          <CastleMap states={castleStates} loadingCastle={loadingCastle} onSelect={onSelectCastle} />
+        {review && castleStates && (
+          <p className="mb-2 self-center rounded-full px-3 py-1 text-xs font-black bg-game-badge text-game-star">{t('castles.review')}</p>
+        )}
+        {castleStates && graph && (
+          <CastleMap states={castleStates} graph={graph} review={review} loadingCastle={loadingCastle} onSelect={onSelectCastle} />
         )}
 
         {/* Privacy line; "opt in/out" opens the saved-progress choice (ConsentDialog). */}

@@ -1,6 +1,7 @@
 // Loads the game-instance catalog that the factory exports into public/catalog/.
 //   index.json     { catalog_version, file, count, ranked, training, names: {normalized name: id} }
 //   puzzles.json   { catalog_version, instances: [ ...full instances, by seq... ] }
+//   level_graph.json  the map: which castles lead into which (engine/levelGraph.js; optional)
 // Every instance has a verbose `name` ("Crimson Delta"), its tile colour `name_color`, its
 // publication order `seq` (assigned by the factory, never changed) and, when shipped live, a
 // `difficulty_ranking` (1 = easiest) and/or a `training_position`. Which castle a puzzle is in is
@@ -50,6 +51,18 @@ export function loadAll() {
       })
   }
   return allPromise
+}
+
+/** The level graph (public/catalog/level_graph.json, engine/levelGraph.js), or null when the
+ *  catalog has none (old catalog: the castles then form one line). With ?catalog=dev a missing
+ *  catalog-dev/level_graph.json falls back to the live one. */
+export function loadLevelGraph() {
+  const get = (dir) => fetch(`${dir}level_graph.json`, { cache: 'no-cache' })
+    .then((r) => (r.ok ? r.json() : null))
+    .catch(() => null)                       // also: the dev server answers index.html for a missing file
+  const live = `${import.meta.env.BASE_URL}catalog/`
+  const dir = catalogDir()
+  return get(dir).then((g) => (g || dir === live ? g : get(live)))
 }
 
 // Puzzles opened / solved, for the marks on the castle grid: engine/progress.js (in memory for

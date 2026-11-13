@@ -8,13 +8,16 @@
 // id alone which version was played -- keep this switch fixed once the game is live.
 export const HIDE_START_CELL_IF_NOT_REQUIRED = true
 
-// Castles (src/engine/castles.js): the level hierarchy of the home-screen map. The factory only
-// ships an ORDER (instance.difficulty_ranking, 1 = easiest) plus the training castle's puzzles
-// (instance.training_position); how many castles there are is decided here, nothing else needs
-// to change (no new catalog export). Castle 0 = the training castle; the remaining ranked
-// puzzles are cut, in ranking order, into CASTLE_COUNT - 1 castles of (nearly) equal size.
+// Castles (src/engine/castles.js): the levels of the home-screen map. How many there are and which
+// lead into which comes from the level graph the factory ships next to the catalog
+// (public/catalog/level_graph.json, src/engine/levelGraph.js). The factory ships an ORDER
+// (instance.difficulty_ranking, 1 = easiest) plus the training castle's puzzles
+// (instance.training_position); castle 0 = the training castle, the remaining ranked puzzles are
+// cut, in ranking order, into the other castles (nearly equal sizes).
+// CASTLE_COUNT is only used when the catalog has no level graph: then CASTLE_COUNT castles form
+// one line, as before the graph.
 export const CASTLE_COUNT = 30
-// A castle opens when the castle below it is open and the player has collected this many stars
+// A castle opens when a castle with a path into it is open and the player has collected this many stars
 // there -- the same for every castle, however many puzzles it holds. Collected stars per castle
 // are counted on their own (engine/progress.js castleStars), so they are kept when puzzles move
 // to another castle.
