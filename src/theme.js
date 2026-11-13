@@ -95,8 +95,8 @@ export const palette = {
   mapTreeTop:        '#24502b',
   mapTreeTopLight:   '#2f6334',
   mapTreeTrunk:      '#5a3d22',
-  mapPath:           '#d8bf8a',
-  mapPathEdge:       '#a88d5c',
+  mapPath:           '#bfa36e',   // a path's stones: two close sand tones
+  mapPathAlt:        '#b2955f',
   mapPathLocked:     '#8a8f9c',
   castleWall:        '#e3dccb',
   castleShade:       '#b9b09c',

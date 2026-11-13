@@ -2,7 +2,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync, existsSync } from 'node:fs'
-import { SITE_ORDER, TRAINING_SITE, siteFor } from '../src/sites.js'
+import { LAND_BOX, SITE_ORDER, SITE_SOLID, TRAINING_SITE, parseLand, siteFor } from '../src/sites.js'
 import { CASTLE_COUNT } from '../src/engine/castles.js'
 
 test('the training level is a castle; the levels loop through the sites', () => {
@@ -29,4 +29,25 @@ test('every site has its three pictures (no animation in them) and a name in eve
     for (const loc of locales) assert.ok(loc.sites?.[site], `sites.${site}`)
   }
   for (const loc of locales) assert.match(loc.castles.name, /\{\{site\}\}.*\(\{\{n\}\}\)/)
+})
+
+test('every landscape is flat things and standing things, each with its box inside the picture', () => {
+  let standing = 0
+  // a tree top may stick out of the picture's box a little
+  const inside = (b) => b.length === 4 && b[0] < b[2] && b[1] < b[3]
+    && b[0] >= LAND_BOX.x - 10 && b[2] <= LAND_BOX.x + LAND_BOX.w + 10 && b[1] >= LAND_BOX.y - 10 && b[3] <= LAND_BOX.y + LAND_BOX.h + 10
+  for (const site of new Set([TRAINING_SITE, ...SITE_ORDER])) {
+    const land = parseLand(readFileSync(new URL(`../src/assets/sites/${site}-land.svg`, import.meta.url), 'utf8'))
+    assert.ok(land.flats.length || land.props.length, `${site}: an empty landscape`)
+    for (const f of land.flats) assert.ok(f.svg && inside(f.box), `${site}: flat thing ${f.box}`)
+    for (const p of land.props) {
+      assert.ok(p.svg && inside(p.box), `${site}: standing thing ${p.box}`)
+      assert.ok(p.foot >= p.box[1] && p.foot <= p.box[3] + 1, `${site}: foot ${p.foot} outside its box`)
+    }
+    const solid = SITE_SOLID[site]
+    assert.ok(solid && solid[0] < 0 && solid[2] > 0 && solid[1] < 0 && solid[3] > 0, `SITE_SOLID.${site}`)
+    standing += land.props.length
+  }
+  assert.ok(standing > 20)
+  assert.throws(() => parseLand('<svg viewBox="0 0 1 1">\n<rect/>\n</svg>'), /neither flat nor/)
 })

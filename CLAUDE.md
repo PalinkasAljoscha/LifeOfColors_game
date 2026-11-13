@@ -185,11 +185,26 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   neighbouring columns furthest apart, also across bands), so no two places stand at the same
   height and neighbours are at least a picture plus label apart; that sets the band height. Place
   pictures are 56-72 px (`size`, from the width). The WHOLE map is shown: open places in colour,
-  locked ones grey with a padlock (no fog). A path is solid once the place it leads to is open
-  through it (start done, or the path to castle 1), dashed otherwise. A place's label is
-  "Name (n)", plus "★ stars/required" (✓ when done; framed gold / green) once stars were collected
-  there; labels are kept inside the map's width. Pictures are drawn top-down so lower places
-  overlap higher ones.
+  locked ones grey with a padlock (no fog). A path is paved with rows of near-rectangular stones of different sizes, no
+  border line (`components/mapPath.js` `pathStones`: deterministic per path, tested; about 12 px wide,
+  two close sand tones `mapPath` / `mapPathAlt`). It is open once the place it leads to is open
+  through it (start done, or the path to castle 1), otherwise grey (`mapPathLocked`), faint and
+  with stones missing. The places' names are NOT written on the map (since 2026-11-13; the
+  button's aria-label keeps "Name (n): ..."); a place only gets a badge "★ stars/required" (✓ when
+  done; framed gold / green) once stars were collected there ("…" while it loads); badges are
+  kept inside the map's width. What covers what (2026-11-13), two rules only: (1) layers, bottom to top: grass, what
+  lies flat (fields, ponds), paths, everything that stands up, badges; (2) everything that stands
+  up -- place pictures, the standing things of their landscapes, the trees below the training
+  castle -- is ONE list drawn top-down by its foot (where it touches the ground), so what stands
+  lower covers what stands behind it. For that a `<site>-land.svg` has one part per line: `<g data-flat="box">` per flat thing
+  and `<g data-foot="y" data-box="box">` per standing thing (`sites.js` `parseLand`, tested;
+  boxes measured from the drawing, in the landscape's units); the map draws them inline. Plus one
+  rule for flat things: a field or pond is only drawn on free grass -- clear of paths, the
+  places' pictures (`SITE_SOLID`), standing things and other flat things, and inside the map --
+  else in its mirror image on the other side of its place, then either of them a little higher,
+  lower or further out (`SHIFTS`), else not at all (`components/mapClear.js` `placeFlat`,
+  tested; lower levels first, the fields below castle 0 last). Standing things are never removed
+  or moved (a tree may stand on a path).
 - **Map sites** (2026-11-12) -- on the home map a level is no longer always a castle
   (`src/sites.js`, drawn in `components/CastleMap.jsx`). The training level (castle 0) is a castle;
   levels 1, 2, 3, ... walk through `SITE_ORDER` in a loop: forest hut, spooky tavern, manor, castle,
