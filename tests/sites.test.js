@@ -57,5 +57,12 @@ test('every landscape is flat things and standing things, each with its box insi
   assert.equal(ponds[0].svg.match(/<rect [^>]*rx="1.5"/g)?.length, 3, 'the pond has its three plants')
   assert.ok(ponds[0].box[2] < 0 && ponds[0].box[3] < 0 && ponds[0].box[3] > -15, 'the pond lies north-west, at the foot of the tower')
   assert.ok(!tower.props.some((p) => /rx="1.5"/.test(p.svg)), 'no water plant stands apart from the pond')
+  // the manor's garden: a left and a right group, so only one side goes when it touches a path
+  const manor = parseLand(readFileSync(new URL('../src/assets/sites/manor-land.svg', import.meta.url), 'utf8'))
+  for (const [group, left] of [['leftGarden', true], ['rightGarden', false]]) {
+    const side = manor.props.filter((p) => p.group === group)
+    assert.ok(side.length >= 3, group)
+    assert.ok(side.every((p) => (p.box[0] + p.box[2] < 0) === left), `${group} on its side`)
+  }
   assert.throws(() => parseLand('<svg viewBox="0 0 1 1">\n<rect/>\n</svg>'), /neither flat nor/)
 })

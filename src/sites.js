@@ -13,9 +13,11 @@
 //   <g data-flat="x0 y0 x1 y1">...</g>
 //       one thing that lies flat on the ground (a field, a pond): under the paths, and only drawn
 //       where it is clear of everything else (or in its mirror image on the other side)
-//   <g data-foot="y" data-box="x0 y0 x1 y1">...</g>
+//   <g data-foot="y" data-box="x0 y0 x1 y1" data-group="name">...</g>
 //       one thing that stands up (a tree, a hedge, a statue, ...); y is where it touches the
-//       ground, which decides what it stands in front of and behind
+//       ground, which decides what it stands in front of and behind. data-group (optional) makes it
+//       part of a group that may go: the whole group is left out where any of it touches a path
+//       (the manor's garden, its left and its right side)
 // The boxes are what each part covers, in the landscape's units (measured from the drawing).
 // No React and no image imports here, so the tests can load it.
 
@@ -48,11 +50,12 @@ export function siteFor(castle) {
 const NUM = '-?\\d+(?:\\.\\d+)?'
 const BOX = `(${NUM}) (${NUM}) (${NUM}) (${NUM})`
 const FLAT_LINE = new RegExp(`^<g data-flat="${BOX}">(.*)</g>$`)
-const PROP_LINE = new RegExp(`^<g data-foot="(${NUM})" data-box="${BOX}">(.*)</g>$`)
+const PROP_LINE = new RegExp(`^<g data-foot="(${NUM})" data-box="${BOX}"(?: data-group="(\\w+)")?>(.*)</g>$`)
 
-/** A landscape file's parts: { flats: [{ box, svg }], props: [{ foot, box, svg }] } in the file's
- *  order -- flats lie flat, props stand up; box = [x0, y0, x1, y1] and foot = the y where it
- *  touches the ground, in the landscape's units; svg = its markup. Throws on any other line. */
+/** A landscape file's parts: { flats: [{ box, svg }], props: [{ foot, box, group, svg }] } in the
+ *  file's order -- flats lie flat, props stand up; box = [x0, y0, x1, y1] and foot = the y where it
+ *  touches the ground, in the landscape's units; group = its group's name or null; svg = its
+ *  markup. Throws on any other line. */
 export function parseLand(text) {
   const flats = [], props = []
   for (const line of text.split('\n').map((l) => l.trim()).filter(Boolean)) {
@@ -60,7 +63,7 @@ export function parseLand(text) {
     if (/^<svg[^>]*>$/.test(line) || line === '</svg>' || /^<metadata>.*<\/metadata>(<\/svg>)?$/.test(line)) continue
     const flat = line.match(FLAT_LINE), prop = line.match(PROP_LINE)
     if (flat) flats.push({ box: flat.slice(1, 5).map(Number), svg: flat[5] })
-    else if (prop) props.push({ foot: Number(prop[1]), box: prop.slice(2, 6).map(Number), svg: prop[6] })
+    else if (prop) props.push({ foot: Number(prop[1]), box: prop.slice(2, 6).map(Number), group: prop[6] ?? null, svg: prop[7] })
     else throw new Error(`landscape: a line that is neither flat nor a standing thing: ${line.slice(0, 60)}`)
   }
   return { flats, props }

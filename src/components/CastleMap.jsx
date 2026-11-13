@@ -3,8 +3,9 @@ import { useTranslation } from 'react-i18next'
 import { palette } from '../theme.js'
 import { TUTORIAL_CASTLE, highestUnlocked } from '../engine/castles.js'
 import { SITE_BOX, SITE_SOLID, parseLand, siteFor } from '../sites.js'
-import { placeFlat } from './mapClear.js'
-import { PATH_REACH, STONE_ROUND, pathStones } from './mapPath.js'
+import { giveWay, onAnyPath, placeFlat } from './mapClear.js'
+import { PATH_HALF, PATH_REACH, STONE_ROUND, pathStones } from './mapPath.js'
+import { relax } from './mapLayout.js'
 
 // The home-screen map: the levels ("castles" in the code) as different places -- a castle, a forest
 // hut, a tavern, ... (src/sites.js: which level is which place) -- each with its own bit of
@@ -26,6 +27,8 @@ import { PATH_REACH, STONE_ROUND, pathStones } from './mapPath.js'
 // not written on the map (the button's aria-label still says "Forest hut (1): ...").
 // Drawing is SVG (decoration only, nothing moves); the places themselves are HTML buttons laid over
 // it.
+// Where a place stands: its row and column (see above), then nudged a little sideways, up or down
+// where that keeps the paths out of other buildings and off each other (mapLayout.js relax).
 // What covers what -- two rules, nothing else:
 //   1. Layers, bottom to top: grass, what lies flat (fields, ponds: the `data-flat` parts of the
 //      landscapes), the paths, everything that stands up, the badges.
@@ -39,7 +42,12 @@ import { PATH_REACH, STONE_ROUND, pathStones } from './mapPath.js'
 // half behind its tower). If its own spot is not free it tries its mirror image on the other side of its
 // place, then both a little higher, lower or further out (SHIFTS), else it is left out.
 // Places are served in level order (lower levels first), the fields below castle 0 last.
-// Standing things are never removed or moved (a tree may still stand on a path).
+// Standing things are not moved, and stay even on a path (a tree may stand on one) -- except a
+// group that may go (sites.js data-group: the manor's left or right garden): it is left out, all
+// of it, where any of it touches a path.
+// Paths that overlap give way (mapClear.js giveWay): open ones before locked ones, then in graph
+// order; a later path drops its stones whose middle lies on an earlier one and is drawn under it,
+// so where paths run together the paving is one, not two on top of each other, and no gap.
 
 const FLAG_COLORS = [palette.cellOrangeFill, palette.cellGreenFill, palette.cellBlueFill]
 const FIELD_COLORS = [palette.mapFieldGreen, palette.mapFieldWheat, palette.mapFieldEarth]
@@ -188,11 +196,23 @@ export default function CastleMap({ states, graph, review = false, loadingCastle
   const bottomPad = Math.max(seg * 0.55, (box?.h ?? 480) / 2)
   const H = topPad + (graph.rows - 1 + Math.max(...offsets)) * seg + bottomPad
   const margin = Math.min(W / 2, Math.max(size * 0.85, 58))
-  const pos = (i) => {
+  // where a place would stand by its row and column ...
+  const grid = (i) => {
     const row = graph.layer[i], col = graph.col[i]
     const x = cols > 1 ? margin + (col * (W - 2 * margin)) / (cols - 1) : W * (0.5 + 0.2 * Math.sin(i * 2.1 + 0.4))
     return { x, y: H - bottomPad - (row + offsets[col]) * seg }
   }
+  // ... and where it stands: nudged from there so the paths keep out of other buildings and off
+  // each other (mapLayout.js relax; worked out again only when the map's size changes)
+  const placed = useMemo(() => {
+    const n = Math.min(states.length, graph.count)
+    const start = Array.from({ length: n }, (_, i) => { const p = grid(i); return { x: p.x, y: p.y + size * 0.4 } })
+    const links = start.flatMap((f, a) => graph.children[a].filter((b) => b < n).map((b) => [a, b]))
+    const dx = cols > 1 ? (W - 2 * margin) / (cols - 1) : size
+    return relax(start, links, { size, half: PATH_HALF, dx, dy: seg, x0: size * 0.75, x1: W - size * 0.75 })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [graph, states.length, W, H, seg, size])
+  const pos = (i) => ({ x: placed[i].x, y: placed[i].y - size * 0.4 })
 
   // where a place stands: the middle of its ground line -- the paths start and end there, so they
   // are already spread out where they come out from behind a building
@@ -253,8 +273,14 @@ export default function CastleMap({ states, graph, review = false, loadingCastle
   }
 
   const ids = Array.from({ length: count }, (_, i) => i)
+  const edges = ids.flatMap((a) => graph.children[a].filter((b) => b < count).map((b) => [a, b]))
+  const lines = edges.map(([a, b]) => [foot(a), foot(b)])
   for (const i of ids) {
-    const { x, y } = pos(i), site = siteFor(i), land = LANDS[site], ground = y + size * 0.4
+    const { x, y } = pos(i), site = siteFor(i), ground = y + size * 0.4
+    // a group of standing things that touches a path is left out, all of it
+    const gone = new Set(LANDS[site].props
+      .filter((p) => p.group && onAnyPath(onMap(p.box, x, ground, size), lines, PATH_REACH + 1)).map((p) => p.group))
+    const land = { ...LANDS[site], props: LANDS[site].props.filter((p) => !gone.has(p.group)) }
     const own = [...land.props.map((p) => onMap(p.box, x, ground, size)), ...SITE_SOLID[site].map((b) => onMap(b, x, ground, size))]
     land.flats.forEach((f, n) => {
       // its spots: as drawn and mirrored, then shifted (away from the middle: dx with its side's sign)
@@ -278,17 +304,23 @@ export default function CastleMap({ states, graph, review = false, loadingCastle
     })
   }
   standing.sort((a, b) => a.foot - b.foot)       // stable: equal feet keep the order above
-  const edges = ids.flatMap((a) => graph.children[a].filter((b) => b < count).map((b) => [a, b]))
   const isOpen = (a, b) => states[b].unlocked && states[a].unlocked
     && (states[a].done || states[b].fromStart || review)
   // the paths' stones: the same on every visit, laid again only when the map's layout changes
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const paving = useMemo(() => edges.map(([a, b]) => pathStones(foot(a), foot(b), a * 131 + b)),
     [graph, count, W, H, seg, size])
-  const paved = edges.map(([a, b], e) => ({ key: `${a}-${b}`, open: isOpen(a, b), stones: paving[e] }))
+  // overlapping paths give way: open ones first, then in graph order
+  const openKey = edges.map(([a, b]) => (isOpen(a, b) ? 1 : 0)).join('')
+  const paved = useMemo(() => {
+    const order = edges.map((e, n) => n).sort((m, n) => openKey[n] - openKey[m] || m - n)
+    const kept = giveWay(order.map((e) => ({ a: lines[e][0], b: lines[e][1], stones: paving[e] })), PATH_HALF)
+    return order.map((e, k) => ({ key: edges[e].join('-'), open: openKey[e] === '1', stones: kept[k] }))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [paving, openKey])
   // what lies flat, where it is clear of everything (see above): a few px of grass around it
   flatWish.push(...sceneryFields)
-  const spot = placeFlat(flatWish, taken, edges.map(([a, b]) => [foot(a), foot(b)]),
+  const spot = placeFlat(flatWish, taken, lines,
     { gap: 3, reach: PATH_REACH + 3, bounds: { x0: 0, y0: 0, x1: W, y1: H } })
   const flat = flatWish.flatMap((w, n) => (spot[n] >= 0 ? [w.els[spot[n]]] : []))
 
@@ -300,15 +332,16 @@ export default function CastleMap({ states, graph, review = false, loadingCastle
         <div className="relative" style={{ height: H }}>
           <svg width={W} height={H} className="absolute inset-0" aria-hidden="true">
             {flat}
-            {/* locked paths first (grey, faint, three stones in ten missing), open ones over them;
+            {/* locked paths first (grey, faint, three stones in ten missing), open ones over them, each
+                in reverse order of precedence (a path that gave way lies under the other);
                 a stone is stroked in its own colour, which rounds its corners */}
             <g strokeWidth={STONE_ROUND} strokeLinejoin="round">
-              {paved.filter((p) => !p.open).map((p) => (
+              {[...paved].reverse().filter((p) => !p.open).map((p) => (
                 <g key={p.key} fill={palette.mapPathLocked} stroke={palette.mapPathLocked} opacity="0.6">
-                  {p.stones.map((st, n) => ((n * 7) % 10 >= 3 ? <path key={n} d={st.d} /> : null))}
+                  {p.stones.map((st) => ((st.n * 7) % 10 >= 3 ? <path key={st.n} d={st.d} /> : null))}
                 </g>
               ))}
-              {paved.filter((p) => p.open).map((p) => (
+              {[...paved].reverse().filter((p) => p.open).map((p) => (
                 <g key={p.key}>
                   {p.stones.map((st, n) => {
                     const tone = st.k >= 1 / 3 && st.k < 2 / 3 ? palette.mapPathAlt : palette.mapPath

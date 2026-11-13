@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { nearPath, overlaps, placeFlat } from '../src/components/mapClear.js'
+import { giveWay, nearPath, onAnyPath, overlaps, placeFlat } from '../src/components/mapClear.js'
 
 const box = (x0, y0, x1, y1) => ({ x0, y0, x1, y1 })
 
@@ -39,4 +39,19 @@ test('a flat thing may touch its own place only in its first spots', () => {
   assert.deepEqual(placeFlat([pond], [house], [], { gap: 2, reach: 8 }), [0])
   const other = { spots: [box(30, 30, 60, 50), box(100, 0, 130, 20)], own: [] }
   assert.deepEqual(placeFlat([other], [house], [], { gap: 2, reach: 8 }), [1])
+})
+
+test('a path gives way where it would lie on an earlier one', () => {
+  const st = (x, y) => ({ box: box(x - 3, y - 3, x + 3, y + 3) })
+  const first = { a: { x: 0, y: 200 }, b: { x: 0, y: 0 }, stones: [st(0, 196), st(0, 150), st(0, 50)] }
+  const second = { a: { x: 0, y: 200 }, b: { x: 100, y: 0 }, stones: [st(2, 194), st(9, 185), st(50, 100), st(99, 5)] }
+  const kept = giveWay([first, second], 5.5)
+  assert.equal(kept[0].length, 3)                                         // the first keeps all
+  assert.deepEqual(kept[1], second.stones.slice(1))                       // the second drops the stone whose middle lies on the first
+})
+
+test('a box on any path', () => {
+  const lines = [[{ x: 0, y: 100 }, { x: 0, y: 0 }]]
+  assert.ok(onAnyPath(box(-3, 40, 3, 60), lines, 8))
+  assert.ok(!onAnyPath(box(30, 40, 40, 60), lines, 8))
 })

@@ -11,6 +11,7 @@
 
 export const STONE_ROUND = 1.4   // stroke width that rounds a stone's corners (px)
 const HALF = 5.5      // half the path's width (px); a row's ends vary around it
+export const PATH_HALF = HALF
 const ROW_MIN = 5     // a row's depth along the path: from ... to (px)
 const ROW_MAX = 8
 const GAP = 1.2       // grass between two stones (px)
@@ -65,8 +66,9 @@ function frameAt(F, s) {
 // A point given in a frame: `along` the path's direction and `across` it.
 const local = (f, along, across) => [f.x + f.tx * along - f.ty * across, f.y + f.ty * along + f.tx * across]
 
-/** The stones of the path from a to b ({x, y} each): [{ d, k }], d = the stone's SVG path (four
- *  corners), k = its own random number in 0..1 (the caller picks its tone by k). */
+/** The stones of the path from a to b ({x, y} each): [{ d, k, box, n }], d = the stone's SVG path
+ *  (four corners), k = its own random number in 0..1 (the caller picks its tone by k), box = what
+ *  it covers ({ x0, y0, x1, y1 }, its rounded edge included), n = its number along the path. */
 export function pathStones(a, b, seed) {
   const F = frames(a, b)
   if (!F.length) return []
@@ -87,7 +89,14 @@ export function pathStones(a, b, seed) {
       const short = r() < 0.25 ? depth * 0.25 * r() : 0
       const corners = [local(f0, g + j(), x0 + j()), local(f0, g + j(), x1 + j()),
         local(f1, -g - short + j(), x1 + j()), local(f1, -g - short + j(), x0 + j())]
-      stones.push({ d: `M${corners.map((p) => `${f(p[0])} ${f(p[1])}`).join('L')}Z`, k: r() })
+      stones.push({
+        d: `M${corners.map((p) => `${f(p[0])} ${f(p[1])}`).join('L')}Z`, k: r(),
+        box: {
+          x0: Math.min(...corners.map((p) => p[0])) - STONE_ROUND / 2, y0: Math.min(...corners.map((p) => p[1])) - STONE_ROUND / 2,
+          x1: Math.max(...corners.map((p) => p[0])) + STONE_ROUND / 2, y1: Math.max(...corners.map((p) => p[1])) + STONE_ROUND / 2,
+        },
+        n: stones.length,
+      })
     }
     s += depth
   }

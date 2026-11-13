@@ -1,6 +1,7 @@
 // Free space on the home map (components/CastleMap.jsx): what lies flat (fields, a pond) is only
 // put where nothing else is -- no path, no place's picture, no standing thing, no other flat
-// thing. Boxes are { x0, y0, x1, y1 } in map pixels.
+// thing; a group of standing things that may go (a garden side) goes when it touches a path; and
+// where two paths overlap, the later one gives way. Boxes are { x0, y0, x1, y1 } in map pixels.
 // Pure (no React) so the tests can use it.
 
 import { curvePoint } from './mapPath.js'
@@ -39,4 +40,22 @@ export function placeFlat(things, taken, paths, { gap, reach, bounds = null }) {
     if (n >= 0) taken.push(spots[n])
     return n
   })
+}
+
+/** Whether the box comes closer than `reach` to any of the paths ([a, b] ends). */
+export const onAnyPath = (box, paths, reach) => paths.some(([a, b]) => nearPath(box, a, b, reach))
+
+/** Overlapping paths give way: `paths` = [{ a, b, stones }] in order of precedence (stones with
+ *  their box). A path drops the stones whose middle lies on a path before it (closer than `reach`
+ *  to its curve), so where paths run together there is one paving, not two on top of each other.
+ *  The caller draws the paths in REVERSE order, so a stone that only reaches over an earlier
+ *  path's edge lies under it: the later path goes on right where the earlier one ends, no gap.
+ *  Returns the kept stones per path. */
+export function giveWay(paths, reach) {
+  return paths.map(({ stones }, k) => stones.filter((st) => {
+    const x = (st.box.x0 + st.box.x1) / 2, y = (st.box.y0 + st.box.y1) / 2
+    const middle = { x0: x, y0: y, x1: x, y1: y }
+    for (let j = 0; j < k; j++) if (nearPath(middle, paths[j].a, paths[j].b, reach)) return false
+    return true
+  }))
 }
