@@ -185,7 +185,8 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   neighbouring columns furthest apart, also across bands), so no two places stand at the same
   height and neighbours are at least a picture plus label apart; that sets the band height. Place
   pictures are 56-72 px (`size`, from the width). The WHOLE map is shown: open places in colour,
-  locked ones grey with a padlock (no fog). A path is paved with rows of near-rectangular stones of different sizes, no
+  locked ones grey with a padlock (no fog). A path runs between the two places' ground centres (where
+  the buildings stand, `foot`) and is paved with rows of near-rectangular stones of different sizes, no
   border line (`components/mapPath.js` `pathStones`: deterministic per path, tested; about 12 px wide,
   two close sand tones `mapPath` / `mapPathAlt`). It is open once the place it leads to is open
   through it (start done, or the path to castle 1), otherwise grey (`mapPathLocked`), faint and
@@ -200,11 +201,16 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   and `<g data-foot="y" data-box="box">` per standing thing (`sites.js` `parseLand`, tested;
   boxes measured from the drawing, in the landscape's units); the map draws them inline. Plus one
   rule for flat things: a field or pond is only drawn on free grass -- clear of paths, the
-  places' pictures (`SITE_SOLID`), standing things and other flat things, and inside the map --
+  places' pictures (`SITE_SOLID`: a few boxes per site, one per band of height, measured from
+  the drawings), standing things and other flat things, and inside the map --
   else in its mirror image on the other side of its place, then either of them a little higher,
   lower or further out (`SHIFTS`), else not at all (`components/mapClear.js` `placeFlat`,
   tested; lower levels first, the fields below castle 0 last). Standing things are never removed
-  or moved (a tree may stand on a path).
+  or moved (a tree may stand on a path). The wizard tower's pond and its three water plants are one
+  flat thing (they always move, mirror and disappear together); its own spot is at the tower's
+  foot on the north-west side, a little behind the tower: a place's flat things may touch the
+  place's own picture and standing things in their drawn spot and its mirror image (`own`,
+  `ownSpots`), never anywhere else (tested).
 - **Map sites** (2026-11-12) -- on the home map a level is no longer always a castle
   (`src/sites.js`, drawn in `components/CastleMap.jsx`). The training level (castle 0) is a castle;
   levels 1, 2, 3, ... walk through `SITE_ORDER` in a loop: forest hut, spooky tavern, manor, castle,

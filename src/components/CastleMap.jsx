@@ -35,7 +35,8 @@ import { PATH_REACH, STONE_ROUND, pathStones } from './mapPath.js'
 //      nearer the viewer and covers what stands behind it.
 // And one more for what lies flat: a field or pond is only drawn where it is clear of everything
 // else -- paths, the places' pictures, standing things, other flat things (mapClear.js) -- and
-// inside the map. If its own spot is not free it tries its mirror image on the other side of its
+// inside the map; only in its drawn spot and its mirror image may it touch its own place (a pond
+// half behind its tower). If its own spot is not free it tries its mirror image on the other side of its
 // place, then both a little higher, lower or further out (SHIFTS), else it is left out.
 // Places are served in level order (lower levels first), the fields below castle 0 last.
 // Standing things are never removed or moved (a tree may still stand on a path).
@@ -193,6 +194,10 @@ export default function CastleMap({ states, graph, review = false, loadingCastle
     return { x, y: H - bottomPad - (row + offsets[col]) * seg }
   }
 
+  // where a place stands: the middle of its ground line -- the paths start and end there, so they
+  // are already spread out where they come out from behind a building
+  const foot = (i) => { const p = pos(i); return { x: p.x, y: p.y + size * 0.4 } }
+
   // Start with the current (highest open) castle in the middle of the screen, or where the player
   // left the map if no new castle opened since.
   const ready = box !== null
@@ -250,11 +255,14 @@ export default function CastleMap({ states, graph, review = false, loadingCastle
   const ids = Array.from({ length: count }, (_, i) => i)
   for (const i of ids) {
     const { x, y } = pos(i), site = siteFor(i), land = LANDS[site], ground = y + size * 0.4
+    const own = [...land.props.map((p) => onMap(p.box, x, ground, size)), ...SITE_SOLID[site].map((b) => onMap(b, x, ground, size))]
     land.flats.forEach((f, n) => {
       // its spots: as drawn and mirrored, then shifted (away from the middle: dx with its side's sign)
       const out = f.box[0] + f.box[2] < 0 ? -1 : 1
       const tries = SHIFTS.flatMap(([o, dy]) => [[false, o * out, dy], [true, o * out, dy]])
       flatWish.push({
+        own,
+        ownSpots: 2,
         spots: tries.map(([mirror, dx, dy]) => onMap(f.box, x, ground, size, mirror, dx, dy)),
         els: tries.map(([mirror, dx, dy]) => (
           <LandPart key={`g${i}-${n}`} x={x} y={y} size={size} svg={f.svg} mirror={mirror} dx={dx} dy={dy} />)),
@@ -262,9 +270,8 @@ export default function CastleMap({ states, graph, review = false, loadingCastle
     })
     land.props.forEach((p, n) => {
       standing.push({ foot: ground + (p.foot * size) / 100, el: <LandPart key={`p${i}-${n}`} x={x} y={y} size={size} svg={p.svg} /> })
-      taken.push(onMap(p.box, x, ground, size))
     })
-    taken.push(onMap(SITE_SOLID[site], x, ground, size))
+    taken.push(...own)
     standing.push({
       foot: ground,
       el: <Site key={`s${i}`} x={x} y={y} size={size} site={site} locked={!states[i].unlocked} flag={FLAG_COLORS[i % 3]} />,
@@ -276,12 +283,12 @@ export default function CastleMap({ states, graph, review = false, loadingCastle
     && (states[a].done || states[b].fromStart || review)
   // the paths' stones: the same on every visit, laid again only when the map's layout changes
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const paving = useMemo(() => edges.map(([a, b]) => pathStones(pos(a), pos(b), a * 131 + b)),
+  const paving = useMemo(() => edges.map(([a, b]) => pathStones(foot(a), foot(b), a * 131 + b)),
     [graph, count, W, H, seg, size])
   const paved = edges.map(([a, b], e) => ({ key: `${a}-${b}`, open: isOpen(a, b), stones: paving[e] }))
   // what lies flat, where it is clear of everything (see above): a few px of grass around it
   flatWish.push(...sceneryFields)
-  const spot = placeFlat(flatWish.map((w) => w.spots), taken, edges.map(([a, b]) => [pos(a), pos(b)]),
+  const spot = placeFlat(flatWish, taken, edges.map(([a, b]) => [foot(a), foot(b)]),
     { gap: 3, reach: PATH_REACH + 3, bounds: { x0: 0, y0: 0, x1: W, y1: H } })
   const flat = flatWish.flatMap((w, n) => (spot[n] >= 0 ? [w.els[spot[n]]] : []))
 

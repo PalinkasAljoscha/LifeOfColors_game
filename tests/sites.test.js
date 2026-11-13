@@ -45,9 +45,17 @@ test('every landscape is flat things and standing things, each with its box insi
       assert.ok(p.foot >= p.box[1] && p.foot <= p.box[3] + 1, `${site}: foot ${p.foot} outside its box`)
     }
     const solid = SITE_SOLID[site]
-    assert.ok(solid && solid[0] < 0 && solid[2] > 0 && solid[1] < 0 && solid[3] > 0, `SITE_SOLID.${site}`)
+    assert.ok(solid?.length && solid.every((b) => b.length === 4 && b[0] < b[2] && b[1] < b[3]), `SITE_SOLID.${site}`)
+    assert.ok(solid.some((b) => b[1] <= 0 && b[3] >= 0 && b[0] < 0 && b[2] > 0), `SITE_SOLID.${site}: covers the ground line`)
     standing += land.props.length
   }
   assert.ok(standing > 20)
+  // the tower's pond and its three water plants are ONE flat thing: they move, mirror and go together
+  const tower = parseLand(readFileSync(new URL('../src/assets/sites/wizardTower-land.svg', import.meta.url), 'utf8'))
+  const ponds = tower.flats.filter((f) => /<ellipse/.test(f.svg))
+  assert.equal(ponds.length, 1)
+  assert.equal(ponds[0].svg.match(/<rect [^>]*rx="1.5"/g)?.length, 3, 'the pond has its three plants')
+  assert.ok(ponds[0].box[2] < 0 && ponds[0].box[3] < 0 && ponds[0].box[3] > -15, 'the pond lies north-west, at the foot of the tower')
+  assert.ok(!tower.props.some((p) => /rx="1.5"/.test(p.svg)), 'no water plant stands apart from the pond')
   assert.throws(() => parseLand('<svg viewBox="0 0 1 1">\n<rect/>\n</svg>'), /neither flat nor/)
 })

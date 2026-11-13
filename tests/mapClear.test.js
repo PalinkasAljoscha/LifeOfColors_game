@@ -24,11 +24,19 @@ test('flat things take their first free spot, or none', () => {
   const field = [box(10, 10, 40, 40), box(80, 10, 110, 40)]            // its spot, its mirror image
   const again = [box(80, 10, 110, 40), box(10, 10, 40, 40)]
   const onPath = [box(190, 100, 230, 130)]
-  assert.deepEqual(placeFlat([field, again, onPath], taken, paths, { gap: 2, reach: 8 }), [1, -1, -1])
+  assert.deepEqual(placeFlat([{ spots: field }, { spots: again }, { spots: onPath }], taken, paths, { gap: 2, reach: 8 }), [1, -1, -1])
   assert.equal(taken.length, 2)                                          // the placed one is taken now
 })
 
 test('a flat thing stays inside the map', () => {
   const bounds = box(0, 0, 100, 100)
-  assert.deepEqual(placeFlat([[box(-10, 10, 20, 30), box(10, 10, 40, 30)]], [], [], { gap: 2, reach: 8, bounds }), [1])
+  assert.deepEqual(placeFlat([{ spots: [box(-10, 10, 20, 30), box(10, 10, 40, 30)] }], [], [], { gap: 2, reach: 8, bounds }), [1])
+})
+
+test('a flat thing may touch its own place only in its first spots', () => {
+  const house = box(0, 0, 40, 40)
+  const pond = { spots: [box(30, 30, 60, 50), box(-20, 30, 10, 50), box(100, 0, 130, 20)], own: [house], ownSpots: 2 }
+  assert.deepEqual(placeFlat([pond], [house], [], { gap: 2, reach: 8 }), [0])
+  const other = { spots: [box(30, 30, 60, 50), box(100, 0, 130, 20)], own: [] }
+  assert.deepEqual(placeFlat([other], [house], [], { gap: 2, reach: 8 }), [1])
 })

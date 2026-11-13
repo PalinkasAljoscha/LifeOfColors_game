@@ -22,15 +22,19 @@ export function nearPath(box, a, b, reach) {
   return false
 }
 
-/** Places the flat things one after the other: each takes the first of its spots (`spots`: boxes,
- *  best first) that lies inside `bounds` (if given) and is clear of everything `taken` by `gap`, of
- *  every path ([a, b] ends) by `reach`, and of the flat things placed before it; that spot is then
- *  taken too. Returns the chosen spot's index per thing, -1 = no free spot (the thing is left
- *  out). `taken` grows. */
+/** Places the flat things one after the other. A thing is { spots, own, ownSpots }: spots = boxes,
+ *  best first; own = boxes of its own place (picture, standing things) that its first `ownSpots`
+ *  spots (default 1) may touch -- those are where the drawing puts it (and its mirror image), next
+ *  to its own place on purpose (a pond half behind its tower); every other spot must be clear of
+ *  them too. A spot must lie inside `bounds` (if
+ *  given) and be clear of everything `taken` by `gap`, of every path ([a, b] ends) by `reach`, and
+ *  of the flat things placed before it; the chosen spot is then taken too. Returns the chosen
+ *  spot's index per thing, -1 = no free spot (the thing is left out). `taken` grows. */
 export function placeFlat(things, taken, paths, { gap, reach, bounds = null }) {
   const inBounds = (b) => !bounds || (b.x0 >= bounds.x0 && b.x1 <= bounds.x1 && b.y0 >= bounds.y0 && b.y1 <= bounds.y1)
-  return things.map((spots) => {
-    const n = spots.findIndex((box) => inBounds(box) && !taken.some((t) => overlaps(box, t, gap))
+  return things.map(({ spots, own = [], ownSpots = 1 }) => {
+    const n = spots.findIndex((box, k) => inBounds(box)
+      && !taken.some((t) => (k >= ownSpots || !own.includes(t)) && overlaps(box, t, gap))
       && !paths.some(([a, b]) => nearPath(box, a, b, reach)))
     if (n >= 0) taken.push(spots[n])
     return n
