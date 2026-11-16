@@ -6,12 +6,13 @@ import GameScreen from './components/GameScreen.jsx'
 import ConsentBanner from './components/ConsentBanner.jsx'
 import { loadIndex, loadAll, loadLevelGraph, markPlayed, findById } from './engine/catalog.js'
 import {
-  assignCastles, castleStates as computeStates, earnedUnlocks, highestUnlocked, CASTLE_COUNT, TUTORIAL_CASTLE,
+  assignCastles, castleStates as computeStates, earnedUnlocks, highestUnlocked, CASTLE_COUNT,
 } from './engine/castles.js'
 import { chainGraph, parseLevelGraph } from './engine/levelGraph.js'
 import { castleStars, progressTotals, recentlyPlayed, seedCastleStars, storageConsent, CONSENT_GRANTED } from './engine/progress.js'
 import { useProgress } from './hooks/useProgress.js'
-import { siteFor } from './sites.js'
+import { siteName } from './sites.js'
+import { fitToScenes } from './workshops.js'
 import { setCatalogVersion, screenView } from './telemetry/telemetry.js'
 
 // Three screens: Home (castle map, engine/castles.js) -> Castle (grid of its puzzles; the
@@ -24,7 +25,7 @@ import { setCatalogVersion, screenView } from './telemetry/telemetry.js'
 // Review: ?map=all in the URL opens every castle (nothing is saved for it; reload without it to
 // play normally).
 export default function App() {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const [index, setIndex] = useState(null)
   const [castles, setCastles] = useState(null)   // [{ castle, pool }] once the catalog is loaded
   const [graph, setGraph] = useState(null)       // engine/levelGraph.js, once loaded
@@ -77,7 +78,10 @@ export default function App() {
         setCatalogVersion(idx.catalog_version)
         const [instances, graphData] = await Promise.all([loadAll(), loadLevelGraph()])
         const g = graphData ? parseLevelGraph(graphData) : chainGraph(CASTLE_COUNT)
-        const all = assignCastles(instances, g.count)
+        // a castle never shows more puzzles than its workshop scene has places: the surplus is left
+        // out everywhere (not on the map's counts, not in the history; ?instance= still opens it)
+        const { castles: all, skipped } = fitToScenes(assignCastles(instances, g.count))
+        for (const { castle: c, ids } of skipped) console.warn(`castle ${c}: ${ids.length} puzzle(s) left out, its scene is full`, ids)
         setGraph(g)
         seedCastleStars(all)                        // once, for progress saved before castle counters
         setCastles(all)
@@ -96,17 +100,16 @@ export default function App() {
       .catch((e) => setError(String(e)))
   }, [])
 
-  // A level's name: "Training castle", then its site on the map with the level number, e.g. "Forest hut (1)".
-  const castleName = (c) => (c === TUTORIAL_CASTLE ? t('castles.tutorial') : t('castles.name', { site: t(`sites.${siteFor(c)}`), n: c }))
+  // A level's name: "Training castle", then each level's own name, e.g. "Amethyst Hut" (sites.js siteName).
+  const castleName = (c) => siteName(t, c)
   const pool = castle !== null ? castles?.[castle]?.pool ?? [] : []
-  // What finishing a castle opens: its children in the graph -- one name ("Manor (12)"), or the
-  // level numbers when there are several ("levels 12, 13 and 14"). Null when it leads nowhere.
+  // What finishing a castle opens: its children in the graph -- one name ("House of the Lily"), or how
+  // many when there are several ("3 new places"). Null when it leads nowhere.
   const opensNext = (c) => {
     const next = states?.[c]?.children ?? []
     if (next.length === 0) return null
     if (next.length === 1) return { one: castleName(next[0]) }
-    const list = new Intl.ListFormat(i18n.language, { type: 'conjunction' }).format(next.map(String))
-    return { list }
+    return { count: next.length }
   }
 
   function playPicked(inst) {

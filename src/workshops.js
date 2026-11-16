@@ -125,6 +125,23 @@ export function workshopFor(castle) {
   return WORKSHOPS[(((Math.trunc(castle) - 1) % n) + n) % n]
 }
 
+/** No castle holds more puzzles than its scene has places: [{ castle, pool }] (engine/castles.js
+ *  assignCastles) with every surplus puzzle left out -- a pool is in ranking order, so the ones
+ *  kept are its first (easiest) and the ones left out its last. The training castle (0) has no
+ *  scene and is never cut. Returns { castles, skipped: [{ castle, ids }] } (skipped = what was
+ *  left out, for a warning); the given list is not changed. The factory's export should never
+ *  let this happen. */
+export function fitToScenes(castles) {
+  const skipped = []
+  const fitted = castles.map(({ castle, pool }) => {
+    const room = castle >= 1 ? workshopFor(castle).slots.length : Infinity
+    if (pool.length <= room) return { castle, pool }
+    skipped.push({ castle, ids: pool.slice(room).map((inst) => inst.id) })
+    return { castle, pool: pool.slice(0, room) }
+  })
+  return { castles: fitted, skipped }
+}
+
 export const isLying = (slot) => Math.abs(slot[2]) > 30
 
 /** Which `n` of the scene's slots hold puzzles, in slot order: spread over the whole scene (the

@@ -3,7 +3,7 @@ import { phaser as C, palette } from '../theme.js'
 import { CELL_STATES, defaultLook } from '../themes.js'
 import { tap, specials } from '../engine/engine.js'
 import { startState } from './startBoard.js'
-import { INTRO_MS, neighbourCells } from '../engine/training.js'
+import { neighbourCells } from '../engine/training.js'
 import { emojiTexture, emojiDisplaySize } from './emojiTexture.js'
 
 // Board-only scene. All rules live in src/engine/engine.js (shared with the tests and
@@ -35,9 +35,10 @@ import { emojiTexture, emojiDisplaySize } from './emojiTexture.js'
 // active theme with its per-game choices drawn (src/themes.js drawLook, registry 'look'); the
 // theme never changes what a tap does.
 //
-// Training castle (registry 'training' true, src/engine/training.js): the goal object blinks in the
-// goal cell with a pointing hand for INTRO_MS at the start, and hovering a cell brightens its
-// neighbours.
+// Training castle (registry 'training' true, src/engine/training.js): hovering a cell brightens its
+// neighbours. Goal intro (registry 'goalIntro' = its length in ms, 0 / false = none; GameScreen
+// decides: the training castle and the first levels after it): the goal object blinks in the goal
+// cell with a pointing hand at the start.
 //
 // The canvas size follows the board's shape (see boardCanvasSize), so any board up to
 // 9 rows x 6 cols fills the available screen area with Phaser.Scale.FIT.
@@ -49,7 +50,7 @@ const RADIUS = 10
 const FRAME = 8            // width (and outer corner radius) of the golden frame on the goal cell
 const EMOJI_SIZE = 54      // size of a theme's cell emoji in px (cells are CELL - GAP = 90 px)
 const HOVER_ALPHA = 0.18   // training: white wash over the hovered cell's neighbours
-const BLINK_MS = 250       // training intro: one fade of the blinking goal object
+const BLINK_MS = 250       // goal intro: one fade of the blinking goal object
 const CLOCK_BULGE = 1.28   // the clock cell's circle: this x the cell's half side as radius
 const CLOCK_SQUARE_RADIUS = 16  // corner radius of the clock's square: round enough to stay inside the circle
 const CLOCK_ARROW_AT = -Math.PI * 3 / 4   // the turning arrow's place on the outer circle: half past 10
@@ -129,10 +130,9 @@ export default class GameScene extends Phaser.Scene {
     this._addSpecials()
 
     this.training = Boolean(this.registry.get('training'))
-    if (this.training) {
-      this._addHover()
-      if (this.registry.get('goalIntro') !== false) this._showGoalIntro()
-    }
+    if (this.training) this._addHover()
+    const introMs = Number(this.registry.get('goalIntro')) || 0
+    if (introMs > 0) this._showGoalIntro(introMs)
 
     this.input.on('pointerdown', this._onPointerDown, this)
     this.game.events.emit('sceneReady', this)
@@ -444,8 +444,8 @@ export default class GameScene extends Phaser.Scene {
     this.input.on('gameout', () => draw(null))
   }
 
-  // Training: the goal object blinks in the goal cell for INTRO_MS, a hand points at it.
-  _showGoalIntro() {
+  // The goal object blinks in the goal cell for `ms`, a hand points at it.
+  _showGoalIntro(ms) {
     const [gr, gc] = this.inst.goal.at
     const { x, y } = this._center(gr, gc)
     const look = this.cellLook[this.inst.goal.color]
@@ -465,7 +465,7 @@ export default class GameScene extends Phaser.Scene {
     const goal = this.add.container(x, y, parts).setDepth(11).setAlpha(0)
     this.tweens.add({
       targets: goal, alpha: { from: 0, to: 1 }, duration: BLINK_MS, yoyo: true,
-      repeat: Math.max(0, Math.round(INTRO_MS / (2 * BLINK_MS)) - 1),
+      repeat: Math.max(0, Math.round(ms / (2 * BLINK_MS)) - 1),
       onComplete: () => goal.destroy(),
     })
     // The hand sits in the neighbouring column, pointing at the goal (left of it if possible).
@@ -474,7 +474,7 @@ export default class GameScene extends Phaser.Scene {
     const hand = this.add.image(hx, y, emojiTexture(this, fromLeft ? '👉' : '👈', EMOJI_SIZE))
       .setDisplaySize(emojiDisplaySize(EMOJI_SIZE), emojiDisplaySize(EMOJI_SIZE)).setDepth(12)
     const bob = this.tweens.add({ targets: hand, x: hx + (fromLeft ? 10 : -10), duration: 300, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' })
-    this.time.delayedCall(INTRO_MS, () => {
+    this.time.delayedCall(ms, () => {
       bob.stop()
       this.tweens.add({ targets: hand, alpha: 0, duration: 200, onComplete: () => hand.destroy() })
     })

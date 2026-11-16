@@ -35,7 +35,7 @@
     "trainingPlan": "Plan d’entraînement",
     "trainingComplete": "Entraînement terminé",
     "trainingReady": "Tu es prêt pour le voyage.",
-    "trainingNext": "Le {{castle}} t’attend.",
+    "trainingNext": "{{castle}} t’attend.",
     "startJourney": "Commencer le voyage"
   },
   "levelScreen": {
@@ -66,7 +66,7 @@
     "statusOn": "Progression sauvegardée sur cet appareil",
     "statusOff": "Progression non sauvegardée (cette visite seulement)",
     "declineDeletes": "« Non merci » supprime la progression sauvegardée de ce navigateur.",
-    "nudgeNews": "🏰 Le {{name}} est ouvert !",
+    "nudgeNews": "🏰 {{name}} : ouvert !",
     "nudgeBody": "Ta progression n’est pas encore enregistrée : les châteaux ouverts disparaîtraient la prochaine fois. L’enregistrer dans ce navigateur ? Elle n’est jamais envoyée nulle part."
   },
   "themes": {
@@ -104,16 +104,26 @@
     "yurt": "Yourte",
     "forestLodge": "Maison forestière"
   },
+  "siteNames": {
+    "forestHut": ["Cabane d’améthyste", "Cabane d’opale", "Cabane de grenat", "Cabane de topaze", "Cabane de jade", "Cabane d’onyx", "Cabane d’agate", "Cabane de béryl"],
+    "forestLodge": ["Cabane de rubis", "Cabane d’émeraude", "Cabane de saphir", "Cabane d’ambre", "Cabane de turquoise", "Cabane de quartz", "Cabane d’obsidienne", "Cabane de jaspe"],
+    "manor": ["Maison du lys", "Maison de la rose", "Maison de la tulipe", "Maison de l’orchidée", "Maison de la violette", "Maison de l’iris", "Maison du pavot", "Maison du dahlia"],
+    "castle": ["Maison du chardon", "Maison du lotus", "Maison de la pivoine", "Maison de l’aster", "Maison du crocus", "Maison du trèfle", "Maison du lilas", "Maison de la lavande"],
+    "windmill": ["Château d’hélium", "Château de néon", "Château d’argon", "Château de krypton", "Château de xénon", "Château de radon", "Château d’hydrogène", "Château d’oxygène"],
+    "yurt": ["Yourte du soleil", "Yourte du vent", "Yourte du brouillard", "Yourte du tonnerre", "Yourte de l’écho", "Yourte de la lune", "Yourte du crépuscule", "Yourte de l’aube"],
+    "tavern": ["La Poule ensorcelée", "Le Druide dansant", "Le Crapaud endormi", "La Chèvre hilare", "Le Corbeau pompette", "La Chouette malicieuse", "Le Chaudron perdu", "Le Loup affamé"],
+    "wizardTower": ["Tour de Mercure", "Tour de Vénus", "Tour de la Terre", "Tour de Mars", "Tour de Jupiter", "Tour de Saturne", "Tour d’Uranus", "Tour de Neptune"]
+  },
   "castles": {
-    "name": "{{site}} ({{n}})",
     "tutorial": "Château d’entraînement",
-    "progress": "{{stars}} sur {{required}} étoiles",
     "progressTraining": "{{solved}} puzzles résolus sur {{required}}",
     "locked": "verrouillé",
-    "toOpen": "pour ouvrir : {{name}}",
+    "lockedHint": "Gagne d’abord {{count}} étoiles ici : {{name}}",
+    "lockedHintAny": "Gagne d’abord {{count}} étoiles dans le lieu précédent",
+    "starsNeeded": "{{count}} étoiles pour ouvrir le lieu suivant",
+    "starsNeededMany": "{{count}} étoiles pour ouvrir les lieux suivants",
     "nextOpen": "{{name}} : ouvert !",
-    "toOpenMany": "pour ouvrir les niveaux {{list}}",
-    "nextOpenMany": "Niveaux {{list}} : ouverts !",
+    "nextOpenMany": "{{count}} nouveaux lieux : ouverts !",
     "review": "Revue : tous les niveaux ouverts"
   },
   "history": {

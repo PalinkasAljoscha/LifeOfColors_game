@@ -83,6 +83,7 @@ export const palette = {
   dustCloud:       '#3f3d3b',   // the dark grey dust cloud over the wrecked board (drawn translucent)
   dustRetryBack:   '#1b1b1d',   // the Retry button on the dust (drawn translucent)
   dustRetryInk:    '#d6d4d1',   // its text and frame, grey
+  bombTicker:      '#84878f',   // the bomb puzzle's passing warning line: grey, as dark as still reads on the navy
   calloutBack:     '#fffbea',   // speech bubbles / callouts on the board
   calloutInk:      '#1a1a2e',
 
@@ -171,9 +172,6 @@ export const palette = {
   wsMedalRing:      '#f6c996',
   wsMedalInk:       '#2f1405',
   wsMedalString:    '#d9c7a4',
-  wsPlate:          '#b87333',   // the hanging copper plate with the star count (flat, like the map's castles)
-  wsPlateShade:     '#8f5626',   // its lower edge and the empty progress groove
-  wsPlateRivet:     '#d99a5b',
   wsBat:            '#14111a',   // the bat passing the tower window
 }
 

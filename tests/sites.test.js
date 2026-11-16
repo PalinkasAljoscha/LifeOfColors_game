@@ -2,7 +2,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync, existsSync } from 'node:fs'
-import { LAND_BOX, SITE_ORDER, SITE_SOLID, TRAINING_SITE, parseLand, siteFor } from '../src/sites.js'
+import { LAND_BOX, SITE_ORDER, SITE_SOLID, TRAINING_SITE, parseLand, siteFor, siteName } from '../src/sites.js'
 import { CASTLE_COUNT } from '../src/engine/castles.js'
 
 test('the training level is a castle; the levels loop through the sites', () => {
@@ -28,7 +28,34 @@ test('every site has its three pictures (no animation in them) and a name in eve
     }
     for (const loc of locales) assert.ok(loc.sites?.[site], `sites.${site}`)
   }
-  for (const loc of locales) assert.match(loc.castles.name, /\{\{site\}\}.*\(\{\{n\}\}\)/)
+})
+
+test('every level has its own name, in every language', () => {
+  const locales = ['en', 'de', 'fr'].map((l) => JSON.parse(readFileSync(new URL(`../src/locales/${l}.json`, import.meta.url))))
+  const graph = JSON.parse(readFileSync(new URL('../public/catalog/level_graph.json', import.meta.url)))
+  const levels = Math.max(CASTLE_COUNT, graph.nodes.length)
+  for (const loc of locales) {
+    // i18next's t, as far as siteName uses it
+    const t = (key) => key.split('.').reduce((o, k) => o?.[k], loc)
+    assert.deepEqual(Object.keys(loc.siteNames).sort(), [...SITE_ORDER].sort())
+    for (const site of SITE_ORDER) assert.equal(loc.siteNames[site].length, locales[0].siteNames[site].length, `siteNames.${site}`)
+    assert.equal(siteName(t, 0), loc.castles.tutorial)
+    assert.equal(siteName(t, 1), loc.siteNames.forestHut[0])
+    assert.equal(siteName(t, 2), loc.siteNames.tavern[0])
+    assert.equal(siteName(t, 9), loc.siteNames.forestHut[1])
+    const names = Array.from({ length: levels }, (_, c) => siteName(t, c))
+    assert.ok(names.every((n) => typeof n === 'string' && n.length > 0 && n.length <= 24), 'a name fits the workshop title')
+    assert.equal(new Set(names).size, levels, 'no two levels share a name')
+    // no level number, no "/ required" any more
+    assert.equal(loc.castles.name, undefined)
+    assert.equal(loc.castles.progress, undefined)
+    assert.match(loc.castles.lockedHint, /\{\{count\}\}.*\{\{name\}\}/)
+    assert.match(loc.castles.lockedHintAny, /\{\{count\}\}/)
+  }
+  // the lists run out and start again
+  const en = (key) => key.split('.').reduce((o, k) => o?.[k], locales[0])
+  const n = locales[0].siteNames.forestHut.length
+  assert.equal(siteName(en, 1 + n * SITE_ORDER.length), siteName(en, 1))
 })
 
 test('every landscape is flat things and standing things, each with its box inside the picture', () => {

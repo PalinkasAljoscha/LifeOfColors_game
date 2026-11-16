@@ -39,8 +39,8 @@ src/
   components/             # HomeScreen (CastleMap: scrollable SVG map of the levels as different sites,
                           # see "Map sites" below), LevelScreen (one castle:
                           # its puzzles as potions in a workshop scene (Workshop, see "Workshop
-                          # scenes" below); the old progress bar + 10-column tile grid is only the
-                          # fallback when a castle has more puzzles than its scene has places; the
+                          # scenes" below); a castle never shows more puzzles than its scene has places, the
+                          # surplus is left out (workshops.js fitToScenes; no tile-grid fallback any more); the
                           # training castle instead: centred title under the Home button, no hint
                           # or puzzle-count line, and a vertical path of bars in the puzzles' colours -- a big title
                           # ("Introduction", then "Day One".."Day Five", levelScreen.days) over the
@@ -129,7 +129,7 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   castle holds now (puzzles can move after a new export; their own stars move with them -- the
   switch from 30 castles to the graph's 55 left old counters as they were: no real players yet,
   user decision). The castle screen names what finishing it opens: its graph children (one name,
-  or "levels 12, 13 and 14": `castles.toOpenMany` / `nextOpenMany`). When play opens a castle and
+  or "3 new places": `castles.nextOpen` / `nextOpenMany`, said by the plate's bar hint once the castle is done). When play opens a castle and
   progress is not saved, the consent banner reappears once per visit (`nudge`). Telemetry
   `level` = castle number (= graph node id; the factory keeps a snapshot of every exported graph
   in `exports/level_graphs/<graph_version>.json` to read it), on the castle screen and in a game.
@@ -155,6 +155,11 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   has dropped into the notebook. Every training puzzle uses the phased version (first the coloured
   neighbours are circled and fly to the left side of the rule, then the changed cell is circled and
   flies to the right side).
+- **Goal intro** (2026-11-16) -- `GameScene._showGoalIntro(ms)`: the goal object (the crown) blinks
+  on the goal field with a pointing hand next to it. Board's `goalIntro` = its length in ms (0 =
+  none), decided in GameScreen: the training castle (`INTRO_MS`, 2 s; not when its first puzzle
+  opens) and the first `GOAL_INTRO_LEVELS` (3) levels after it, castles 1-3 (`GOAL_INTRO_MS`, 3 s;
+  `src/config.js`) -- at every start of a puzzle, also after Retry. It never blocks taps.
 - **Training intro** -- `components/TrainingIntro.jsx`: training puzzle 1 (`training.day === 1`)
   opens with four speech bubbles, each right next to what it explains, its arrow pointing at the ring with a
   small space (`ARROW_SPACE`, 6 px)
@@ -201,9 +206,14 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   two close sand tones `mapPath` / `mapPathAlt`). It is open once the place it leads to is open
   through it (start done, or the path to castle 1), otherwise grey (`mapPathLocked`), faint and
   with stones missing. The places' names are NOT written on the map (since 2026-11-13; the
-  button's aria-label keeps "Name (n): ..."); a place only gets a badge "★ stars/required" (✓ when
-  done; framed gold / green) once stars were collected there ("…" while it loads); badges are
-  kept inside the map's width. What covers what (2026-11-13), two rules only: (1) layers, bottom to top: grass, what
+  open place's name is its button's tooltip and aria-label); a place only gets a badge "★ stars" (✓ when
+  done; framed gold / green; never "/20" -- only the training castle shows "✓ won/all") once stars
+  were collected there ("…" while it loads); badges are kept inside the map's width. A locked place
+  says what opens it in a bubble over it, "Get 20 stars in Amethyst Hut first"
+  (`castles.lockedHint`: the open place with a path into it, with several the one with the most
+  stars; `castles.lockedHintAny` when none is open yet): while the mouse is over it or it has the
+  focus, and for `HINT_MS` (2.6 s) after a tap -- so locked places are not `disabled` buttons
+  (`aria-disabled`). What covers what (2026-11-13), two rules only: (1) layers, bottom to top: grass, what
   lies flat (fields, ponds), paths, everything that stands up, badges; (2) everything that stands
   up -- place pictures, the standing things of their landscapes, the trees below the training
   castle -- is ONE list drawn top-down by its foot (where it touches the ground), so what stands
@@ -230,9 +240,16 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   (`src/sites.js`, drawn in `components/CastleMap.jsx`). The training level (castle 0) is a castle;
   levels 1, 2, 3, ... walk through `SITE_ORDER` in a loop: forest hut, spooky tavern, manor, castle,
   wizard's tower, old windmill, yurt, forest lodge (`siteFor`). In the code a level is still a
-  "castle" (engine, progress, telemetry: unchanged); a site is only a look and a name. A level's
-  name is its site with the level number, "Forest hut (1)" (`castles.name` = `{{site}} ({{n}})`,
-  site names in the locales under `sites.*`; the training level stays `castles.tutorial`); the
+  "castle" (engine, progress, telemetry: unchanged); a site is only a look and a name. Every level has
+  its OWN name (2026-11-16; `sites.js` `siteName(t, castle)`, no level number any more): the k-th
+  level of a site takes the k-th name of the site's list in the locales, `siteNames.<site>` (8 each,
+  the same length in every language, starting again after the last; tested: no two levels share a
+  name): forest hut and forest lodge = gemstone + "Hut" ("Amethyst Hut"; two different gem lists),
+  manor and castle = "House of the" + flower, windmill = gas + "Castle" ("Helium Castle"), yurt =
+  "Yurt of the Sun / Wind / ...", tavern = short tavern names ("The Bewitched Hen"), wizard's tower
+  = "Tower of" + planet. Names are written out per language (articles and cases differ), at most
+  24 letters (the workshop title). `sites.*` (the kind of place) is only the fallback; the
+  training level stays `castles.tutorial`. The
   same name is used as the workshop's title, in the "to open ..." lines and in the history.
   Pictures in `src/assets/sites/`: `<site>.svg` (open), `<site>-locked.svg` (the same in grey with a
   padlock, windows dark, no smoke) and `<site>-land.svg` (its own bit of landscape: castle and
@@ -262,22 +279,32 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   flask for a special puzzle** (`isSpecial`); solved = copper medal at the neck with the best stars
   (check mark without a rating; drawn 1.6 x, `MEDAL_SCALE`); only opened = stopper off, a little
   vapour now and then; untouched = stoppered. The potions keep their glass, glow and stoppers (the
-  only gradients on the screen). Header in the app's own look: the hanging copper plate (flat) with
-  the castle's stars / required stars and the line to the next castle, the castle title in the
+  only gradients on the screen). Header in the app's own look: the hanging copper plate, in the SAME copper as the potions' medals
+  (their gradient `ws-medal`, edge, ring and ink `wsMedal*`; star and number in the medal's ink),
+  with the castle's stars (the number only, no "/ required") over a bar that fills towards the next
+  castle. No "to open ..." line on the plate: the bar says what it is for in a small bubble under
+  the plate, "20 stars needed to open next sites" (`castles.starsNeeded` / `starsNeededMany`; once
+  done: `nextOpen` / `nextOpenMany`; `LevelScreen.barHint`), while the mouse is over it or it has
+  the focus, and for 2.6 s after a tap. Then the castle title in the
   app's font, the puzzle count, and "Home" as the game screen's rounded button.
   A potion's lean, shift, fill level, stopper (cork, dark cork, wooden plug, wax, linen cap, glass
   ball) and its rare life (bubbles, or a small electric flash) come from its puzzle id
   (`potionLook`, seeded), so a potion looks the same every time. Most potions are still.
   **Picking**: a tapped potion lifts up and comes forward a little (CSS `ws-lift`, drawn in front
-  of the rail and its neighbours), and its puzzle opens after `PICK_MS` (340 ms); further taps are
-  ignored meanwhile. The glow of a potion reaches over its neighbours and takes no taps.
+  of the rail and its neighbours), and its puzzle opens after `PICK_MS` (420 ms; a slow, short lift: 7 units up, 1.1 x); further taps are
+  ignored meanwhile. The lift is the ONLY movement of a pick: no press-in scale on `:active` (it
+  grew, shrank back and only then lifted -- the picked potion is drawn anew in front). The glow of a potion reaches over its neighbours and takes no taps.
   In the tower a bat passes outside the window at random times (every 6-30 s, one or two abrupt
   turns, each flight drawn anew; `Bat`, `scene.window`), behind the window's bars.
   No motion at all with "reduce motion" (the puzzle then opens at once).
   The picture is shown whole (never cropped); the rest of the screen is the same navy. In the
   tower some places lie on a table: special puzzles get standing places first (`placePuzzles`).
-  If a castle holds more puzzles than its scene has places (34-35), LevelScreen falls back to the
-  tile grid. The pictures and the numbers in workshops.js come from one drawing script (not in
+  A castle never shows more puzzles than its scene has places (34-35): `workshops.js`
+  `fitToScenes` (called in App right after `assignCastles`, tested) leaves the surplus out -- the
+  last of the pool's ranking order, so the easiest stay -- with a `console.warn`. Left-out puzzles
+  are in no castle: not on the screen, not in the counts or the history; `?instance=` still opens
+  them. The factory's export should never let it happen (it is only a guard; the former tile-grid
+  fallback is gone since 2026-11-16). The pictures and the numbers in workshops.js come from one drawing script (not in
   this repo) -- a new picture needs new numbers. Decoration in the pictures is sparse and simple,
   from a fixed list: mice, spider, roots, toad, mushrooms (the only colourful things besides the
   potions and gold), gold coins, dried herbs, corkscrew, plus candles, a lantern, a retort and
@@ -316,7 +343,12 @@ tests/                    # engine vectors (generated), classic-rule test, catal
     line drawn), current state big at the top, the others small and faded, turning
     counter-clockwise one step per move (`CLOCK_TURN_MS`). On `boom` the scene knocks every cell out
     of line (`_wreck`: shifted, tilted, squeezed, overlapping; stepped, not smooth).
-  - React (`GameScreen.jsx`, `components/SpecialOverlays.jsx`): bomb / mirror puzzles open with a
+  - React (`GameScreen.jsx`, `components/SpecialOverlays.jsx`): a bomb puzzle opens with its
+    warning as one line of grey text (`bombTicker`) between two ⚠️ passing from right to left, visible
+    only between the outer edges of the board's outer cells, just above the board (lifted 0.3 em),
+    3 times (`BombTicker`, `BOMB_TICKER_PASSES`, 7.8 s a pass, CSS
+    `ticker-pass`; each time opened, not on Retry; taps do not stop it, an explosion does; with
+    "reduce motion" it stands still for 4.5 s) -- no callout; a mirror puzzle opens with a
     short callout (each time opened, not on Retry; gone after 4.5 s or the first tap); the first tap
     on a blocked / clock cell per screen explains it; each bomb tap shows "Oh, careful!" with 😱 (2 s);
     an explosion = cartoon starburst with BAM drawn into it as letter shapes (SVG paths
@@ -329,7 +361,7 @@ tests/                    # engine vectors (generated), classic-rule test, catal
     via its `text` map). Colours in `theme.js` (Special cells section). Callouts are positioned from
     the canvas with `cellOnScreen` (they retry until the canvas is laid out).
   - Workshop: a special puzzle is a round-bottomed flask instead of a test tube (see Workshop scenes).
-  - Tiles (history dialog, game screen name swatch, fallback grid): a special puzzle's tile has a wavy white border (`SpecialTile` / `isSpecial` in
+  - Tiles (history dialog, game screen name swatch): a special puzzle's tile has a wavy white border (`SpecialTile` / `isSpecial` in
     `LevelScreen.jsx`, colour `specialTileEdge`) instead of the plain rounded rectangle, so players
     can find the special puzzles. Only the drawing changes; the button keeps the full tile as its
     tap area (the grid has `pt-1` so the top row's waves are not clipped). The same tile is used in

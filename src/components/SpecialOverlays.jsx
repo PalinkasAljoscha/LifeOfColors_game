@@ -1,4 +1,4 @@
-import { useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { palette } from '../theme.js'
 import { cellOnScreen } from '../game/GameScene.js'
@@ -6,7 +6,11 @@ import { Emoji } from './Emoji.jsx'
 
 // Overlays of the special cells on the board box (components/GameScreen.jsx; rules in
 // src/engine/engine.js tap):
-//   SpecialCallout  a speech bubble pointing at a cell: the intro of a bomb / mirror puzzle, the
+//   BombTicker      the bomb puzzle's warning: one line of grey text between two ⚠️ that passes
+//                   from right to left, visible only between the outer edges of the board's outer
+//                   cells, just above the board (over its top edge when there
+//                   is no room above), BOMB_TICKER_PASSES times, then it is gone. Never takes taps.
+//   SpecialCallout  a speech bubble pointing at a cell: the intro of a mirror puzzle, the
 //                   first tap on a blocked / clock cell, the bomb's "Oh, careful!" (with a scared
 //                   face popping up and away, 2 s). Never takes taps (pointer-events: none).
 //   BoomOverlay     phase 'exploding': a cartoon starburst with BAM drawn into it (letter shapes, no
@@ -28,6 +32,58 @@ const BAM_LETTERS = [
   'M0 22V0H5L8 8L11 0H16V22H11.6V10.5L8 17.5L4.4 10.5V22Z',
 ]
 const DUST_DRIFT_S = 40   // seconds for the dust to cross the board once (slowest puffs a bit more)
+
+export const BOMB_TICKER_PASSES = 3
+const TICKER_PASS_MS = 7800      // one pass over the cells' width
+const TICKER_LIFT_EM = 0.3       // the line sits this much higher (about twice a full stop's height)
+const TICKER_MARK = '⚠️'          // at both ends of the line
+const TICKER_STILL_MS = 4500     // "reduce motion": the line just stands there this long
+
+/** The bomb warning passing just above the board in `boardRef`, visible exactly between the
+ *  board's left and right edges; onDone after the last pass. */
+export function BombTicker({ boardRef, instance, text, onDone }) {
+  const ref = useRef(null)
+  const [pos, setPos] = useState(null)       // { top, left, width } in the board box: from the left edge of the
+                                             // first column's cells to the right edge of the last column's
+  const still = useMemo(() => typeof window !== 'undefined'
+    && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true, [])
+  useLayoutEffect(() => {
+    // the canvas may not be laid out yet: try again on the next frames (as SpecialCallout)
+    let frame = 0, raf = 0
+    const place = () => {
+      const cell = cellOnScreen(boardRef.current, instance, 0, 0)
+      const last = cellOnScreen(boardRef.current, instance, 0, instance.board.cols - 1)
+      const el = ref.current
+      if (!cell || !el || cell.board.width === 0) {
+        if (frame++ < 120) raf = requestAnimationFrame(place)
+        return
+      }
+      const h = el.offsetHeight
+      const lift = TICKER_LIFT_EM * parseFloat(getComputedStyle(el.firstElementChild ?? el).fontSize)
+      const left = cell.x - cell.size / 2, right = last.x + last.size / 2
+      setPos({ top: Math.max(0, cell.board.top - h - 2 - lift), left, width: right - left })
+    }
+    place()
+    return () => cancelAnimationFrame(raf)
+  }, [boardRef, instance])
+  useEffect(() => {
+    if (!still) return undefined
+    const id = setTimeout(onDone, TICKER_STILL_MS)
+    return () => clearTimeout(id)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [still])
+  return (
+    <div ref={ref} className="absolute z-20 overflow-hidden pointer-events-none" role="status"
+         style={{ top: pos?.top ?? 0, left: pos?.left ?? 0, width: pos?.width ?? '100%', visibility: pos ? 'visible' : 'hidden' }}>
+      <p className={`ticker-pass whitespace-nowrap text-lg font-black leading-snug ${still ? 'text-center whitespace-normal px-3' : 'w-max'}`}
+         style={{ color: palette.bombTicker, '--pass-time': `${TICKER_PASS_MS}ms`, '--passes': BOMB_TICKER_PASSES, '--from': `${pos?.width ?? 0}px`,
+                  animationPlayState: pos ? 'running' : 'paused' }}
+         onAnimationEnd={onDone}>
+        {TICKER_MARK} {text} {TICKER_MARK}
+      </p>
+    </div>
+  )
+}
 
 /** Speech bubble at cell `at` of the board in `boardRef` (above the cell, below it when there is
  *  no room above). `emoji`: a face that pops up next to the bubble. */

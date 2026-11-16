@@ -104,16 +104,26 @@
     "yurt": "Jurte",
     "forestLodge": "Waldhaus"
   },
+  "siteNames": {
+    "forestHut": ["Amethysthütte", "Opalhütte", "Granathütte", "Topashütte", "Jadehütte", "Onyxhütte", "Achathütte", "Beryllhütte"],
+    "forestLodge": ["Rubinhütte", "Smaragdhütte", "Saphirhütte", "Bernsteinhütte", "Türkishütte", "Quarzhütte", "Obsidianhütte", "Jaspishütte"],
+    "manor": ["Haus der Lilie", "Haus der Rose", "Haus der Tulpe", "Haus der Orchidee", "Haus des Veilchens", "Haus der Iris", "Haus des Mohns", "Haus der Dahlie"],
+    "castle": ["Haus der Distel", "Haus des Lotus", "Haus der Pfingstrose", "Haus der Aster", "Haus des Krokus", "Haus des Klees", "Haus des Flieders", "Haus des Lavendels"],
+    "windmill": ["Heliumburg", "Neonburg", "Argonburg", "Kryptonburg", "Xenonburg", "Radonburg", "Wasserstoffburg", "Sauerstoffburg"],
+    "yurt": ["Jurte der Sonne", "Jurte des Windes", "Jurte des Nebels", "Jurte des Donners", "Jurte des Echos", "Jurte des Mondes", "Jurte der Dämmerung", "Jurte des Morgenrots"],
+    "tavern": ["Zur verhexten Henne", "Zum tanzenden Druiden", "Zur schläfrigen Kröte", "Zur grinsenden Ziege", "Zum beschwipsten Raben", "Zur zwinkernden Eule", "Zum verlorenen Kessel", "Zum hungrigen Wolf"],
+    "wizardTower": ["Turm des Merkur", "Turm der Venus", "Turm der Erde", "Turm des Mars", "Turm des Jupiter", "Turm des Saturn", "Turm des Uranus", "Turm des Neptun"]
+  },
   "castles": {
-    "name": "{{site}} ({{n}})",
     "tutorial": "Übungsburg",
-    "progress": "{{stars}} von {{required}} Sternen",
     "progressTraining": "{{solved}} von {{required}} Puzzles gelöst",
     "locked": "gesperrt",
-    "toOpen": "um {{name}} zu öffnen",
+    "lockedHint": "Hole zuerst {{count}} Sterne hier: {{name}}",
+    "lockedHintAny": "Hole zuerst {{count}} Sterne am Ort davor",
+    "starsNeeded": "{{count}} Sterne öffnen den nächsten Ort",
+    "starsNeededMany": "{{count}} Sterne öffnen die nächsten Orte",
     "nextOpen": "{{name}} ist offen!",
-    "toOpenMany": "um die Stufen {{list}} zu öffnen",
-    "nextOpenMany": "Stufen {{list}} sind offen!",
+    "nextOpenMany": "{{count}} neue Orte sind offen!",
     "review": "Ansicht: alle Stufen offen"
   },
   "history": {

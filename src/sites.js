@@ -2,8 +2,9 @@
 //
 // The levels are still "castles" in the code (engine/castles.js), but on the map each one is a
 // different place: the training level is a castle, levels 1, 2, 3, ... walk through SITE_ORDER and
-// start again. A site is only a look and a name (locales `sites.<key>`); rules, unlocking and
-// telemetry do not know about it.
+// start again. A site is only a look and a name; rules, unlocking and telemetry do not know about
+// it. Every level has its own name (siteName, locales `siteNames.<key>`: a list per site;
+// `sites.<key>` is the kind of place and only the fallback).
 // Pictures: src/assets/sites/<key>.svg (open), <key>-locked.svg (grey, with padlock) and
 // <key>-land.svg (the bit of landscape around it), all flat like the rest of the map and still
 // (no animation). The site pictures use the box x -110..110, y -165..15 and the landscape
@@ -45,6 +46,19 @@ export function siteFor(castle) {
   const n = Math.trunc(castle)
   if (!(n >= 1)) return TRAINING_SITE
   return SITE_ORDER[(n - 1) % SITE_ORDER.length]
+}
+
+/** A level's own name: the training level is "Training castle"; every other level takes the next
+ *  name of its site's list (locales `siteNames.<site>`: gemstone huts, flower houses, planet towers,
+ *  ...) -- the k-th level of a site gets the k-th name, starting again after the last. `t` is
+ *  i18next's. */
+export function siteName(t, castle) {
+  const n = Math.trunc(castle)
+  if (!(n >= 1)) return t('castles.tutorial')
+  const site = siteFor(n)
+  const list = t(`siteNames.${site}`, { returnObjects: true })
+  if (!Array.isArray(list) || list.length === 0) return t(`sites.${site}`)
+  return list[Math.floor((n - 1) / SITE_ORDER.length) % list.length]
 }
 
 const NUM = '-?\\d+(?:\\.\\d+)?'

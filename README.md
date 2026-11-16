@@ -55,7 +55,7 @@ uncolored cells, a witch-hand mouse cursor, its own homepage texts and decoratio
 - Theme colours live in `src/theme.js`; themed texts in the locale files under `themes.<name>`.
 - On the home map every level is a place: the training level a castle, then forest hut, tavern,
   manor, castle, wizard's tower, windmill, yurt and forest lodge in a loop (`src/sites.js`,
-  pictures in `src/assets/sites/`); a level is named after its place, e.g. "Forest hut (1)".
+  pictures in `src/assets/sites/`); every level has its own name, e.g. "Amethyst Hut" (`siteNames.*` in the locales).
 - A castle's puzzles are picked in a workshop scene drawn in the flat look of the home map: one
   potion per puzzle (test tube, or a round flask for a special puzzle). Scenes, their pictures (SVG)
   and potion places: `src/workshops.js`, `src/assets/workshops/`, `src/components/Workshop.jsx`.

@@ -3,7 +3,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync, existsSync } from 'node:fs'
-import { WORKSHOPS, WORKSHOP_WIDTH, WORKSHOP_HEIGHT, STOPPERS, STOPPER_SHADES, workshopFor, placePuzzles, potionLook, isLying, spreadSlots, emptySlots } from '../src/workshops.js'
+import { WORKSHOPS, WORKSHOP_WIDTH, WORKSHOP_HEIGHT, STOPPERS, STOPPER_SHADES, workshopFor, placePuzzles, fitToScenes, potionLook, isLying, spreadSlots, emptySlots } from '../src/workshops.js'
 import { assignCastles, CASTLE_COUNT, TUTORIAL_CASTLE } from '../src/engine/castles.js'
 import { parseLevelGraph } from '../src/engine/levelGraph.js'
 import { palette } from '../src/theme.js'
@@ -64,6 +64,23 @@ test('fewer puzzles than places: spread over the scene, the rest are empty test 
   assert.ok(empty.every((s) => !placed.some((p) => p.slot === s)))
   assert.deepEqual(placePuzzles(scene, pool, isSpecial, 7), placed, 'the same castle looks the same every visit')
   assert.deepEqual(spreadSlots(scene, scene.slots.length, 3), scene.slots)
+})
+
+test('fitToScenes: a castle keeps at most as many puzzles as its scene has places', () => {
+  const make = (n, tag) => Array.from({ length: n }, (_, k) => ({ id: `${tag}${k}` }))
+  const room = (c) => workshopFor(c).slots.length
+  const castles = [
+    { castle: 0, pool: make(60, 't') },                 // the training castle has no scene: never cut
+    { castle: 1, pool: make(room(1) + 3, 'a') },
+    { castle: 2, pool: make(room(2), 'b') },
+    { castle: 3, pool: make(5, 'c') },
+  ]
+  const { castles: fitted, skipped } = fitToScenes(castles)
+  assert.deepEqual(fitted.map((c) => c.pool.length), [60, room(1), room(2), 5])
+  assert.deepEqual(fitted[1].pool, castles[1].pool.slice(0, room(1)), 'the first (easiest) stay, in order')
+  assert.deepEqual(skipped, [{ castle: 1, ids: castles[1].pool.slice(room(1)).map((p) => p.id) }])
+  assert.equal(castles[1].pool.length, room(1) + 3, 'the given list is not changed')
+  for (const { castle, pool } of fitted.slice(1)) assert.ok(placePuzzles(workshopFor(castle), pool, () => false, castle))
 })
 
 test('placePuzzles: too many puzzles -> null; flasks stand before test tubes do', () => {

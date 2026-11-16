@@ -1,6 +1,5 @@
 import { useTranslation } from 'react-i18next'
 import { playState } from '../engine/catalog.js'
-import { bestStars } from '../engine/progress.js'
 import { useProgress } from '../hooks/useProgress.js'
 import { ConsentBannerSpacer } from './ConsentBanner.jsx'
 import { inkOn, mixHex, palette } from '../theme.js'
@@ -13,16 +12,11 @@ import Workshop from './Workshop.jsx'
 // sorcerer's workshop (components/Workshop.jsx, one of the scenes in src/workshops.js per castle):
 // a test tube per puzzle in the puzzle's colour, a round flask for a special puzzle, a copper
 // medal with the best stars on a solved one. Tapping a potion starts that puzzle.
-// Only if a castle ever holds more puzzles than its scene has places, the plain tile grid below
-// is shown instead:
-// every puzzle of the level as a tile in its name's
-// colour (10 columns, publication order, so new puzzles appear at the end). Tapping a tile
-// starts that puzzle. Tiles carry no label; the name is shown on the game screen.
-// Solved puzzles show their best star rating (a check mark if the puzzle has no rating),
-// puzzles only opened a small dot (engine/progress.js: this visit, or saved if the player
-// opted in).
+// A castle never holds more puzzles than its scene has places: the app leaves the surplus out
+// (workshops.js fitToScenes, called in App). The former fallback, a plain tile grid, is gone; its
+// tile drawing (SpecialTile, TileMark) is still used by the history dialog and the game screen.
 // Used for one castle (engine/castles.js): `state` = { stars, required, done }, shown as a bar
-// towards opening `next` (App opensNext: { one: name } or { list: '12, 13 and 14' }, the castles
+// towards opening `next` (App opensNext: { one: name } or { count }, the castles
 // its paths lead to; null where none lead on). Empty test tubes fill the places the castle's
 // puzzles leave free (workshops.js placePuzzles); they cannot be tapped.
 // Training castle (state.training): the puzzles are a path to follow in order (TrainingPath):
@@ -170,44 +164,40 @@ function TrainingPath({ pool, states, onPick }) {
   )
 }
 
-/** The line about what this castle opens: "to open Manor (12)" / "Levels 12, 13 and 14 are open!". */
-export function openLine(t, next, done) {
+/** What the workshop plate's bar says about itself: "20 stars needed to open next sites", or,
+ *  once the castle is done, what is open ("House of the Lily is open!" / "3 new places are open!").
+ *  `next` = App opensNext; null when the castle leads nowhere. */
+export function barHint(t, next, state) {
   if (!next) return null
-  return next.one
-    ? t(done ? 'castles.nextOpen' : 'castles.toOpen', { name: next.one })
-    : t(done ? 'castles.nextOpenMany' : 'castles.toOpenMany', { list: next.list })
+  if (state.done) return next.one ? t('castles.nextOpen', { name: next.one }) : t('castles.nextOpenMany', { count: next.count })
+  return t(next.one ? 'castles.starsNeeded' : 'castles.starsNeededMany', { count: state.required })
 }
 
 export default function LevelScreen({ title, next, state, pool, onPick, onBack, nudging = false }) {
   const { t } = useTranslation()
   useProgress()
   const states = pool.map(playState)
-  const { stars, solved, required, done, training } = state
-  const have = training ? solved : stars          // training: won puzzles; else stars
-  const share = Math.min(1, have / required)
 
-  // The workshop scene (not for the training castle; null if the scene has too few places).
-  const scene = training ? null : workshopFor(state.castle)
-  const placed = scene && placePuzzles(scene, pool, isSpecial, state.castle)
-  if (placed) {
+  // Every castle but the training castle: its workshop scene. A castle never holds more puzzles
+  // than its scene has places (workshops.js fitToScenes, App); the slice only guards that.
+  if (!state.training) {
+    const scene = workshopFor(state.castle)
+    const placed = placePuzzles(scene, pool.slice(0, scene.slots.length), isSpecial, state.castle)
     const stateOf = new Map(pool.map((inst, i) => [inst.id, states[i]]))
     return (
       <Workshop scene={scene} placed={placed} playStates={placed.map(({ inst }) => stateOf.get(inst.id))} isSpecial={isSpecial}
                 empty={emptySlots(scene, placed)}
-                title={title} nextLine={openLine(t, next, state.done)} state={state} onPick={onPick} onBack={onBack} nudging={nudging} />
+                title={title} barHint={barHint(t, next, state)} state={state} onPick={onPick} onBack={onBack} nudging={nudging} />
     )
   }
 
+  // The training castle: the Home button alone on top, the title centred below it, then the path.
   return (
     <div className="h-[100dvh] w-full flex flex-col bg-game-bg safe-pad">
       <div className="mx-auto w-full max-w-md">
-        {/* training: the Home button alone on top, the title centred below it */}
-        <div className={training ? 'flex flex-col' : 'flex items-center gap-3'}>
-          <div className={training ? 'order-2 mt-3 mb-6 text-center' : 'min-w-0'}>
-            <h1 className={`${training ? 'text-3xl' : 'text-2xl'} font-black leading-tight`}>{title}</h1>
-            {!training && (
-              <p className="text-xs text-game-silver font-sans font-semibold">{t('home.puzzleCount', { count: pool.length })}</p>
-            )}
+        <div className="flex flex-col">
+          <div className="order-2 mt-3 mb-6 text-center">
+            <h1 className="text-3xl font-black leading-tight">{title}</h1>
           </div>
           <button
             onClick={onBack}
@@ -217,53 +207,10 @@ export default function LevelScreen({ title, next, state, pool, onPick, onBack, 
             {t('levelScreen.back')}
           </button>
         </div>
-
-        {next && !training && (
-          <div className="mt-3">
-            <p className="text-sm font-sans font-bold">
-              {training
-                ? <span style={{ color: palette.correctGreen }}>✓ {solved}</span>
-                : <span className="text-game-star">★ {stars}</span>}
-              <span className="text-game-silver"> / {required} · </span>
-              <span className={done ? 'text-white' : 'text-game-silver'}>
-                {openLine(t, next, done)}
-              </span>
-            </p>
-            <div className="mt-1.5 h-2.5 rounded-full bg-game-track overflow-hidden"
-                 role="progressbar" aria-valuemin={0} aria-valuemax={required} aria-valuenow={Math.min(have, required)}>
-              <div className="h-full rounded-full" style={{ width: `${share * 100}%`, background: done ? palette.correctGreen : palette.starGold }} />
-            </div>
-          </div>
-        )}
-
-        {!training && (
-          <p className="mt-4 mb-2 text-sm text-game-silver font-sans font-semibold text-center">{t('levelScreen.choose')}</p>
-        )}
       </div>
 
       <div className="flex-1 min-h-0 overflow-y-auto">
-        {training ? <TrainingPath pool={pool} states={states} onPick={onPick} /> : (
-        <div className="mx-auto w-full max-w-md grid grid-cols-10 gap-1.5 pt-1 pb-4">
-          {pool.map((inst, i) => {
-            const best = states[i] === 'solved' ? bestStars(inst.id) : null
-            const special = isSpecial(inst)
-            return (
-            <button
-              key={inst.id}
-              onClick={() => onPick(inst)}
-              className={`relative aspect-[4/3] active:scale-90 transition-transform flex items-center justify-center
-                          ${special ? '' : 'rounded-md ring-1 ring-inset ring-white/20'}`}
-              style={special ? undefined : { background: inst.name_color }}
-              aria-label={states[i] === 'solved' ? `${inst.name} ✓${best ? ` ${'★'.repeat(best)}` : ''}` : inst.name}
-              title={inst.name}
-            >
-              {special && <SpecialTile color={inst.name_color} />}
-              <span className="relative"><TileMark state={states[i]} best={best} /></span>
-            </button>
-            )
-          })}
-        </div>
-        )}
+        <TrainingPath pool={pool} states={states} onPick={onPick} />
         <ConsentBannerSpacer nudge={nudging} />
       </div>
     </div>

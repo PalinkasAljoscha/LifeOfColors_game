@@ -14,8 +14,11 @@ import { ConsentBannerSpacer } from './ConsentBanner.jsx'
 //     or a round-bottomed flask for a special puzzle (LevelScreen isSpecial);
 //   * solved: a copper medal at the neck with the best stars (a check mark if the puzzle has no
 //     rating); only opened: the stopper is off and a little vapour rises now and then;
-//   * the hanging copper plate top left: the castle's stars / required and the way to the next
-//     castle; the castle title, the puzzle count and the "Home" button (the game screen's button
+//   * the hanging copper plate top left, in the medals' copper (same gradient, edge, ring and
+//     ink): the castle's stars (no "/ required") over a bar towards the next castle; the bar says
+//     what it is for ("20 stars needed to open next sites", `barHint`) in a small bubble under the
+//     plate while the mouse is over it, it has the focus, or for HINT_MS after a tap;
+//     the castle title, the puzzle count and the "Home" button (the game screen's button
 //     look); "Pick your poison" only where the scene has a place for it (the crypt's lintel).
 // A potion's lean, stopper, fill level and rare life (bubbles, an electric flash) come from its
 // puzzle id (workshops.js potionLook), so it looks the same each time. Tapping a potion lifts it
@@ -30,8 +33,9 @@ const pictureOf = (key) => PICTURES[`../assets/workshops/${key}.svg`]
 const GAME_FONT = '"Arial Black", Arial, sans-serif'     // the app's font (tailwind font-game)
 const TEXT_FONT = 'Arial, sans-serif'
 const MEDAL_SCALE = 1.6
-const PICK_MS = 340          // how long a tapped potion lifts and comes forward before its puzzle opens
+const PICK_MS = 420          // how long a tapped potion lifts and comes forward before its puzzle opens
 
+const HINT_MS = 2600         // how long the bar's hint stays after a tap
 const STAR = 'M0,-1 L0.29,-0.31 L0.95,-0.31 L0.42,0.12 L0.59,0.81 L0,0.42 L-0.59,0.81 L-0.42,0.12 L-0.95,-0.31 L-0.29,-0.31 Z'
 const TUBE = 'M-9.6,-72 V-9.6 A9.6,9.6 0 0 0 9.6,-9.6 V-72'
 const FLASK = 'M-5,-70 V-37.6 A19.4,19.4 0 1 0 5,-37.6 V-70'
@@ -347,9 +351,9 @@ function Bat({ window: win }) {
  * playStates [state] per placed puzzle: 'solved' | 'played' | anything else = untouched
  * isSpecial  (inst) -> round flask instead of a test tube
  * empty      [slot] places without a puzzle: an empty test tube each (cannot be tapped)
- * title / state: as LevelScreen; nextLine = the line about what this castle opens (LevelScreen openLine)
+ * title / state: as LevelScreen; barHint = what the plate's bar says about itself (LevelScreen barHint), or null
  */
-export default function Workshop({ scene, placed, playStates, isSpecial, empty = [], title, nextLine, state, onPick, onBack, nudging = false }) {
+export default function Workshop({ scene, placed, playStates, isSpecial, empty = [], title, barHint = null, state, onPick, onBack, nudging = false }) {
   const { t } = useTranslation()
   const moving = useMemo(() => !reducedMotion(), [])
   const looks = useMemo(
@@ -370,6 +374,16 @@ export default function Workshop({ scene, placed, playStates, isSpecial, empty =
     setPicked(k)
     timer.current = setTimeout(() => onPick(placed[k].inst), PICK_MS)
   }
+  // the plate's bar says what it is for: on hover / focus, and for HINT_MS after a tap
+  const [hint, setHint] = useState(false)
+  const hintTimer = useRef(null)
+  useEffect(() => () => clearTimeout(hintTimer.current), [])
+  const showHint = (ms = 0) => {
+    clearTimeout(hintTimer.current)
+    setHint(true)
+    if (ms) hintTimer.current = setTimeout(() => setHint(false), ms)
+  }
+  const hideHint = () => { clearTimeout(hintTimer.current); setHint(false) }
   const picture = pictureOf(scene.key)
   const { stars, required, done } = state
   const share = Math.min(1, stars / required)
@@ -435,22 +449,39 @@ export default function Workshop({ scene, placed, playStates, isSpecial, empty =
           {/* the picked potion comes forward: in front of the rail and its neighbours */}
           {picked !== null && potion(picked)}
 
-          {/* the hanging copper plate: stars collected in this castle / stars that open the next */}
-          <g textAnchor="middle" role="img" aria-label={`★ ${stars} / ${required}${nextLine ? ` · ${nextLine}` : ''}`}>
+          {/* the hanging copper plate, in the medals' copper: stars collected in this castle, the bar
+              fills towards the next; the bar's hint (what it is for) shows in a bubble under the plate */}
+          <g textAnchor="middle">
             <path d="M32,0 V42 M112,0 V42" stroke={palette.castleLockedShade} strokeWidth="2.4" strokeDasharray="5 3" />
-            <rect x="16" y="40" width="112" height="64" rx="8" fill={palette.wsPlate} />
-            <path d="M16,92 h112 v4 a8,8 0 0 1 -8,8 h-96 a8,8 0 0 1 -8,-8 z" fill={palette.wsPlateShade} />
-            <circle cx="24" cy="48" r="2" fill={palette.wsPlateRivet} />
-            <circle cx="120" cy="48" r="2" fill={palette.wsPlateRivet} />
-            <path d={STAR} transform="translate(40,65) scale(11)" fill={palette.starGold} />
-            <text x="88" y="73" fontFamily={GAME_FONT} fontWeight="900" fontSize="21" fill={palette.gameBg}>
-              {stars}<tspan fontSize="13" dx="2">/ {required}</tspan>
-            </text>
-            <rect x="28" y="80" width="88" height="6" rx="3" fill={palette.wsPlateShade} />
-            <rect x="28" y="80" width={88 * share} height="6" rx="3" fill={done ? palette.correctGreen : palette.starGold} />
-            {nextLine && (
-              <text x="72" y="100.4" fontFamily={TEXT_FONT} fontWeight="700" fontSize={fitSize(nextLine, 8, 100, 0.56)} fill={palette.white}>{nextLine}</text>
-            )}
+            <rect x="16" y="41" width="112" height="58" rx="8" fill={palette.overlayBlack} opacity="0.5" />
+            <rect x="16" y="40" width="112" height="58" rx="8" fill="url(#ws-medal)" stroke={palette.wsMedalEdge} strokeWidth="1" />
+            <rect x="19.5" y="43.5" width="105" height="51" rx="5.5" fill="none" stroke={palette.wsMedalRing} strokeOpacity="0.7" strokeWidth="0.6" />
+            <g role="img" aria-label={`★ ${stars}`}>
+              <path d={STAR} transform="translate(54,63) scale(11)" fill={palette.wsMedalInk} />
+              <text x="86" y="71" fontFamily={GAME_FONT} fontWeight="900" fontSize="21" fill={palette.wsMedalInk}>{stars}</text>
+            </g>
+            <g className={barHint ? 'ws-bar' : undefined} tabIndex={barHint ? 0 : undefined} role="img" aria-label={barHint ?? undefined}
+               onPointerEnter={barHint ? (e) => { if (e.pointerType === 'mouse') showHint() } : undefined}
+               onPointerLeave={barHint ? (e) => { if (e.pointerType === 'mouse') hideHint() } : undefined}
+               onFocus={barHint ? () => showHint() : undefined} onBlur={barHint ? hideHint : undefined}
+               onClick={barHint ? () => showHint(HINT_MS) : undefined}>
+              <rect x="28" y="80" width="88" height="6" rx="3" fill={palette.wsMedalLo} />
+              <rect x="28" y="80" width={88 * share} height="6" rx="3" fill={done ? palette.correctGreen : palette.starGold} />
+              {/* the bar's tap / hover area: the plate's lower part */}
+              <rect x="20" y="74" width="104" height="20" fill={palette.white} fillOpacity="0" />
+              <rect className="ws-focus" x="22" y="75" width="100" height="16" rx="6" fill="none" stroke={palette.white} strokeWidth="1.5" />
+            </g>
+            {hint && barHint && (() => {
+              const size = fitSize(barHint, 10, 350, 0.56), w = barHint.length * size * 0.56 + 18
+              return (
+                <g pointerEvents="none" aria-hidden="true">
+                  <path d="M66,106.5 l6,-6 l6,6 z" fill={palette.castleBadge} stroke={palette.starGold} strokeWidth="1.2" />
+                  <rect x="10" y="106" width={w} height="22" rx="8" fill={palette.castleBadge} stroke={palette.starGold} strokeWidth="1.2" />
+                  <path d="M67.4,106.6 l4.6,-4.6 l4.6,4.6 z" fill={palette.castleBadge} />
+                  <text x={10 + w / 2} y="120.6" fontFamily={TEXT_FONT} fontWeight="700" fontSize={size} fill={palette.white}>{barHint}</text>
+                </g>
+              )
+            })()}
           </g>
 
           {/* "Home": the game screen's rounded button */}

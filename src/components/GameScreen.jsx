@@ -12,8 +12,9 @@ import { progressTotals } from '../engine/progress.js'
 import { minMovesOf, starsForWin } from '../engine/stars.js'
 import { drawLook, themedKey } from '../themes.js'
 import { specials } from '../engine/engine.js'
-import { SpecialCallout, BoomOverlay, EXPLOSION_MS } from './SpecialOverlays.jsx'
-import { addObservation, observation } from '../engine/training.js'
+import { SpecialCallout, BombTicker, BoomOverlay, EXPLOSION_MS } from './SpecialOverlays.jsx'
+import { GOAL_INTRO_LEVELS, GOAL_INTRO_MS } from '../config.js'
+import { INTRO_MS, addObservation, observation } from '../engine/training.js'
 import * as telemetry from '../telemetry/telemetry.js'
 import { SpecialTile, isSpecial } from './LevelScreen.jsx'
 
@@ -30,9 +31,15 @@ import { SpecialTile, isSpecial } from './LevelScreen.jsx'
 // the win animation ("Passed training day X"; "Training complete" for the win that completes the plan).
 // A win plays the win animation (components/WinCelebration.jsx) over the board; afterwards the board
 // stays as it is and only Retry / Back go on. onHome is no longer used here (no win dialog).
-// Special cells (src/engine/engine.js, components/SpecialOverlays.jsx): a bomb / mirror puzzle opens
-// with a short callout at the special cell (each time it is opened, not on Retry; gone after
-// INTRO_CALLOUT_MS or the first tap); the first tap on a blocked / clock cell (per screen) explains
+// Goal intro (GameScene _showGoalIntro): at every start of a puzzle, also after Retry, the goal
+// object blinks on the goal field with a pointing hand -- in the training castle (INTRO_MS; not
+// when its first puzzle opens, TrainingIntro explains the goal there) and in the first
+// GOAL_INTRO_LEVELS levels after it (GOAL_INTRO_MS, src/config.js).
+// Special cells (src/engine/engine.js, components/SpecialOverlays.jsx): a bomb puzzle opens with
+// its warning passing over the screen just above the board, three times (BombTicker; each time the
+// puzzle is opened, not on Retry; taps do not stop it); a mirror puzzle opens with a short callout
+// at the mirror cell (each time it is opened, not on Retry; gone after INTRO_CALLOUT_MS or the
+// first tap); the first tap on a blocked / clock cell (per screen) explains
 // it; a tap on the bomb shows "Oh, careful!" with a scared face (BOMB_WARN_MS). When the bomb goes
 // off: the explosion (the whole screen shakes, EXPLOSION_MS), then the rubble with a Retry button --
 // the same as the Retry button on top (moves reset; telemetry: the triggering tap was a click that
@@ -47,10 +54,10 @@ export default function GameScreen({ instance, place, training = null, pick, onP
   // special cells: the callout on the board ({ key, at, text, emoji, intro, ms }), the bomb's
   // explosion (null | 'exploding' | 'rubble'), and which tap explanations were shown on this screen
   const [callout, setCallout] = useState(() => {
-    if (special.type === 'bomb') return { key: 0, at: special.bomb.at, text: t(themedKey('special.bombIntro')), intro: true, ms: INTRO_CALLOUT_MS }
     if (special.type === 'mirror') return { key: 0, at: special.mirror[0], text: t('special.mirrorIntro'), intro: true, ms: INTRO_CALLOUT_MS }
     return null
   })
+  const [ticker, setTicker] = useState(special.type === 'bomb')   // the bomb warning is still passing
   const calloutKey = useRef(0)
   const [boom, setBoom] = useState(null)
   const explained = useRef(new Set())
@@ -79,6 +86,10 @@ export default function GameScreen({ instance, place, training = null, pick, onP
   // training puzzle 1: three explanations before the first move (components/TrainingIntro.jsx),
   // each time the puzzle is opened (not again on Retry); null when done / not shown
   const [introStep, setIntroStep] = useState(() => (training?.day === 1 ? 0 : null))
+  const level = instance.level
+  const goalIntro = training
+    ? (training.day === 1 && round === 0 ? 0 : INTRO_MS)
+    : (level >= 1 && level <= GOAL_INTRO_LEVELS ? GOAL_INTRO_MS : 0)
   const nextIntro = () => setIntroStep((s) => (s === null || s + 1 >= INTRO_STEPS ? null : s + 1))
 
   function openNotes() {
@@ -141,6 +152,7 @@ export default function GameScreen({ instance, place, training = null, pick, onP
 
   function onBoom() {
     setCallout(null)
+    setTicker(false)
     setBoom('exploding')
     clearTimeout(boomTimer.current)
     boomTimer.current = setTimeout(() => setBoom('rubble'), EXPLOSION_MS)
@@ -268,12 +280,15 @@ export default function GameScreen({ instance, place, training = null, pick, onP
       <div ref={boardBoxRef} className={training ? 'min-h-0 mt-2 relative w-full shrink' : 'flex-1 min-h-0 mt-2 relative'}
            style={training ? { aspectRatio: `${boardSize.width} / ${boardSize.height}`, maxWidth: '100%' } : undefined}>
         <Board key={round} instance={instance} look={look} training={training !== null}
-               goalIntro={!(training?.day === 1 && round === 0)} onClick={onClick} onWon={onWon}
+               goalIntro={goalIntro} onClick={onClick} onWon={onWon}
                onSpecialTap={onSpecialTap} onBoom={onBoom} />
         {/* special cells: callouts at a cell, and the bomb's explosion / rubble (with its Retry) */}
         {callout && !boom && (
           <SpecialCallout key={`callout-${callout.key}`} boardRef={boardBoxRef} instance={instance} at={callout.at}
                           text={callout.text} emoji={callout.emoji ?? null} look={look} />
+        )}
+        {ticker && !boom && (
+          <BombTicker boardRef={boardBoxRef} instance={instance} text={t(themedKey('special.bombIntro'))} onDone={() => setTicker(false)} />
         )}
         {boom && <BoomOverlay phase={boom} onRetry={retry} boardRef={boardBoxRef} instance={instance} />}
         {/* training puzzle 1: the explanations come first; a tap on the board goes to the next one */}

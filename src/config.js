@@ -8,6 +8,12 @@
 // id alone which version was played -- keep this switch fixed once the game is live.
 export const HIDE_START_CELL_IF_NOT_REQUIRED = true
 
+// The goal intro (game/GameScene.js _showGoalIntro): in the first GOAL_INTRO_LEVELS levels after
+// the training castle (castles 1..GOAL_INTRO_LEVELS) every puzzle starts -- also after Retry -- with
+// the goal object blinking on the goal field and a hand pointing at it, for GOAL_INTRO_MS.
+export const GOAL_INTRO_LEVELS = 3
+export const GOAL_INTRO_MS = 3000
+
 // Castles (src/engine/castles.js): the levels of the home-screen map. How many there are and which
 // lead into which comes from the level graph the factory ships next to the catalog
 // (public/catalog/level_graph.json, src/engine/levelGraph.js). The factory ships an ORDER

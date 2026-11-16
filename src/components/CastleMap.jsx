@@ -1,8 +1,8 @@
-import { useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { palette } from '../theme.js'
-import { TUTORIAL_CASTLE, highestUnlocked } from '../engine/castles.js'
-import { SITE_BOX, SITE_SOLID, parseLand, siteFor } from '../sites.js'
+import { highestUnlocked } from '../engine/castles.js'
+import { SITE_BOX, SITE_SOLID, parseLand, siteFor, siteName } from '../sites.js'
 import { giveWay, onAnyPath, placeFlat } from './mapClear.js'
 import { PATH_HALF, PATH_REACH, STONE_ROUND, pathStones } from './mapPath.js'
 import { relax } from './mapLayout.js'
@@ -22,9 +22,13 @@ import { relax } from './mapLayout.js'
 // The map scrolls vertically (no visible scroll bar); it opens with the player's current castle
 // (the highest open one) in the middle of the screen -- for castle 0 extra landscape below it makes
 // that possible.
-// Each castle where stars were collected shows "stars / required" in a small badge under it (the
-// training castle: puzzles won / all of them), framed gold, green once done. The places' names are
-// not written on the map (the button's aria-label still says "Forest hut (1): ...").
+// Each castle where stars were collected shows its stars in a small badge under it ("★ 12"; not
+// how many are needed -- the training castle: puzzles won / all of them), framed gold, green once
+// done. The places' names are not written on the map (an open place's name is its button's
+// tooltip and aria-label, "Amethyst Hut: 12 stars"). A locked place says what opens it in a small
+// bubble over it -- "Get 20 stars in Amethyst Hut first" (the open place with a path into it; with
+// several, the one with the most stars) -- while the mouse is over it, it has the keyboard focus,
+// or for HINT_MS after a tap.
 // Drawing is SVG (decoration only, nothing moves); the places themselves are HTML buttons laid over
 // it.
 // Where a place stands: its row and column (see above), then nudged a little sideways, up or down
@@ -81,6 +85,8 @@ const placed = (box, x, y, size) => {
   const k = size / 100
   return { x: x + box.x * k, y: y + size * 0.4 + box.y * k, width: box.w * k, height: box.h * k }
 }
+
+const HINT_MS = 2600         // how long a tapped locked place shows what opens it
 
 // Where else a flat thing may go when its own spot is taken, in the landscape's units: [out, down]
 // (out = away from the place's middle; each is tried as it is and mirrored, in this order).
@@ -170,6 +176,15 @@ export default function CastleMap({ states, graph, review = false, loadingCastle
   const { t } = useTranslation()
   const scrollRef = useRef(null)
   const [box, setBox] = useState(null)          // { w, h } of the visible map area
+  const [hint, setHint] = useState(null)        // the locked place that says what opens it, or null
+  const hintTimer = useRef(null)
+  useEffect(() => () => clearTimeout(hintTimer.current), [])
+  const showHint = (i, ms = 0) => {
+    clearTimeout(hintTimer.current)
+    setHint(i)
+    if (ms) hintTimer.current = setTimeout(() => setHint(null), ms)
+  }
+  const hideHint = (i) => { clearTimeout(hintTimer.current); setHint((h) => (h === i ? null : h)) }
 
   useLayoutEffect(() => {
     const el = scrollRef.current
@@ -356,28 +371,57 @@ export default function CastleMap({ states, graph, review = false, loadingCastle
           {ids.map((i) => {
             const s = states[i]
             const { x, y } = pos(i)
-            const name = i === TUTORIAL_CASTLE ? t('castles.tutorial') : t('castles.name', { site: t(`sites.${siteFor(i)}`), n: i })
+            const name = siteName(t, i)
+            // a locked place: what opens it -- the stars still to get in the open place that leads
+            // to it (with several, the one where the player has the most)
+            const from = s.unlocked ? null : s.parents.filter((p) => states[p]?.unlocked && !states[p].training)
+              .sort((a, b) => states[b].stars - states[a].stars)[0]
+            const lockedHint = s.unlocked ? null : from !== undefined
+              ? t('castles.lockedHint', { count: states[from].required, name: siteName(t, from) })
+              : t('castles.lockedHintAny', { count: s.required })
             const label = s.unlocked
-              ? `${name}: ${t(s.training ? 'castles.progressTraining' : 'castles.progress',
-                  { stars: s.stars, solved: s.solved, required: s.required })}`
-              : `${name}: ${t('castles.locked')}`
+              ? `${name}: ${s.training
+                  ? t('castles.progressTraining', { solved: s.solved, required: s.required })
+                  : t('progress.stars', { count: s.stars })}`
+              : `${name}: ${t('castles.locked')}. ${lockedHint}`
             const counted = s.unlocked && (s.training ? s.solved > 0 : s.stars > 0)
             const loading = loadingCastle === i
             // keep the badge inside the map: its width is estimated from its text (11px bold),
             // and a badge that would stick out at an edge is moved in
-            const chars = loading ? 1 : 2 + `${s.training ? s.solved : s.stars}/${s.required}`.length + (s.done ? 2 : 0)
+            const chars = loading ? 1 : 2 + (s.training ? `${s.solved}/${s.required}` : `${s.stars}`).length + (s.done ? 2 : 0)
             const half = (chars * 6.6 + 14) / 2
             const lx = Math.min(Math.max(x, half + 2), W - half - 2)
             return (
               <div key={i}>
+                {/* a locked place is not `disabled`: it still takes the mouse, the focus and taps for its hint */}
                 <button
-                  onClick={() => s.unlocked && onSelect(i)}
-                  disabled={!s.unlocked || loadingCastle !== null}
+                  onClick={() => (s.unlocked ? onSelect(i) : showHint(i, HINT_MS))}
+                  onPointerEnter={s.unlocked ? undefined : (e) => { if (e.pointerType === 'mouse') showHint(i) }}
+                  onPointerLeave={s.unlocked ? undefined : (e) => { if (e.pointerType === 'mouse') hideHint(i) }}
+                  onFocus={s.unlocked ? undefined : () => showHint(i)}
+                  onBlur={s.unlocked ? undefined : () => hideHint(i)}
+                  disabled={s.unlocked && loadingCastle !== null}
+                  aria-disabled={!s.unlocked || undefined}
                   aria-label={label}
-                  className="absolute rounded-2xl active:scale-95 transition-transform disabled:cursor-default"
+                  title={s.unlocked ? name : undefined}
+                  className={`absolute rounded-2xl ${s.unlocked ? 'active:scale-95 transition-transform' : 'cursor-default'} disabled:cursor-default`}
                   style={{ left: x - size * 0.6, top: y - size * 1.05, width: size * 1.2, height: size * 1.5 }}
                 />
-                {/* the badge: "★ 12/20" once stars were collected there (✓ when done); "…" while loading */}
+                {hint === i && lockedHint && (() => {
+                  // the bubble over the place, kept inside the map's width
+                  const w = Math.min(190, W - 8)
+                  return (
+                    <span className="absolute z-10 -translate-x-1/2 -translate-y-full rounded-xl px-2.5 py-1.5 text-center text-xs
+                                     font-sans font-bold leading-snug text-white bg-game-badge ring-2 shadow-lg pointer-events-none"
+                          style={{
+                            left: Math.min(Math.max(x, w / 2 + 4), W - w / 2 - 4), top: y - size * 0.95, width: 'max-content', maxWidth: w,
+                            '--tw-ring-color': palette.starGold,
+                          }} aria-hidden="true">
+                      {lockedHint}
+                    </span>
+                  )
+                })()}
+                {/* the badge: "★ 12" once stars were collected there (✓ when done); "…" while loading */}
                 {(counted || loading) && (
                   <span className={`absolute -translate-x-1/2 whitespace-nowrap rounded-full px-1.5 py-px text-[11px] font-black
                                     pointer-events-none ${counted ? 'bg-game-badge ring-2' : 'bg-game-badge/80'}`}
@@ -390,7 +434,7 @@ export default function CastleMap({ states, graph, review = false, loadingCastle
                         {s.training
                           ? <span style={{ color: palette.correctGreen }}>✓ {s.solved}</span>
                           : <span className="text-game-star">★ {s.stars}</span>}
-                        <span className="text-game-silver">/{s.required}</span>
+                        {s.training && <span className="text-game-silver">/{s.required}</span>}
                         {s.done && <span style={{ color: palette.correctGreen }}> ✓</span>}
                       </>
                     )}

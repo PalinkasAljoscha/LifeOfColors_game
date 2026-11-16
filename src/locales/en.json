@@ -104,16 +104,26 @@
     "yurt": "Yurt",
     "forestLodge": "Forest lodge"
   },
+  "siteNames": {
+    "forestHut": ["Amethyst Hut", "Opal Hut", "Garnet Hut", "Topaz Hut", "Jade Hut", "Onyx Hut", "Agate Hut", "Beryl Hut"],
+    "forestLodge": ["Ruby Hut", "Emerald Hut", "Sapphire Hut", "Amber Hut", "Turquoise Hut", "Quartz Hut", "Obsidian Hut", "Jasper Hut"],
+    "manor": ["House of the Lily", "House of the Rose", "House of the Tulip", "House of the Orchid", "House of the Violet", "House of the Iris", "House of the Poppy", "House of the Dahlia"],
+    "castle": ["House of the Thistle", "House of the Lotus", "House of the Peony", "House of the Aster", "House of the Crocus", "House of the Clover", "House of the Lilac", "House of the Lavender"],
+    "windmill": ["Helium Castle", "Neon Castle", "Argon Castle", "Krypton Castle", "Xenon Castle", "Radon Castle", "Hydrogen Castle", "Oxygen Castle"],
+    "yurt": ["Yurt of the Sun", "Yurt of the Wind", "Yurt of the Fog", "Yurt of the Thunder", "Yurt of the Echo", "Yurt of the Moon", "Yurt of the Twilight", "Yurt of the Dawn"],
+    "tavern": ["The Bewitched Hen", "The Dancing Druid", "The Sleepy Toad", "The Grinning Goat", "The Tipsy Raven", "The Winking Owl", "The Lost Cauldron", "The Hungry Wolf"],
+    "wizardTower": ["Tower of Mercury", "Tower of Venus", "Tower of Earth", "Tower of Mars", "Tower of Jupiter", "Tower of Saturn", "Tower of Uranus", "Tower of Neptune"]
+  },
   "castles": {
-    "name": "{{site}} ({{n}})",
     "tutorial": "Training castle",
-    "progress": "{{stars}} of {{required}} stars",
     "progressTraining": "{{solved}} of {{required}} puzzles won",
     "locked": "locked",
-    "toOpen": "to open {{name}}",
+    "lockedHint": "Get {{count}} stars in {{name}} first",
+    "lockedHintAny": "Get {{count}} stars in the place before it first",
+    "starsNeeded": "{{count}} stars needed to open the next site",
+    "starsNeededMany": "{{count}} stars needed to open next sites",
     "nextOpen": "{{name}} is open!",
-    "toOpenMany": "to open levels {{list}}",
-    "nextOpenMany": "Levels {{list}} are open!",
+    "nextOpenMany": "{{count}} new places are open!",
     "review": "Review: every level open"
   },
   "history": {
