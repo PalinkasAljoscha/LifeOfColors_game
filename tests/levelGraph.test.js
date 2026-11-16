@@ -2,7 +2,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { existsSync, readFileSync } from 'node:fs'
 import { chainGraph, parseLevelGraph } from '../src/engine/levelGraph.js'
-import { assignCastles, castleStates } from '../src/engine/castles.js'
+import { assignCastles, castleStates, usesSites } from '../src/engine/castles.js'
 
 // T -> 1 -> {2, 3}; 2 -> 4; 3 -> 4, 5
 const SMALL = {
@@ -64,6 +64,12 @@ test('the shipped level graph is usable and every site gets puzzles', { skip: !e
   assert.equal(castles.length, g.count)
   const sizes = castles.slice(1).map((c) => c.pool.length)
   assert.ok(Math.min(...sizes) > 0, 'every site has puzzles')
-  assert.ok(Math.max(...sizes) - Math.min(...sizes) <= 1, 'evenly spread')
+  const ranked = castles.slice(1).flatMap((c) => c.pool)
+  if (usesSites(ranked, g.count - 1)) {
+    // the factory placed every puzzle (instance.site): sizes differ, each puzzle is in its site
+    for (const c of castles.slice(1)) for (const p of c.pool) assert.equal(p.site, c.castle)
+  } else {
+    assert.ok(Math.max(...sizes) - Math.min(...sizes) <= 1, 'evenly spread')
+  }
   assert.deepEqual(g.children[0], [1], 'the training castle leads to site 1 only')
 })

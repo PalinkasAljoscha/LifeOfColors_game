@@ -242,12 +242,17 @@
     "difficulty_ranking": {
       "type": "integer",
       "minimum": 1,
-      "description": "Not hashed. Place 1..K (no ties, no gaps over the live ranked instances of the catalog; 1 = easiest) in the order the app distributes puzzles over its castles (src/engine/castles.js): it removes the training puzzles and cuts the rest, in this order, into CASTLE_COUNT - 1 castles. Absent = not ranked; absent on retired instances."
+      "description": "Not hashed. Place 1..K (no ties, no gaps over the live ranked instances of the catalog; 1 = easiest) in the order the app distributes puzzles over its castles (src/engine/castles.js): it removes the training puzzles and puts the rest into the castle of their `site` (or, in catalogs without sites, cuts them in this order into near-equal castles); inside a castle puzzles are in this order. Absent = not ranked; absent on retired instances."
     },
     "training_position": {
       "type": "integer",
       "minimum": 1,
       "description": "Optional, not hashed. Place 1..k in the training castle (castle 0). A training instance may also have a difficulty_ranking (ignored for the castle split). Absent on retired instances."
+    },
+    "site": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Optional, not hashed (since 2026-11-14). The castle (level-graph node 1..count-1) of a live ranked, non-training instance, set by the factory (site_bins.py) and sticky: a puzzle keeps its site when puzzles are added. Either every live ranked non-training instance of a catalog has one or none does (then the app cuts the ranking into near-equal castles). Absent on training and retired instances."
     },
     "start_cell_required": {
       "type": [

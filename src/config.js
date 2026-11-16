@@ -12,8 +12,9 @@ export const HIDE_START_CELL_IF_NOT_REQUIRED = true
 // lead into which comes from the level graph the factory ships next to the catalog
 // (public/catalog/level_graph.json, src/engine/levelGraph.js). The factory ships an ORDER
 // (instance.difficulty_ranking, 1 = easiest) plus the training castle's puzzles
-// (instance.training_position); castle 0 = the training castle, the remaining ranked puzzles are
-// cut, in ranking order, into the other castles (nearly equal sizes).
+// (instance.training_position); castle 0 = the training castle. The remaining ranked puzzles go
+// to their instance.site (the castle the factory placed them in); in catalogs without sites they
+// are cut, in ranking order, into the other castles (nearly equal sizes).
 // CASTLE_COUNT is only used when the catalog has no level graph: then CASTLE_COUNT castles form
 // one line, as before the graph.
 export const CASTLE_COUNT = 30

@@ -5,6 +5,7 @@ import assert from 'node:assert/strict'
 import { readFileSync, existsSync } from 'node:fs'
 import { WORKSHOPS, WORKSHOP_WIDTH, WORKSHOP_HEIGHT, STOPPERS, STOPPER_SHADES, workshopFor, placePuzzles, potionLook, isLying, spreadSlots, emptySlots } from '../src/workshops.js'
 import { assignCastles, CASTLE_COUNT, TUTORIAL_CASTLE } from '../src/engine/castles.js'
+import { parseLevelGraph } from '../src/engine/levelGraph.js'
 import { palette } from '../src/theme.js'
 
 const isSpecial = (inst) => (inst.board?.special_cells?.length ?? 0) > 0
@@ -36,7 +37,10 @@ test('castles walk through the scenes; neighbours differ', () => {
 
 test('every castle of the current catalog fits its scene, each puzzle exactly once', () => {
   const { instances } = JSON.parse(readFileSync(new URL('../public/catalog/puzzles.json', import.meta.url)))
-  for (const { castle, pool } of assignCastles(instances)) {
+  // as many castles as the app shows: the shipped level graph's sites, else CASTLE_COUNT
+  const graph = new URL('../public/catalog/level_graph.json', import.meta.url)
+  const count = existsSync(graph) ? parseLevelGraph(JSON.parse(readFileSync(graph))).count : CASTLE_COUNT
+  for (const { castle, pool } of assignCastles(instances.filter((i) => !i.retired), count)) {
     if (castle === TUTORIAL_CASTLE) continue
     const scene = workshopFor(castle)
     const placed = placePuzzles(scene, pool, isSpecial)

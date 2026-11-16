@@ -29,7 +29,7 @@ src/
   App.jsx                 # screens: Home (castle map) -> Castle (grid) -> Game; ?instance=<name or id> opens one puzzle
   engine/engine.js        # THE rule engine (must match the factory's instance.py exactly), incl. special cells (tap)
   engine/catalog.js       # loads public/catalog/{index,puzzles,level_graph}.json (loadAll, loadLevelGraph)
-  engine/castles.js       # the castle hierarchy: ranking -> castles, required stars, unlocking (ANY parent done)
+  engine/castles.js       # the castle hierarchy: instance.site (else ranking cut) -> castles, required stars, unlocking (ANY parent done)
   engine/levelGraph.js    # the level graph (public/catalog/level_graph.json): which castles lead into which
   engine/progress.js      # tried/solved puzzles + best stars + per-castle star counters; saved only after opt-in
   engine/stars.js         # star rating of a win (1-5) from moves and moves_to_win_min

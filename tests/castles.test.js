@@ -38,6 +38,28 @@ test('training puzzles go to castle 0 in their order, the rest is cut by ranking
   assert.equal(all.find((p) => p.id === 'x').level, undefined)
 })
 
+test('with sites, every ranked puzzle goes to its site (sticky), in ranking order inside it', () => {
+  // site 1 holds rankings 1 and 5, site 3 the hardest; site 2 empty -- not an equal cut
+  const all = [
+    { id: 'a', difficulty_ranking: 5, site: 1 }, { id: 'b', difficulty_ranking: 1, site: 1 },
+    { id: 'c', difficulty_ranking: 2, site: 3 }, { id: 'd', difficulty_ranking: 3, site: 3 },
+    { id: 't', training_position: 1, difficulty_ranking: 4 },          // training: no site, castle 0
+  ]
+  const castles = assignCastles(all, 4)
+  assert.deepEqual(castles.map((c) => c.pool.map((p) => p.id)), [['t'], ['b', 'a'], [], ['c', 'd']])
+  for (const c of castles) for (const p of c.pool) assert.equal(p.level, c.castle)
+})
+
+test('sites are used only when every ranked puzzle has a valid one', () => {
+  const make = (sites) => sites.map((site, i) => ({ id: `p${i}`, difficulty_ranking: i + 1, site }))
+  // one missing / out of range (castle 0 or beyond the map) -> near-equal cut by ranking
+  for (const sites of [[3, 3, undefined, 3], [3, 3, 0, 3], [3, 3, 4, 3], [3, 3, 1.5, 3]]) {
+    const sizes = assignCastles(make(sites), 4).slice(1).map((c) => c.pool.length)
+    assert.deepEqual(sizes, [2, 1, 1], `sites ${sites}`)
+  }
+  assert.deepEqual(assignCastles(make([3, 3, 3, 3]), 4).slice(1).map((c) => c.pool.length), [0, 0, 4])
+})
+
 test('the number of castles is only a parameter', () => {
   const all = Array.from({ length: 10 }, (_, i) => ranked(`p${i}`, i + 1))
   for (const n of [2, 3, 11, 30]) {

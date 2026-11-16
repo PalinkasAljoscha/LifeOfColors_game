@@ -13,14 +13,16 @@
 // from the stars of the puzzles currently in a castle: a counter only grows, so a castle stays
 // done when puzzles move between castles after a new catalog.
 //
-// Which puzzles belong to which castle (assignCastles) -- the factory ships an order, not levels:
+// Which puzzles belong to which castle (assignCastles):
 //   * castle 0: every playable instance with a training_position, in that order;
 //   * castles 1..count-1 (count = the graph's sites): every other playable instance with a
-//     difficulty_ranking, in ranking order (1 = easiest), cut into count - 1 consecutive castles
-//     of nearly equal size (sizes differ by at most one), in castle-number order -- the graph's
-//     ids grow from the bottom of the map to the top. Inside a castle the puzzles stay in
-//     ranking order.
-// A new catalog can move puzzles to another castle; their own best stars go with them.
+//     difficulty_ranking. When EVERY one of them carries a `site` (1..count-1, set by the factory,
+//     sticky: a puzzle keeps its site when puzzles are added), each goes to the castle of its site.
+//     Otherwise (older catalogs) they are cut, in ranking order (1 = easiest), into count - 1
+//     consecutive castles of nearly equal size (sizes differ by at most one), in castle-number
+//     order -- the graph's ids grow from the bottom of the map to the top. Inside a castle the
+//     puzzles are in ranking order either way.
+// A new catalog can move puzzles to another castle (without sites); their own best stars go with them.
 // Pure functions (no React, no fetch) so the tests can use them.
 
 import { CASTLE_COUNT, UNLOCK_STARS } from '../config.js'
@@ -32,7 +34,8 @@ export const TUTORIAL_CASTLE = 0
 /** Split playable instances into castles: [{ castle, pool }] of length `count`. Sets
  *  `inst.level` = its castle number on every assigned instance (the app's own field: used for
  *  telemetry `level` and for the castle star counters); instances without a training_position
- *  or difficulty_ranking are left out. */
+ *  or difficulty_ranking are left out. Ranked instances go to their `site` when all of them have
+ *  a valid one (1..count-1), else they are cut into near-equal castles in ranking order. */
 export function assignCastles(instances, count = CASTLE_COUNT) {
   const pools = Array.from({ length: count }, () => [])
   const byId = (a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0)
@@ -42,9 +45,15 @@ export function assignCastles(instances, count = CASTLE_COUNT) {
     .sort((a, b) => a.difficulty_ranking - b.difficulty_ranking || byId(a, b))
   pools[TUTORIAL_CASTLE].push(...training)
   const n = count - 1
-  if (n > 0) ranked.forEach((inst, k) => pools[1 + Math.floor((k * n) / ranked.length)].push(inst))
+  if (n > 0 && ranked.length > 0 && usesSites(ranked, n)) ranked.forEach((inst) => pools[inst.site].push(inst))
+  else if (n > 0) ranked.forEach((inst, k) => pools[1 + Math.floor((k * n) / ranked.length)].push(inst))
   pools.forEach((pool, castle) => { for (const inst of pool) inst.level = castle })
   return pools.map((pool, castle) => ({ castle, pool }))
+}
+
+/** Every ranked instance carries a site of a ranked castle (1..n). */
+export function usesSites(ranked, n) {
+  return ranked.every((inst) => Number.isInteger(inst.site) && inst.site >= 1 && inst.site <= n)
 }
 
 /** Stars needed in a castle to open the next one: UNLOCK_STARS, independent of its puzzle count. */
