@@ -19,7 +19,7 @@ import { ConsentBannerSpacer } from './ConsentBanner.jsx'
 //     what it is for ("20 stars needed to open next sites", `barHint`) in a small bubble under the
 //     plate while the mouse is over it, it has the focus, or for HINT_MS after a tap;
 //     the castle title, the puzzle count and the "Home" button (the game screen's button
-//     look); "Pick your poison" only where the scene has a place for it (the crypt's lintel).
+//     look); "Vita Colorum" only where the scene has a place for it (the crypt's lintel).
 // A potion's lean, stopper, fill level and rare life (bubbles, an electric flash) come from its
 // puzzle id (workshops.js potionLook), so it looks the same each time. Tapping a potion lifts it
 // up and brings it forward a little (PICK_MS), then the puzzle opens. In the tower a bat passes
@@ -388,7 +388,7 @@ export default function Workshop({ scene, placed, playStates, isSpecial, empty =
   const { stars, required, done } = state
   const share = Math.min(1, stars / required)
   const count = t('home.puzzleCount', { count: placed.length })
-  const choose = t('levelScreen.choose')
+  const choose = t('levelScreen.cryptMotto')   // "Vita Colorum", Latin in every language
   const back = t('levelScreen.back')
   const banner = scene.banner
   const potion = (k) => {
@@ -497,7 +497,7 @@ export default function Workshop({ scene, placed, playStates, isSpecial, empty =
             <text x="212" y="84" fontFamily={TEXT_FONT} fontWeight="700" fontSize="11.5" fill={palette.silverGray}>{count}</text>
           </g>
 
-          {/* "Pick your poison", where the picture has a place for it (the crypt's lintel) */}
+          {/* "Vita Colorum", where the picture has a place for it (the crypt's lintel) */}
           {banner && (
             <text x={banner.x} y={banner.y} textAnchor="middle" pointerEvents="none" fontFamily={GAME_FONT} fontWeight="900"
                   fontSize={fitSize(choose, banner.size, banner.maxW, 0.64)} fill={palette.gameBg}>{choose}</text>

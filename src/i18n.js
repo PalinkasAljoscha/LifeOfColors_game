@@ -10,10 +10,9 @@ export const LANGUAGES = [
   { code: 'fr', label: 'Français' },
 ]
 
-// Start in the browser's language if we have it, otherwise German (the default). Read locally only: the language is
-// never sent anywhere (see src/telemetry/telemetry.js for what is collected).
-const browser = (typeof navigator !== 'undefined' && navigator.language || 'en').slice(0, 2).toLowerCase()
-const initial = LANGUAGES.some((l) => l.code === browser) ? browser : 'de'
+// Always start in German, whatever the browser's language (the player switches with DE / EN / FR on
+// the home screen; the choice is not stored).
+const initial = 'de'
 
 i18n
   .use(initReactI18next)
@@ -36,5 +35,7 @@ const setTitle = () => {
 }
 setTitle()
 i18n.on('languageChanged', setTitle)
+// the page's language follows the chosen one (screen readers, hyphenation)
+i18n.on('languageChanged', (lng) => { if (typeof document !== 'undefined') document.documentElement.lang = lng })
 
 export default i18n

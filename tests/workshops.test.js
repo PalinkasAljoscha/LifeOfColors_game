@@ -21,7 +21,7 @@ test('every scene has its picture, its rail colour and places inside the picture
     }
     if (scene.banner) assert.ok(scene.banner.maxW > 100 && scene.banner.size > 10)
   }
-  assert.equal(WORKSHOPS.filter((s) => s.banner).length, 1, 'only one scene carries the "Pick your poison" line')
+  assert.equal(WORKSHOPS.filter((s) => s.banner).length, 1, 'only one scene carries the "Vita Colorum" motto')
   assert.equal(WORKSHOPS.filter((s) => s.window).length, 1, 'one scene has a window for the bat')
   for (let k = 1; k <= STOPPER_SHADES; k++) assert.ok(palette[`wsWax${k}`] && palette[`wsCloth${k}`], `shade ${k}`)
 })

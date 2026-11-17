@@ -13,7 +13,7 @@
 //             Lying (|rot| > 30, the tower's table): x, y = the middle, rot = the tilt in degrees.
 //   rails     the rack rails: a bar { x, y, w, h } (optionally turned by `a` degrees around cx, cy)
 //             or an arc { arc, x0, x1, y, rise }
-//   banner    where the "Pick your poison" line (levelScreen.choose) sits, or null: only the crypt
+//   banner    where the motto "Vita Colorum" (levelScreen.cryptMotto) sits, or null: only the crypt
 //             has it (on its stone lintel): centre x, baseline y, font size, the widest it may get
 //   flames    [x, y] of candle / lantern flames (drawn live so they can flicker)
 //   window    only the tower: its window, for the bat that passes outside (see there)

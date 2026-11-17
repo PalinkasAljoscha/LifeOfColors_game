@@ -6,11 +6,12 @@ import { Emoji } from './Emoji.jsx'
 
 // Overlays of the special cells on the board box (components/GameScreen.jsx; rules in
 // src/engine/engine.js tap):
-//   BombTicker      the bomb puzzle's warning: one line of grey text between two ⚠️ that passes
+//   IntroTicker     the opening explanation of a bomb, mirror or clock puzzle: one line of grey
+//                   text between two marks (⚠️ bomb, 🪞 mirror, 🕰️ clock, INTRO_MARKS) that passes
 //                   from right to left, visible only between the outer edges of the board's outer
 //                   cells, just above the board (over its top edge when there
-//                   is no room above), BOMB_TICKER_PASSES times, then it is gone. Never takes taps.
-//   SpecialCallout  a speech bubble pointing at a cell: the intro of a mirror puzzle, the
+//                   is no room above), TICKER_PASSES times, then it is gone. Never takes taps.
+//   SpecialCallout  a speech bubble pointing at a cell: the
 //                   first tap on a blocked / clock cell, the bomb's "Oh, careful!" (with a scared
 //                   face popping up and away, 2 s). Never takes taps (pointer-events: none).
 //   BoomOverlay     phase 'exploding': a cartoon starburst with BAM drawn into it (letter shapes, no
@@ -33,15 +34,15 @@ const BAM_LETTERS = [
 ]
 const DUST_DRIFT_S = 40   // seconds for the dust to cross the board once (slowest puffs a bit more)
 
-export const BOMB_TICKER_PASSES = 3
-const TICKER_PASS_MS = 7800      // one pass over the cells' width
+export const TICKER_PASSES = 3
+const TICKER_PASS_MS = 6600      // one pass over the cells' width
 const TICKER_LIFT_EM = 0.3       // the line sits this much higher (about twice a full stop's height)
-const TICKER_MARK = '⚠️'          // at both ends of the line
+export const INTRO_MARKS = { bomb: '⚠️', mirror: '🪞', clock: '🕰️' }   // at both ends of the line
 const TICKER_STILL_MS = 4500     // "reduce motion": the line just stands there this long
 
-/** The bomb warning passing just above the board in `boardRef`, visible exactly between the
- *  board's left and right edges; onDone after the last pass. */
-export function BombTicker({ boardRef, instance, text, onDone }) {
+/** A special puzzle's explanation passing just above the board in `boardRef`, visible only between
+ *  the outer edges of the outer cells, `mark` at both ends; onDone after the last pass. */
+export function IntroTicker({ boardRef, instance, text, mark, onDone }) {
   const ref = useRef(null)
   const [pos, setPos] = useState(null)       // { top, left, width } in the board box: from the left edge of the
                                              // first column's cells to the right edge of the last column's
@@ -76,10 +77,10 @@ export function BombTicker({ boardRef, instance, text, onDone }) {
     <div ref={ref} className="absolute z-20 overflow-hidden pointer-events-none" role="status"
          style={{ top: pos?.top ?? 0, left: pos?.left ?? 0, width: pos?.width ?? '100%', visibility: pos ? 'visible' : 'hidden' }}>
       <p className={`ticker-pass whitespace-nowrap text-lg font-black leading-snug ${still ? 'text-center whitespace-normal px-3' : 'w-max'}`}
-         style={{ color: palette.bombTicker, '--pass-time': `${TICKER_PASS_MS}ms`, '--passes': BOMB_TICKER_PASSES, '--from': `${pos?.width ?? 0}px`,
+         style={{ color: palette.bombTicker, '--pass-time': `${TICKER_PASS_MS}ms`, '--passes': TICKER_PASSES, '--from': `${pos?.width ?? 0}px`,
                   animationPlayState: pos ? 'running' : 'paused' }}
          onAnimationEnd={onDone}>
-        {TICKER_MARK} {text} {TICKER_MARK}
+        {mark} {text} {mark}
       </p>
     </div>
   )

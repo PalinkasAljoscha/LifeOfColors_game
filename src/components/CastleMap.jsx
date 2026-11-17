@@ -25,10 +25,9 @@ import { relax } from './mapLayout.js'
 // Each castle where stars were collected shows its stars in a small badge under it ("★ 12"; not
 // how many are needed -- the training castle: puzzles won / all of them), framed gold, green once
 // done. The places' names are not written on the map (an open place's name is its button's
-// tooltip and aria-label, "Amethyst Hut: 12 stars"). A locked place says what opens it in a small
-// bubble over it -- "Get 20 stars in Amethyst Hut first" (the open place with a path into it; with
-// several, the one with the most stars) -- while the mouse is over it, it has the keyboard focus,
-// or for HINT_MS after a tap.
+// tooltip and aria-label, "Amethyst Hut: 12 stars"). A locked place shows its name (bold) and what
+// opens it -- "Get 20 stars in a preceding place first" -- in a small bubble over it while the
+// mouse is over it, it has the keyboard focus, or for HINT_MS after a tap.
 // Drawing is SVG (decoration only, nothing moves); the places themselves are HTML buttons laid over
 // it.
 // Where a place stands: its row and column (see above), then nudged a little sideways, up or down
@@ -372,13 +371,8 @@ export default function CastleMap({ states, graph, review = false, loadingCastle
             const s = states[i]
             const { x, y } = pos(i)
             const name = siteName(t, i)
-            // a locked place: what opens it -- the stars still to get in the open place that leads
-            // to it (with several, the one where the player has the most)
-            const from = s.unlocked ? null : s.parents.filter((p) => states[p]?.unlocked && !states[p].training)
-              .sort((a, b) => states[b].stars - states[a].stars)[0]
-            const lockedHint = s.unlocked ? null : from !== undefined
-              ? t('castles.lockedHint', { count: states[from].required, name: siteName(t, from) })
-              : t('castles.lockedHintAny', { count: s.required })
+            // a locked place: its name and what opens it ("Get 20 stars in a preceding place first")
+            const lockedHint = s.unlocked ? null : t('castles.lockedHint', { count: s.required })
             const label = s.unlocked
               ? `${name}: ${s.training
                   ? t('castles.progressTraining', { solved: s.solved, required: s.required })
@@ -417,7 +411,8 @@ export default function CastleMap({ states, graph, review = false, loadingCastle
                             left: Math.min(Math.max(x, w / 2 + 4), W - w / 2 - 4), top: y - size * 0.95, width: 'max-content', maxWidth: w,
                             '--tw-ring-color': palette.starGold,
                           }} aria-hidden="true">
-                      {lockedHint}
+                      <span className="block font-black">{name}</span>
+                      <span className="block font-semibold">{lockedHint}</span>
                     </span>
                   )
                 })()}

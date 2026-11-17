@@ -40,7 +40,7 @@
   },
   "levelScreen": {
     "back": "Home",
-    "choose": "Wähle dein Gift",
+    "cryptMotto": "Vita Colorum",
     "intro": "Einführung",
     "start": "Los",
     "days": {
@@ -118,8 +118,7 @@
     "tutorial": "Übungsburg",
     "progressTraining": "{{solved}} von {{required}} Puzzles gelöst",
     "locked": "gesperrt",
-    "lockedHint": "Hole zuerst {{count}} Sterne hier: {{name}}",
-    "lockedHintAny": "Hole zuerst {{count}} Sterne am Ort davor",
+    "lockedHint": "Hole zuerst {{count}} Sterne an einem Ort davor",
     "starsNeeded": "{{count}} Sterne öffnen den nächsten Ort",
     "starsNeededMany": "{{count}} Sterne öffnen die nächsten Orte",
     "nextOpen": "{{name}} ist offen!",
@@ -146,6 +145,7 @@
     "bombCareful": "Oh, Vorsicht!",
     "bombIntro": "Achtung! Eines der Objekte bringt die Bombe zum Explodieren.",
     "bombIntroColors": "Achtung! Eine der Farben bringt die Bombe zum Explodieren.",
-    "mirrorIntro": "Spiegelfelder sind verschränkt: Verwandle eines, und das andere verwandelt sich genauso."
+    "mirrorIntro": "Spiegelfelder sind verschränkt: Verwandle eines, und das andere verwandelt sich genauso.",
+    "clockIntro": "Das Uhrfeld lässt sich nicht antippen: Es dreht sich weiter, sobald du ein anderes Feld verwandelst."
   }
 }

@@ -40,7 +40,7 @@
   },
   "levelScreen": {
     "back": "Home",
-    "choose": "Pick your poison",
+    "cryptMotto": "Vita Colorum",
     "intro": "Introduction",
     "start": "Start",
     "days": {
@@ -118,8 +118,7 @@
     "tutorial": "Training castle",
     "progressTraining": "{{solved}} of {{required}} puzzles won",
     "locked": "locked",
-    "lockedHint": "Get {{count}} stars in {{name}} first",
-    "lockedHintAny": "Get {{count}} stars in the place before it first",
+    "lockedHint": "Get {{count}} stars in a preceding place first",
     "starsNeeded": "{{count}} stars needed to open the next site",
     "starsNeededMany": "{{count}} stars needed to open next sites",
     "nextOpen": "{{name}} is open!",
@@ -146,6 +145,7 @@
     "bombCareful": "Oh, careful!",
     "bombIntro": "Watch out! One of the objects triggers the bomb.",
     "bombIntroColors": "Watch out! One of the colors triggers the bomb.",
-    "mirrorIntro": "Mirror fields are entangled: transform one and the other changes the same way."
+    "mirrorIntro": "Mirror fields are entangled: transform one and the other changes the same way.",
+    "clockIntro": "The clock field can't be tapped: it moves on each time you transform another field."
   }
 }

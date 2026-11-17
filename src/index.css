@@ -200,8 +200,8 @@ body {
   to { transform: translate(calc(-50% + var(--drift)), calc(-50% - var(--drift) * 0.12)); }
 }
 .dust-drift { animation: dustDrift var(--drift-time) linear both; }
-/* The bomb puzzle's warning: a line of text that passes from the board's right edge to its left
-   edge, just above the board, BOMB_TICKER_PASSES times (components/SpecialOverlays.jsx BombTicker;
+/* A bomb / mirror / clock puzzle's explanation: a line of text that passes from the board's right edge to its left
+   edge, just above the board, TICKER_PASSES times (components/SpecialOverlays.jsx IntroTicker;
    --from: the board's width in px). */
 @keyframes tickerPass { from { transform: translateX(var(--from)); } to { transform: translateX(-100%); } }
 .ticker-pass { animation: tickerPass var(--pass-time) linear var(--passes) both; }

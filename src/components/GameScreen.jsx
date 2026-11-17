@@ -12,7 +12,7 @@ import { progressTotals } from '../engine/progress.js'
 import { minMovesOf, starsForWin } from '../engine/stars.js'
 import { drawLook, themedKey } from '../themes.js'
 import { specials } from '../engine/engine.js'
-import { SpecialCallout, BombTicker, BoomOverlay, EXPLOSION_MS } from './SpecialOverlays.jsx'
+import { SpecialCallout, IntroTicker, INTRO_MARKS, BoomOverlay, EXPLOSION_MS } from './SpecialOverlays.jsx'
 import { GOAL_INTRO_LEVELS, GOAL_INTRO_MS } from '../config.js'
 import { INTRO_MS, addObservation, observation } from '../engine/training.js'
 import * as telemetry from '../telemetry/telemetry.js'
@@ -35,29 +35,25 @@ import { SpecialTile, isSpecial } from './LevelScreen.jsx'
 // object blinks on the goal field with a pointing hand -- in the training castle (INTRO_MS; not
 // when its first puzzle opens, TrainingIntro explains the goal there) and in the first
 // GOAL_INTRO_LEVELS levels after it (GOAL_INTRO_MS, src/config.js).
-// Special cells (src/engine/engine.js, components/SpecialOverlays.jsx): a bomb puzzle opens with
-// its warning passing over the screen just above the board, three times (BombTicker; each time the
-// puzzle is opened, not on Retry; taps do not stop it); a mirror puzzle opens with a short callout
-// at the mirror cell (each time it is opened, not on Retry; gone after INTRO_CALLOUT_MS or the
-// first tap); the first tap on a blocked / clock cell (per screen) explains
+// Special cells (src/engine/engine.js, components/SpecialOverlays.jsx): a bomb, mirror or clock
+// puzzle opens with its explanation passing just above the board, three times (IntroTicker; each
+// time the puzzle is opened, not on Retry; taps do not stop it); the first tap on a blocked / clock cell (per screen) explains
 // it; a tap on the bomb shows "Oh, careful!" with a scared face (BOMB_WARN_MS). When the bomb goes
 // off: the explosion (the whole screen shakes, EXPLOSION_MS), then the rubble with a Retry button --
 // the same as the Retry button on top (moves reset; telemetry: the triggering tap was a click that
 // changed nothing, the Retry a restart).
-const INTRO_CALLOUT_MS = 4500
 const TAP_CALLOUT_MS = 3500
 const BOMB_WARN_MS = 2000
 
 export default function GameScreen({ instance, place, training = null, pick, onPickNew, onHome }) {
   const { t } = useTranslation()
   const special = specials(instance)
-  // special cells: the callout on the board ({ key, at, text, emoji, intro, ms }), the bomb's
+  // special cells: the callout on the board ({ key, at, text, emoji, ms }), the bomb's
   // explosion (null | 'exploding' | 'rubble'), and which tap explanations were shown on this screen
-  const [callout, setCallout] = useState(() => {
-    if (special.type === 'mirror') return { key: 0, at: special.mirror[0], text: t('special.mirrorIntro'), intro: true, ms: INTRO_CALLOUT_MS }
-    return null
-  })
-  const [ticker, setTicker] = useState(special.type === 'bomb')   // the bomb warning is still passing
+  const [callout, setCallout] = useState(null)
+  // the opening explanation of a bomb / mirror / clock puzzle is still passing
+  const [ticker, setTicker] = useState(special.type in INTRO_MARKS)
+  const tickerText = { bomb: themedKey('special.bombIntro'), mirror: 'special.mirrorIntro', clock: 'special.clockIntro' }[special.type]
   const calloutKey = useRef(0)
   const [boom, setBoom] = useState(null)
   const explained = useRef(new Set())
@@ -190,7 +186,6 @@ export default function GameScreen({ instance, place, training = null, pick, onP
 
   function onClick({ r, c, changed, board, rule, color }) {
     telemetry.recordClick(r, c, changed, rule, color)
-    if (callout?.intro) setCallout(null)   // the opening callout goes with the first tap
     if (changed) {
       movesRef.current += 1
       setMoves(movesRef.current)
@@ -288,7 +283,8 @@ export default function GameScreen({ instance, place, training = null, pick, onP
                           text={callout.text} emoji={callout.emoji ?? null} look={look} />
         )}
         {ticker && !boom && (
-          <BombTicker boardRef={boardBoxRef} instance={instance} text={t(themedKey('special.bombIntro'))} onDone={() => setTicker(false)} />
+          <IntroTicker boardRef={boardBoxRef} instance={instance} text={t(tickerText)} mark={INTRO_MARKS[special.type]}
+                       onDone={() => setTicker(false)} />
         )}
         {boom && <BoomOverlay phase={boom} onRetry={retry} boardRef={boardBoxRef} instance={instance} />}
         {/* training puzzle 1: the explanations come first; a tap on the board goes to the next one */}

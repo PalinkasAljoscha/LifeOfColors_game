@@ -17,7 +17,7 @@ it has no "edition" tagline.
 | App shell | React 18 (Vite 6) |
 | Board | Phaser 3 (mounted inside a React component) |
 | Styling | Tailwind CSS 3 |
-| Text | i18next / react-i18next (en, de, fr) |
+| Text | i18next / react-i18next (en, de, fr); always starts in German (`src/i18n.js`), whatever the browser says |
 | Rules | `src/engine/engine.js` -- pure JS, shared by the scene and the tests |
 | Telemetry | Supabase (Postgres REST), insert-only, anonymous |
 | Tests | Node's built-in test runner (`npm test`), no extra dependency |
@@ -209,9 +209,8 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   open place's name is its button's tooltip and aria-label); a place only gets a badge "★ stars" (✓ when
   done; framed gold / green; never "/20" -- only the training castle shows "✓ won/all") once stars
   were collected there ("…" while it loads); badges are kept inside the map's width. A locked place
-  says what opens it in a bubble over it, "Get 20 stars in Amethyst Hut first"
-  (`castles.lockedHint`: the open place with a path into it, with several the one with the most
-  stars; `castles.lockedHintAny` when none is open yet): while the mouse is over it or it has the
+  shows its name (bold) and what opens it in a bubble over it, "Get 20 stars in a preceding place
+  first" (`castles.lockedHint`): while the mouse is over it or it has the
   focus, and for `HINT_MS` (2.6 s) after a tap -- so locked places are not `disabled` buttons
   (`aria-disabled`). What covers what (2026-11-13), two rules only: (1) layers, bottom to top: grass, what
   lies flat (fields, ponds), paths, everything that stands up, badges; (2) everything that stands
@@ -268,8 +267,8 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   (`gameBg`) with a few lighter wall stones, plain two-tone shapes in the map's and the game's
   colours, no textures, gradients or outlines (a first, painted version with its own fonts was
   dropped as not coherent with the rest of the app) -- plus, in workshops.js, its potion places
-  (`slots`), rack rails, flame spots and, for the crypt only, where the "Pick your poison" line
-  (`levelScreen.choose`) sits (on its stone lintel; the other scenes have no such line).
+  (`slots`), rack rails, flame spots and, for the crypt only, where the motto "Vita Colorum"
+  (`levelScreen.cryptMotto`, Latin for "life of colours", the same in every language) sits (on its stone lintel; the other scenes have no such line).
   A castle with fewer puzzles than its scene has places (since the level graph: about 18 per
   castle) spreads them over the scene (`spreadSlots`: the slots cut into equal runs, one random slot
   per run, seeded by the castle number, puzzles kept in slot order); every other place shows an
@@ -343,13 +342,13 @@ tests/                    # engine vectors (generated), classic-rule test, catal
     line drawn), current state big at the top, the others small and faded, turning
     counter-clockwise one step per move (`CLOCK_TURN_MS`). On `boom` the scene knocks every cell out
     of line (`_wreck`: shifted, tilted, squeezed, overlapping; stepped, not smooth).
-  - React (`GameScreen.jsx`, `components/SpecialOverlays.jsx`): a bomb puzzle opens with its
-    warning as one line of grey text (`bombTicker`) between two ⚠️ passing from right to left, visible
-    only between the outer edges of the board's outer cells, just above the board (lifted 0.3 em),
-    3 times (`BombTicker`, `BOMB_TICKER_PASSES`, 7.8 s a pass, CSS
+  - React (`GameScreen.jsx`, `components/SpecialOverlays.jsx`): a bomb, mirror or clock puzzle
+    opens with its explanation (`special.bombIntro` / `mirrorIntro` / `clockIntro`) as one line of
+    grey text (`bombTicker`) between two marks (⚠️ / 🪞 / 🕰️, `INTRO_MARKS`) passing from right to
+    left, visible only between the outer edges of the board's outer cells, just above the board
+    (lifted 0.3 em), 3 times (`IntroTicker`, `TICKER_PASSES`, 6.6 s a pass, CSS
     `ticker-pass`; each time opened, not on Retry; taps do not stop it, an explosion does; with
-    "reduce motion" it stands still for 4.5 s) -- no callout; a mirror puzzle opens with a
-    short callout (each time opened, not on Retry; gone after 4.5 s or the first tap); the first tap
+    "reduce motion" it stands still for 4.5 s) -- no opening callouts any more; the first tap
     on a blocked / clock cell per screen explains it; each bomb tap shows "Oh, careful!" with 😱 (2 s);
     an explosion = cartoon starburst with BAM drawn into it as letter shapes (SVG paths
     `BAM_LETTERS`, no font, the same in every language; each letter tilted and sized differently),

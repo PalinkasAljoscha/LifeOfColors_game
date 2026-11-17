@@ -49,8 +49,9 @@ test('every level has its own name, in every language', () => {
     // no level number, no "/ required" any more
     assert.equal(loc.castles.name, undefined)
     assert.equal(loc.castles.progress, undefined)
-    assert.match(loc.castles.lockedHint, /\{\{count\}\}.*\{\{name\}\}/)
-    assert.match(loc.castles.lockedHintAny, /\{\{count\}\}/)
+    assert.match(loc.castles.lockedHint, /\{\{count\}\}/)
+    assert.equal(loc.levelScreen.cryptMotto, 'Vita Colorum', 'the crypt motto is Latin in every language')
+    assert.ok(loc.special.mirrorIntro && loc.special.clockIntro && loc.special.bombIntro)
   }
   // the lists run out and start again
   const en = (key) => key.split('.').reduce((o, k) => o?.[k], locales[0])

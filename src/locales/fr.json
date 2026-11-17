@@ -40,7 +40,7 @@
   },
   "levelScreen": {
     "back": "Accueil",
-    "choose": "Choisis ton poison",
+    "cryptMotto": "Vita Colorum",
     "intro": "Introduction",
     "start": "Jouer",
     "days": {
@@ -118,8 +118,7 @@
     "tutorial": "Château d’entraînement",
     "progressTraining": "{{solved}} puzzles résolus sur {{required}}",
     "locked": "verrouillé",
-    "lockedHint": "Gagne d’abord {{count}} étoiles ici : {{name}}",
-    "lockedHintAny": "Gagne d’abord {{count}} étoiles dans le lieu précédent",
+    "lockedHint": "Gagne d’abord {{count}} étoiles dans un lieu précédent",
     "starsNeeded": "{{count}} étoiles pour ouvrir le lieu suivant",
     "starsNeededMany": "{{count}} étoiles pour ouvrir les lieux suivants",
     "nextOpen": "{{name}} : ouvert !",
@@ -146,6 +145,7 @@
     "bombCareful": "Oh, attention !",
     "bombIntro": "Attention ! L'un des objets fait exploser la bombe.",
     "bombIntroColors": "Attention ! L'une des couleurs fait exploser la bombe.",
-    "mirrorIntro": "Les cases miroirs sont intriquées : transforme l'une, et l'autre change de la même façon."
+    "mirrorIntro": "Les cases miroirs sont intriquées : transforme l'une, et l'autre change de la même façon.",
+    "clockIntro": "La case horloge ne se touche pas : elle avance chaque fois que tu transformes une autre case."
   }
 }
