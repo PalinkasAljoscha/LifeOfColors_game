@@ -160,6 +160,9 @@ export default function App() {
         pick={game.pick}
         onPickNew={leaveGame}
         onHome={() => { leaveGame(); setCastle(null) }}
+        // still locked places this castle leads to: reaching its stars here opens (some of) them
+        canUnlock={castle !== null && !!states?.[castle]?.unlocked && !states[castle].training
+          && (states[castle].children ?? []).some((c) => !states[c]?.unlocked)}
       />
     )
   }

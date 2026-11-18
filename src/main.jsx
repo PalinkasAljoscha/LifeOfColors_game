@@ -3,6 +3,8 @@ import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
 import './i18n.js'
 import './index.css'
+// the crypt motto's Roman capitals: bundled with the app (never loaded from another server)
+import '@fontsource/cinzel/latin-700.css'
 import { activeTheme, cursorCss } from './themes.js'
 import { palette } from './theme.js'
 import { initProgress } from './engine/progress.js'

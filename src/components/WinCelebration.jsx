@@ -14,6 +14,10 @@ import { palette } from '../theme.js'
 //            stars that sparkle (twinkle, with rotating glints) before they fade
 //   'stars'  any other win outside the training castle
 //   'text'   only the result box -- training puzzles (and reduced motion)
+// unlocked (this win brought the castle to its 20 stars and opens new places): a copper plate -- the
+// workshop plate's copper, the potions' medal colours -- comes down on two chains from the top of the
+// screen over the board's upper part, swings a little and says "New places unlocked!"; it goes up
+// again at the end (UNLOCK_AT .. doneAt; with reduced motion it just hangs there).
 // Then onDone(): the board stays as it is (the scene takes no more taps after a win); the player
 // goes on with Retry or Back. Everything is random within limits, drawn once per win.
 const STAR_MS = 2700        // one star's life: pop, brighten, turn white, evaporate
@@ -24,6 +28,49 @@ const TEXT_AT = 600
 const TEXT_MS = 2900
 const DONE_AT = Math.max(TEXT_AT + TEXT_MS, 900 + SPARKLE_MS) + 100
 const TEXT_ONLY_MS = 2600   // 'text': how long the result box stays
+const UNLOCK_AT = 700       // unlocked: the copper plate starts to come down
+const UNLOCK_DONE_AT = 5600 // ... and the whole animation lasts at least this long
+const PLATE_W = 250, PLATE_H = 84, LINK = 9   // the plate (px) and one chain link's length
+const GAME_FONT = '"Arial Black", Arial, sans-serif'
+
+// The copper plate on its two chains, hanging `drop` px below the top of the screen (the chains'
+// length); drawn like the workshop's plate (medal gradient, edge, inner ring, rivets).
+function UnlockPlate({ drop, text }) {
+  const W = PLATE_W, H = PLATE_H, top = drop
+  const links = Math.ceil(top / LINK) + 1
+  const chain = (x) => Array.from({ length: links }, (_, k) => {
+    const y = top - (k + 0.5) * LINK
+    return k % 2 === 0
+      ? <ellipse key={k} cx={x} cy={y} rx="2.6" ry={LINK * 0.62} fill="none" stroke={palette.wsMedalLo} strokeWidth="1.6" />
+      : <rect key={k} x={x - 0.9} y={y - LINK * 0.6} width="1.8" height={LINK * 1.2} rx="0.9" fill={palette.wsMedalMid} />
+  })
+  // the text in one or two lines (split at the space nearest the middle), as big as fits
+  const spaces = [...text.matchAll(/ /g)].map((m) => m.index)
+  const cut = spaces.sort((a, b) => Math.abs(a - text.length / 2) - Math.abs(b - text.length / 2))[0]
+  const lines = cut === undefined ? [text] : [text.slice(0, cut), text.slice(cut + 1)]
+  const longest = Math.max(...lines.map((l) => l.length))
+  const size = Math.min(lines.length > 1 ? 23 : 21, (W - 30) / (longest * 0.7))
+  return (
+    <svg width={W} height={top + H + 4} viewBox={`0 0 ${W} ${top + H + 4}`} aria-hidden="true" style={{ overflow: 'visible' }}>
+      <defs>
+        <radialGradient id="win-plate" cx="0.35" cy="0.3" r="0.8">
+          <stop offset="0" stopColor={palette.wsMedalHi} />
+          <stop offset="0.5" stopColor={palette.wsMedalMid} />
+          <stop offset="1" stopColor={palette.wsMedalLo} />
+        </radialGradient>
+      </defs>
+      {chain(30)}{chain(W - 30)}
+      <rect x="0" y={top + 2} width={W} height={H} rx="10" fill={palette.overlayBlack} opacity="0.45" />
+      <rect x="0" y={top} width={W} height={H} rx="10" fill="url(#win-plate)" stroke={palette.wsMedalEdge} strokeWidth="1.2" />
+      <rect x="4" y={top + 4} width={W - 8} height={H - 8} rx="7" fill="none" stroke={palette.wsMedalRing} strokeOpacity="0.7" strokeWidth="0.8" />
+      {[30, W - 30].map((x) => <circle key={x} cx={x} cy={top + 9} r="3" fill={palette.wsMedalRing} stroke={palette.wsMedalEdge} strokeWidth="0.8" />)}
+      <text x={W / 2} y={top + H / 2 + 3 + size * 0.36 - ((lines.length - 1) * size * 1.15) / 2} textAnchor="middle"
+            fontFamily={GAME_FONT} fontWeight="900" fontSize={size} fill={palette.wsMedalInk}>
+        {lines.map((l, k) => <tspan key={k} x={W / 2} dy={k ? size * 1.15 : 0}>{l}</tspan>)}
+      </text>
+    </svg>
+  )
+}
 
 const rnd = (a, b) => a + Math.random() * (b - a)
 const reducedMotion = () => typeof window !== 'undefined' &&
@@ -56,11 +103,11 @@ function Glint({ size }) {
 /** training: null or { day, complete, next }; moves, best (null = unknown), stars (1-5 or null),
  *  newBest. */
 export default function WinCelebration({ boardRef, training = null, moves, best = null, stars = null,
-                                         newBest = false, onDone }) {
+                                         newBest = false, unlocked = false, onDone }) {
   const { t } = useTranslation()
   const [mode] = useState(() => winMode({ training, stars, reduced: reducedMotion() }))
   const still = mode === 'text'
-  const doneAt = still ? TEXT_ONLY_MS : DONE_AT
+  const doneAt = unlocked ? Math.max(UNLOCK_DONE_AT, still ? TEXT_ONLY_MS : DONE_AT) : still ? TEXT_ONLY_MS : DONE_AT
   const [board, setBoard] = useState(null)   // the board's rect in page px
   const doneRef = useRef(onDone)
   doneRef.current = onDone
@@ -141,6 +188,19 @@ export default function WinCelebration({ boardRef, training = null, moves, best 
           </span>
         )
       })}
+
+      {/* new places unlocked: the copper plate comes down on its chains over the board's upper part */}
+      {unlocked && board && (() => {
+        const drop = Math.max(24, board.top + Math.min(board.height * 0.06, 24))
+        return (
+          <div className={reducedMotion() ? 'absolute' : 'absolute win-plate'}
+               style={{ left: board.left + board.width / 2 - PLATE_W / 2, top: 0,
+                        '--rise': `${-(drop + PLATE_H + 12)}px`, animationDelay: `${UNLOCK_AT}ms`,
+                        animationDuration: `${doneAt - UNLOCK_AT}ms` }}>
+            <UnlockPlate drop={drop} text={t('win.unlocked')} />
+          </div>
+        )
+      })()}
 
       {/* 4. the result, centred on the board */}
       {board && (

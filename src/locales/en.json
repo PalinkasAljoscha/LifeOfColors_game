@@ -18,6 +18,7 @@
     "retry": "Retry",
     "back": "Back",
     "home": "Home",
+    "backTo": "Back to {{name}}",
     "moves_one": "{{count}} move",
     "moves_other": "{{count}} moves",
     "best": "Best: {{count}}"
@@ -36,10 +37,12 @@
     "trainingComplete": "Training Complete",
     "trainingReady": "You are ready for the journey now.",
     "trainingNext": "{{castle}} is waiting.",
-    "startJourney": "Start journey"
+    "startJourney": "Start journey",
+    "unlocked": "New places unlocked!"
   },
   "levelScreen": {
-    "back": "Home",
+    "back": "Map",
+    "level": "Level {{n}}",
     "cryptMotto": "Vita Colorum",
     "intro": "Introduction",
     "start": "Start",

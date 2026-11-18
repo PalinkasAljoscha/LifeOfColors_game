@@ -8,7 +8,9 @@ import NotebookOpen, { NotebookPeek } from './TrainingNotes.jsx'
 import NoteFlight from './NoteFlight.jsx'
 import TrainingIntro, { INTRO_STEPS } from './TrainingIntro.jsx'
 import { markSolved } from '../engine/catalog.js'
-import { progressTotals } from '../engine/progress.js'
+import { castleStars, progressTotals } from '../engine/progress.js'
+import { UNLOCK_STARS } from '../config.js'
+import { siteFor } from '../sites.js'
 import { minMovesOf, starsForWin } from '../engine/stars.js'
 import { drawLook, themedKey } from '../themes.js'
 import { specials } from '../engine/engine.js'
@@ -45,7 +47,11 @@ import { SpecialTile, isSpecial } from './LevelScreen.jsx'
 const TAP_CALLOUT_MS = 3500
 const BOMB_WARN_MS = 2000
 
-export default function GameScreen({ instance, place, training = null, pick, onPickNew, onHome }) {
+// The pictures of the places (sites.js): the Back button shows the place the puzzle belongs to.
+const SITE_PICTURES = import.meta.glob(['../assets/sites/*.svg', '!../assets/sites/*-land.svg', '!../assets/sites/*-locked.svg'],
+  { eager: true, import: 'default' })
+
+export default function GameScreen({ instance, place, training = null, pick, onPickNew, onHome, canUnlock = false }) {
   const { t } = useTranslation()
   const special = specials(instance)
   // special cells: the callout on the board ({ key, at, text, emoji, ms }), the bomb's
@@ -210,8 +216,11 @@ export default function GameScreen({ instance, place, training = null, pick, onP
     const stars = starsForWin(movesRef.current, minMoves)
     const allWon = () => training !== null && progressTotals(training.ids).solved === training.ids.length
     const wasComplete = allWon()
+    const before = castleStars(instance.level)
     const saved = markSolved(instance, stars)              // best rating per puzzle (engine/progress.js)
-    setResult({ stars, ...saved, trainingComplete: !wasComplete && allWon() })
+    // this win brought the castle's stars to UNLOCK_STARS: new places open (the copper plate)
+    const unlocked = canUnlock && before < UNLOCK_STARS && castleStars(instance.level) >= UNLOCK_STARS
+    setResult({ stars, ...saved, trainingComplete: !wasComplete && allWon(), unlocked })
     // Short pause so the player sees the goal cell change before the animation starts. After it the
     // board stays as it is (the scene takes no more taps); Retry or Back go on.
     winTimer.current = setTimeout(() => setWon(true), 400)
@@ -220,7 +229,17 @@ export default function GameScreen({ instance, place, training = null, pick, onP
 
   return (
     <div className={`h-[100dvh] w-full flex flex-col bg-game-bg safe-pad${boom === 'exploding' ? ' boom-shake' : ''}`}>
-      <div className="mx-auto w-full max-w-md flex gap-3">
+      <div className="mx-auto w-full max-w-md flex gap-2">
+        {/* 🗺️: back to the home screen's map */}
+        <button
+          onClick={() => leave(onHome, 'home')}
+          className="w-14 h-16 rounded-2xl bg-game-panel border-2 border-white/15 active:scale-95 transition-transform
+                     flex items-center justify-center text-3xl shrink-0"
+          aria-label={t('levelScreen.back')}
+          title={t('levelScreen.back')}
+        >
+          <span aria-hidden="true">🗺️</span>
+        </button>
         <button
           onClick={retry}
           className="flex-1 h-16 rounded-2xl bg-game-btn hover:bg-game-btn-hover active:scale-95 transition-transform
@@ -228,12 +247,16 @@ export default function GameScreen({ instance, place, training = null, pick, onP
         >
           <span aria-hidden="true">↻</span> {t('game.retry')}
         </button>
+        {/* back to the puzzle's place (its workshop): the place's picture */}
         <button
           onClick={() => leave(onPickNew, 'back')}
-          className="w-24 h-16 rounded-2xl bg-game-panel border-2 border-white/15 active:scale-95 transition-transform
-                     text-lg font-black flex items-center justify-center gap-1.5"
+          className="w-20 h-16 rounded-2xl bg-game-panel border-2 border-white/15 active:scale-95 transition-transform
+                     flex items-center justify-center overflow-hidden shrink-0"
+          aria-label={place ? t('game.backTo', { name: place }) : t('game.back')}
+          title={place ? t('game.backTo', { name: place }) : t('game.back')}
         >
-          <span aria-hidden="true">←</span> {t('game.back')}
+          <img src={SITE_PICTURES[`../assets/sites/${siteFor(instance.level ?? 0)}.svg`]} alt="" draggable="false"
+               className="h-[4.8rem] w-auto max-w-none mt-1.5" />
         </button>
         {/* Info: the rules pop-up ("How it works") */}
         <button
@@ -312,6 +335,7 @@ export default function GameScreen({ instance, place, training = null, pick, onP
         <WinCelebration key={round} boardRef={boardBoxRef}
                         training={training && { day: training.day, next: training.next, complete: result?.trainingComplete === true }}
                         moves={moves} best={minMoves} stars={result?.stars ?? null} newBest={result?.newBest ?? false}
+                        unlocked={result?.unlocked === true}
                         onDone={() => setWon(false)} />
       )}
     </div>

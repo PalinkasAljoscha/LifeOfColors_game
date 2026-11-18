@@ -18,6 +18,7 @@
     "retry": "Rejouer",
     "back": "Retour",
     "home": "Accueil",
+    "backTo": "Retour à {{name}}",
     "moves_one": "{{count}} coup",
     "moves_other": "{{count}} coups",
     "best": "Record : {{count}}"
@@ -36,10 +37,12 @@
     "trainingComplete": "Entraînement terminé",
     "trainingReady": "Tu es prêt pour le voyage.",
     "trainingNext": "{{castle}} t’attend.",
-    "startJourney": "Commencer le voyage"
+    "startJourney": "Commencer le voyage",
+    "unlocked": "Nouveaux lieux débloqués !"
   },
   "levelScreen": {
-    "back": "Accueil",
+    "back": "Carte",
+    "level": "Niveau {{n}}",
     "cryptMotto": "Vita Colorum",
     "intro": "Introduction",
     "start": "Jouer",

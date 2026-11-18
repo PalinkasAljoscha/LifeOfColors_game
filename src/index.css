@@ -89,6 +89,19 @@ body {
   25%  { opacity: 0.75; }
   100% { transform: translateY(-80px) scale(2.3); opacity: 0; }
 }
+/* new places unlocked: the copper plate comes down on its chains, swings to rest, and goes up at the end
+   (WinCelebration; --rise = how far up it starts, above the screen) */
+.win-plate { transform-origin: 50% 0; animation-name: winPlate; animation-timing-function: linear; animation-fill-mode: both; }
+@keyframes winPlate {
+  0%   { transform: translateY(var(--rise)) rotate(0deg); animation-timing-function: cubic-bezier(0.3, 0.7, 0.4, 1); }
+  20%  { transform: translateY(0) rotate(0deg); animation-timing-function: ease-in-out; }
+  27%  { transform: translateY(0) rotate(1.6deg); animation-timing-function: ease-in-out; }
+  34%  { transform: translateY(0) rotate(-1deg); animation-timing-function: ease-in-out; }
+  41%  { transform: translateY(0) rotate(0.4deg); animation-timing-function: ease-in-out; }
+  48%  { transform: translateY(0) rotate(0deg); }
+  88%  { transform: translateY(0) rotate(0deg); animation-timing-function: ease-in; }
+  100% { transform: translateY(var(--rise)) rotate(0deg); }
+}
 .win-text { animation-name: winText; animation-timing-function: ease-out; animation-fill-mode: both; }
 @keyframes winText {
   0%   { transform: scale(0.8); opacity: 0; }
@@ -239,4 +252,13 @@ body {
   from { transform: translateY(0) scale(1); filter: drop-shadow(0 0 0 rgb(0 0 0 / 0)); }
   to   { transform: translateY(-7px) scale(1.1); filter: drop-shadow(0 5px 4px rgb(0 0 0 / 0.45)); }
 }
-@media (prefers-reduced-motion: reduce) { .ws-press { transition: none; } .ws-lifted { animation: none; } }
+/* ... and its stopper comes off: starts a little after the lift, pulled up along the neck with a
+   small twist, gone shortly before the puzzle opens (PICK_MS 520). */
+.ws-unstop { transform-box: fill-box; transform-origin: 50% 100%; animation: ws-unstop 340ms ease-in 110ms forwards; }
+@keyframes ws-unstop {
+  0%   { transform: translateY(0) rotate(0); opacity: 1; }
+  25%  { transform: translateY(-2px) rotate(-6deg); opacity: 1; }
+  70%  { transform: translateY(-13px) rotate(9deg); opacity: 1; }
+  100% { transform: translateY(-19px) rotate(14deg); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .ws-press { transition: none; } .ws-lifted, .ws-unstop { animation: none; } }

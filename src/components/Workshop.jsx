@@ -18,8 +18,8 @@ import { ConsentBannerSpacer } from './ConsentBanner.jsx'
 //     ink): the castle's stars (no "/ required") over a bar towards the next castle; the bar says
 //     what it is for ("20 stars needed to open next sites", `barHint`) in a small bubble under the
 //     plate while the mouse is over it, it has the focus, or for HINT_MS after a tap;
-//     the castle title, the puzzle count and the "Home" button (the game screen's button
-//     look); "Vita Colorum" only where the scene has a place for it (the crypt's lintel).
+//     the castle title, "Level n" under it and the 🗺️ button back to the map (the game
+//     screen's button look); "Vita Colorum" only where the scene has a place for it (the crypt's lintel).
 // A potion's lean, stopper, fill level and rare life (bubbles, an electric flash) come from its
 // puzzle id (workshops.js potionLook), so it looks the same each time. Tapping a potion lifts it
 // up and brings it forward a little (PICK_MS), then the puzzle opens. In the tower a bat passes
@@ -33,12 +33,65 @@ const pictureOf = (key) => PICTURES[`../assets/workshops/${key}.svg`]
 const GAME_FONT = '"Arial Black", Arial, sans-serif'     // the app's font (tailwind font-game)
 const TEXT_FONT = 'Arial, sans-serif'
 const MEDAL_SCALE = 1.6
-const PICK_MS = 420          // how long a tapped potion lifts and comes forward before its puzzle opens
+const PICK_MS = 520          // a tapped potion lifts (420 ms) and is unstoppered, then its puzzle opens
+const MOTTO_FONT = 'Cinzel, "Times New Roman", serif'   // Roman inscription capitals (bundled, @fontsource/cinzel)
 
 const HINT_MS = 2600         // how long the bar's hint stays after a tap
 const STAR = 'M0,-1 L0.29,-0.31 L0.95,-0.31 L0.42,0.12 L0.59,0.81 L0,0.42 L-0.59,0.81 L-0.42,0.12 L-0.95,-0.31 L-0.29,-0.31 Z'
 const TUBE = 'M-9.6,-72 V-9.6 A9.6,9.6 0 0 0 9.6,-9.6 V-72'
 const FLASK = 'M-5,-70 V-37.6 A19.4,19.4 0 1 0 5,-37.6 V-70'
+
+// Small deterministic random numbers (the motto's wear looks the same every visit).
+function rng(seed) {
+  let s = seed >>> 0
+  return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296 }
+}
+
+/** The wear of the crypt's motto: scratches and chipped holes around (x, y) over a w x h box. */
+function mottoWear(x, y, w, h) {
+  const r = rng(1729)
+  const scratches = Array.from({ length: 9 }, () => {
+    const cx = x - w / 2 + r() * w, cy = y - h * 0.8 + r() * h * 0.9, len = 6 + r() * 16
+    const a = ((-35 + r() * 70) * Math.PI) / 180, dx = (Math.cos(a) * len) / 2, dy = (Math.sin(a) * len) / 2
+    const bend = (r() - 0.5) * 3
+    return { d: `M${(cx - dx).toFixed(1)},${(cy - dy).toFixed(1)} Q${(cx - dy * 0.2 + bend).toFixed(1)},${(cy + dx * 0.2 + bend).toFixed(1)} ${(cx + dx).toFixed(1)},${(cy + dy).toFixed(1)}`,
+      w: 0.5 + r() * 0.9 }
+  })
+  const holes = Array.from({ length: 14 }, () => ({
+    cx: x - w / 2 + r() * w, cy: y - h * 0.75 + r() * h * 0.8, rx: 0.6 + r() * 1.6, ry: 0.5 + r() * 1.1, rot: r() * 180,
+  }))
+  return { scratches, holes }
+}
+
+// The crypt's motto, carved into its stone lintel and worn: dark grey Roman capitals with a pale lower
+// edge (the cut catches the light), rough edges and patches where the paint is gone (filter), a few
+// scratches and chipped holes (mask). Still -- nothing moves.
+function Motto({ banner, text }) {
+  const size = fitSize(text, banner.size, banner.maxW, 0.8)
+  const { scratches, holes } = useMemo(() => mottoWear(banner.x, banner.y, banner.maxW * 0.8, size * 1.1), [banner, size])
+  const box = { x: banner.x - banner.maxW / 2 - 10, y: banner.y - size * 1.6, width: banner.maxW + 20, height: size * 2.2 }
+  return (
+    <g pointerEvents="none">
+      <filter id="ws-motto-worn" x="-10%" y="-40%" width="120%" height="180%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="1" seed="3" result="fine" />
+        <feDisplacementMap in="SourceGraphic" in2="fine" scale="0.7" xChannelSelector="R" yChannelSelector="G" result="rough" />
+        <feTurbulence type="fractalNoise" baseFrequency="0.22 0.4" numOctaves="2" seed="11" result="noise" />
+        <feColorMatrix in="noise" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -14 0 0 0 9.1" result="keep" />
+        <feComposite in="rough" in2="keep" operator="in" />
+      </filter>
+      <mask id="ws-motto-wear" maskUnits="userSpaceOnUse" {...box}>
+        <rect {...box} fill={palette.white} />
+        {scratches.map((s, k) => <path key={k} d={s.d} stroke={palette.overlayBlack} strokeWidth={s.w} fill="none" strokeLinecap="round" />)}
+        {holes.map((h, k) => <ellipse key={k} cx={h.cx} cy={h.cy} rx={h.rx} ry={h.ry} transform={`rotate(${h.rot} ${h.cx} ${h.cy})`} fill={palette.overlayBlack} />)}
+      </mask>
+      <g mask="url(#ws-motto-wear)" filter="url(#ws-motto-worn)" textAnchor="middle" fontFamily={MOTTO_FONT} fontWeight="700"
+         fontSize={size} letterSpacing={size * 0.115}>
+        <text x={banner.x} y={banner.y + 0.9} fill={palette.wsMottoLight} fillOpacity="0.55" aria-hidden="true">{text.toUpperCase()}</text>
+        <text x={banner.x} y={banner.y} fill={palette.wsMotto}>{text.toUpperCase()}</text>
+      </g>
+    </g>
+  )
+}
 
 const reducedMotion = () => typeof window !== 'undefined' &&
   Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)
@@ -230,7 +283,8 @@ function Potion({ slot, look, colour, special, state, best, glowId, moving, floa
           <path d="M6.4,-60 V-30" stroke={palette.white} strokeOpacity="0.16" strokeWidth="1" strokeLinecap="round" />
           <ellipse cx="0" cy="-72" rx="10.8" ry="2.4" fill={palette.wsGlassDark} fillOpacity="0.5" stroke={palette.wsGlass} strokeOpacity="0.7" strokeWidth="1.1" />
         </>}
-        {corked ? <Stopper look={look} cw={cw} top={top} /> : (moving && [0, 1].map(puff))}
+        {/* picked: the stopper comes off while the potion lifts (CSS ws-unstop, starts a little later) */}
+        {corked ? <g className={picked ? 'ws-unstop' : undefined}><Stopper look={look} cw={cw} top={top} /></g> : (moving && [0, 1].map(puff))}
         {state === 'solved' && <>
           <path d={`M${special ? -5 : -9.6},${neck - 7} L0,${neck} L${special ? 5 : 9.6},${neck - 7}`} fill="none" stroke={palette.wsMedalString} strokeWidth="0.9" />
           <Medal y={neck + 3} best={best} turn={angle} />
@@ -387,7 +441,7 @@ export default function Workshop({ scene, placed, playStates, isSpecial, empty =
   const picture = pictureOf(scene.key)
   const { stars, required, done } = state
   const share = Math.min(1, stars / required)
-  const count = t('home.puzzleCount', { count: placed.length })
+  const levelLine = t('levelScreen.level', { n: state.castle })
   const choose = t('levelScreen.cryptMotto')   // "Vita Colorum", Latin in every language
   const back = t('levelScreen.back')
   const banner = scene.banner
@@ -457,8 +511,11 @@ export default function Workshop({ scene, placed, playStates, isSpecial, empty =
             <rect x="16" y="40" width="112" height="58" rx="8" fill="url(#ws-medal)" stroke={palette.wsMedalEdge} strokeWidth="1" />
             <rect x="19.5" y="43.5" width="105" height="51" rx="5.5" fill="none" stroke={palette.wsMedalRing} strokeOpacity="0.7" strokeWidth="0.6" />
             <g role="img" aria-label={`★ ${stars}`}>
-              <path d={STAR} transform="translate(54,63) scale(11)" fill={palette.wsMedalInk} />
-              <text x="86" y="71" fontFamily={GAME_FONT} fontWeight="900" fontSize="21" fill={palette.wsMedalInk}>{stars}</text>
+              {/* 20 stars reached: star and number turn gold (the bar stays gold, never green) */}
+              <path d={STAR} transform="translate(54,63) scale(11)" fill={done ? palette.starGold : palette.wsMedalInk}
+                    stroke={done ? palette.wsMedalInk : 'none'} strokeWidth={done ? 0.09 : 0} />
+              <text x="86" y="71" fontFamily={GAME_FONT} fontWeight="900" fontSize="21" fill={done ? palette.starGold : palette.wsMedalInk}
+                    stroke={done ? palette.wsMedalInk : 'none'} strokeWidth={done ? 1.1 : 0} paintOrder="stroke">{stars}</text>
             </g>
             <g className={barHint ? 'ws-bar' : undefined} tabIndex={barHint ? 0 : undefined} role="img" aria-label={barHint ?? undefined}
                onPointerEnter={barHint ? (e) => { if (e.pointerType === 'mouse') showHint() } : undefined}
@@ -466,7 +523,7 @@ export default function Workshop({ scene, placed, playStates, isSpecial, empty =
                onFocus={barHint ? () => showHint() : undefined} onBlur={barHint ? hideHint : undefined}
                onClick={barHint ? () => showHint(HINT_MS) : undefined}>
               <rect x="28" y="80" width="88" height="6" rx="3" fill={palette.wsMedalLo} />
-              <rect x="28" y="80" width={88 * share} height="6" rx="3" fill={done ? palette.correctGreen : palette.starGold} />
+              <rect x="28" y="80" width={88 * share} height="6" rx="3" fill={palette.starGold} />
               {/* the bar's tap / hover area: the plate's lower part */}
               <rect x="20" y="74" width="104" height="20" fill={palette.white} fillOpacity="0" />
               <rect className="ws-focus" x="22" y="75" width="100" height="16" rx="6" fill="none" stroke={palette.white} strokeWidth="1.5" />
@@ -484,24 +541,23 @@ export default function Workshop({ scene, placed, playStates, isSpecial, empty =
             })()}
           </g>
 
-          {/* "Home": the game screen's rounded button */}
+          {/* "Home" (🗺️, back to the map): the game screen's rounded button */}
           <g className="ws-sign" role="button" tabIndex={0} aria-label={back} {...activate(onBack)}>
             <rect x="296" y="42" width="80" height="44" rx="14" fill={palette.panel} stroke={palette.white} strokeOpacity="0.15" strokeWidth="2" />
-            <text x="336" y="69.6" textAnchor="middle" fontFamily={GAME_FONT} fontWeight="900" fontSize={fitSize(back, 15, 66, 0.68)} fill={palette.white}>{back}</text>
+            <title>{back}</title>
+            {/* the map: back to the home screen's map */}
+            <text x="336" y="73.5" textAnchor="middle" fontSize="25" aria-hidden="true">🗺️</text>
             <rect className="ws-focus" x="293" y="39" width="86" height="50" rx="16" fill="none" stroke={palette.white} strokeWidth="2" />
           </g>
 
-          {/* castle title and puzzle count */}
+          {/* castle title and its level number */}
           <g textAnchor="middle" pointerEvents="none">
             <text x="212" y="66" fontFamily={GAME_FONT} fontWeight="900" fontSize={fitSize(title, 23, 160, 0.66)} fill={palette.white} role="heading" aria-level="1">{title}</text>
-            <text x="212" y="84" fontFamily={TEXT_FONT} fontWeight="700" fontSize="11.5" fill={palette.silverGray}>{count}</text>
+            <text x="212" y="84" fontFamily={TEXT_FONT} fontWeight="700" fontSize="11.5" fill={palette.silverGray}>{levelLine}</text>
           </g>
 
           {/* "Vita Colorum", where the picture has a place for it (the crypt's lintel) */}
-          {banner && (
-            <text x={banner.x} y={banner.y} textAnchor="middle" pointerEvents="none" fontFamily={GAME_FONT} fontWeight="900"
-                  fontSize={fitSize(choose, banner.size, banner.maxW, 0.64)} fill={palette.gameBg}>{choose}</text>
-          )}
+          {banner && <Motto banner={banner} text={choose} />}
         </svg>
       </div>
       <ConsentBannerSpacer nudge={nudging} />

@@ -70,6 +70,10 @@ export const palette = {
   blockedFill:     '#0e0e18',   // blocked cell: an out-of-bounds hole ...
   blockedBorder:   '#2a2a3c',
   blockedHatch:    '#34344a',   // ... with diagonal hatching
+  bombScorch:      '#0b0909',   // the bomb cell after the explosion: black burn traces ...
+  bombSoot:        '#1d1716',   // ... the soot around them ...
+  bombAsh:         '#6a5f57',   // ... on burnt, ash-grey ground (so the black shows)
+  bombAshEdge:     '#3b322d',
   bombFill:        '#24161a',   // bomb cell
   bombBorder:      '#6b2f2f',
   mirrorLink:      '#8fe3ff',   // frame around both mirror cells, their tint and the line between them
@@ -172,6 +176,8 @@ export const palette = {
   wsMedalRing:      '#f6c996',
   wsMedalInk:       '#2f1405',
   wsMedalString:    '#d9c7a4',
+  wsMotto:          '#2c2e33',   // the crypt's carved motto: dark grey ...
+  wsMottoLight:     '#a3a7b0',   // ... and the pale lower edge of the cut
   wsBat:            '#14111a',   // the bat passing the tower window
 }
 

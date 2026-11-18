@@ -137,7 +137,9 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   map says so; the training castle's own order still applies).
 - **Start cell switch** -- `src/config.js` `HIDE_START_CELL_IF_NOT_REQUIRED`: puzzles with
   `start_cell_required: false` start all-uncolored (`src/game/startBoard.js`); same id either way.
-- **Game screen** -- top row: Retry, Back, and an info button (circled "i") that opens the
+- **Game screen** -- top row (2026-11-18): 🗺️ (home: back to the map, telemetry reason 'home'),
+  Retry, Back -- the picture of the puzzle's place (`sites.js` `siteFor(instance.level)`, its open
+  `<site>.svg`; aria-label "Back to <name>", `game.backTo`) -- and an info button (circled "i") that opens the
   rules pop-up (RulesDialog, "How it works"). Below: puzzle name and the moves counter only. No
   goal / rules line under the board; in training the notebook peek starts right at the board's
   lower edge and reaches the screen bottom: the board box takes the board's aspect ratio, the free
@@ -180,6 +182,12 @@ tests/                    # engine vectors (generated), classic-rule test, catal
     (`winSparkle1-5`) that twinkle with glints before they fade;
   - `text` (training castle, or reduced motion): only the result box.
   No shake, no lightning (both tried and dropped).
+  **New places unlocked** (2026-11-18): when a win brings the castle's star counter to
+  `UNLOCK_STARS` (it was below before) and the castle leads to a place that is still locked (App
+  `canUnlock`), a copper plate in the workshop plate's copper (medal gradient, edge, ring, rivets)
+  comes down on two chains from the top of the screen over the board's upper part, swings to rest,
+  says "New places unlocked!" (`win.unlocked`) and goes up again at the end (CSS `win-plate`; the
+  whole animation lasts at least 5.6 s then; reduced motion: it just hangs there).
   The result box (translucent, over the board) has no title: the won stars, "New best!", the
   training-complete message, moves and "Best: X". Afterwards only the board is left as it is: the
   scene takes no more taps after a win, and the player goes on with Retry or Back. Random within
@@ -268,7 +276,11 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   colours, no textures, gradients or outlines (a first, painted version with its own fonts was
   dropped as not coherent with the rest of the app) -- plus, in workshops.js, its potion places
   (`slots`), rack rails, flame spots and, for the crypt only, where the motto "Vita Colorum"
-  (`levelScreen.cryptMotto`, Latin for "life of colours", the same in every language) sits (on its stone lintel; the other scenes have no such line).
+  (`levelScreen.cryptMotto`, Latin for "life of colours", the same in every language; drawn as a
+  worn inscription by `Motto`: Roman capitals in Cinzel -- the one font the app bundles itself,
+  `@fontsource/cinzel`, latin 700 only, never from another server -- dark grey `wsMotto` with a
+  pale lower edge `wsMottoLight`, rough edges and missing patches (SVG filter) and fixed scratches
+  and chipped holes (mask, seeded)) sits (on its stone lintel; the other scenes have no such line).
   A castle with fewer puzzles than its scene has places (since the level graph: about 18 per
   castle) spreads them over the scene (`spreadSlots`: the slots cut into equal runs, one random slot
   per run, seeded by the castle number, puzzles kept in slot order); every other place shows an
@@ -281,16 +293,20 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   only gradients on the screen). Header in the app's own look: the hanging copper plate, in the SAME copper as the potions' medals
   (their gradient `ws-medal`, edge, ring and ink `wsMedal*`; star and number in the medal's ink),
   with the castle's stars (the number only, no "/ required") over a bar that fills towards the next
-  castle. No "to open ..." line on the plate: the bar says what it is for in a small bubble under
+  castle; the bar stays gold (never green), and once the 20 stars are reached the star and the
+  number turn gold too (dark copper outline). No "to open ..." line on the plate: the bar says what it is for in a small bubble under
   the plate, "20 stars needed to open next sites" (`castles.starsNeeded` / `starsNeededMany`; once
   done: `nextOpen` / `nextOpenMany`; `LevelScreen.barHint`), while the mouse is over it or it has
-  the focus, and for 2.6 s after a tap. Then the castle title in the
+  the focus, and for 2.6 s after a tap. Then the castle title with "Level n" (`levelScreen.level`) under it,
+  and 🗺️ (back to the map, `levelScreen.back` as its label) as the game screen's rounded button. The castle title in the
   app's font, the puzzle count, and "Home" as the game screen's rounded button.
   A potion's lean, shift, fill level, stopper (cork, dark cork, wooden plug, wax, linen cap, glass
   ball) and its rare life (bubbles, or a small electric flash) come from its puzzle id
   (`potionLook`, seeded), so a potion looks the same every time. Most potions are still.
   **Picking**: a tapped potion lifts up and comes forward a little (CSS `ws-lift`, drawn in front
-  of the rail and its neighbours), and its puzzle opens after `PICK_MS` (420 ms; a slow, short lift: 7 units up, 1.1 x); further taps are
+  of the rail and its neighbours), and its puzzle opens after `PICK_MS` (520 ms; a slow, short lift: 7 units up, 1.1 x, 420 ms; a stoppered potion is
+  unstoppered meanwhile: CSS `ws-unstop`, starting 110 ms after the lift, the stopper pulled up along
+  the neck with a small twist and fading out); further taps are
   ignored meanwhile. The lift is the ONLY movement of a pick: no press-in scale on `:active` (it
   grew, shrank back and only then lifted -- the picked potion is drawn anew in front). The glow of a potion reaches over its neighbours and takes no taps.
   In the tower a bat passes outside the window at random times (every 6-30 s, one or two abrupt
@@ -310,7 +326,7 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   books (book backs vary: gold strip, gold symbol, dark red stripes, or an unreadable black title;
   symbol and title books with silver stripes of varying width at the top, the bottom or both); no
   skulls. Colours of the live parts: `ws*` in theme.js. Fonts: the app's own (Arial Black) --
-  never load fonts (or anything else) from another server.
+  never load fonts (or anything else) from another server; the one exception in look, Cinzel for the crypt's motto, is bundled with the app (npm `@fontsource/cinzel`).
 - **Mobile first** -- portrait phones are the main target; boards up to 9 rows x 6 cols must fit.
 - **Special cells** (2026-11-06; schema 1.1, feature tags `special-blocked`, `special-bomb`,
   `special-mirror`, `special-clock`, one entry in `board.special_cells`). CRITICAL: the rules live in
@@ -341,7 +357,9 @@ tests/                    # engine vectors (generated), classic-rule test, catal
     neighbours, may reach over them or off the board) with its cycle's states on a circle (no ring
     line drawn), current state big at the top, the others small and faded, turning
     counter-clockwise one step per move (`CLOCK_TURN_MS`). On `boom` the scene knocks every cell out
-    of line (`_wreck`: shifted, tilted, squeezed, overlapping; stepped, not smooth).
+    of line (`_wreck`: shifted, tilted, squeezed, overlapping; stepped, not smooth) and the bomb is
+    gone: its cell shows black burn traces instead (`_scorch`: ragged charred blotch, soot streaks
+    and specks, on ash-grey ground, colours `bombScorch` / `bombSoot` / `bombAsh*`).
   - React (`GameScreen.jsx`, `components/SpecialOverlays.jsx`): a bomb, mirror or clock puzzle
     opens with its explanation (`special.bombIntro` / `mirrorIntro` / `clockIntro`) as one line of
     grey text (`bombTicker`) between two marks (⚠️ / 🪞 / 🕰️, `INTRO_MARKS`) passing from right to

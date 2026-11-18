@@ -29,7 +29,8 @@ import { emojiTexture, emojiDisplaySize } from './emojiTexture.js'
 // square's corners, drawn above its neighbours, may reach over them or off the board) and shows its
 // colour cycle as states placed on a circle (no ring line drawn) -- the current state big at the top, the others small and faded -- that turns counter-
 // clockwise by one step (CLOCK_TURN_MS) after every move. When the bomb goes off the cells are
-// knocked out of line (_wreck: shifted, tilted, squeezed, overlapping).
+// knocked out of line (_wreck: shifted, tilted, squeezed, overlapping) and the bomb is gone: its
+// cell shows black burn traces (_scorch).
 //
 // What a cell shows (colour, or an emoji on a background) comes from the game's look: the
 // active theme with its per-game choices drawn (src/themes.js drawLook, registry 'look'); the
@@ -350,6 +351,7 @@ export default class GameScene extends Phaser.Scene {
   // nearer the blast at (br, bc), overlapping in a random order. Jerky on purpose
   // (a few steps, no smooth tween); happens under the BOOM, so the player sees the result after it.
   _wreck(br, bc) {
+    this._scorch()
     const rnd = (a, b) => a + Math.random() * (b - a)
     const order = []
     this.cells.forEach((row, r) => row.forEach((cell, c) => order.push({ cell, r, c })))
@@ -366,6 +368,50 @@ export default class GameScene extends Phaser.Scene {
       }
       this.tweens.add({ targets: cell, ...to, duration: 240, ease: 'Stepped', easeParams: [3] })
       cell.setDepth(Math.random() * 2)
+    }
+  }
+
+  // The bomb is gone after the explosion: its cell shows black burn traces -- a ragged charred blotch,
+  // soot streaks running out from it and a few soot specks -- instead of the bomb.
+  _scorch() {
+    const cell = this.bombCell
+    if (!cell) return
+    cell.label.setVisible(false)
+    this.time.delayedCall(260, () => cell.setDepth(2.5))   // after _wreck's shuffle: over its neighbours
+    const rnd = (a, b) => a + Math.random() * (b - a)
+    const g = cell.g
+    const h = (CELL - GAP) / 2
+    g.clear()
+    // burnt ground: ash grey, so the black traces show (the bomb cell itself was nearly black)
+    g.fillStyle(C.bombAshEdge)
+    g.fillRoundedRect(-h, -h, 2 * h, 2 * h, RADIUS)
+    g.fillStyle(C.bombAsh)
+    g.fillRoundedRect(-h + 3, -h + 3, 2 * h - 6, 2 * h - 6, RADIUS - 2)
+    // streaks first (under the blotch), out to and a little beyond the cell's edge
+    for (let k = 0; k < 13; k++) {
+      const a = (k / 13) * Math.PI * 2 + rnd(-0.2, 0.2)
+      const r0 = rnd(14, 20), r1 = rnd(h * 0.85, h * 1.25)
+      g.fillStyle(C.bombScorch, rnd(0.6, 0.9))
+      const w = rnd(0.12, 0.22)
+      g.fillTriangle(Math.cos(a - w) * r0, Math.sin(a - w) * r0, Math.cos(a + w) * r0, Math.sin(a + w) * r0,
+                     Math.cos(a) * r1, Math.sin(a) * r1)
+    }
+    // the charred blotch: a ragged ring of points, then a darker heart
+    const blotch = (rMin, rMax, colour, alpha) => {
+      const pts = Array.from({ length: 18 }, (_, k) => {
+        const a = (k / 18) * Math.PI * 2, r = rnd(rMin, rMax)
+        return { x: Math.cos(a) * r, y: Math.sin(a) * r }
+      })
+      g.fillStyle(colour, alpha)
+      g.fillPoints(pts, true)
+    }
+    blotch(26, 38, C.bombSoot, 0.9)
+    blotch(14, 26, C.bombScorch, 1)
+    // soot specks
+    for (let k = 0; k < 9; k++) {
+      const a = rnd(0, Math.PI * 2), r = rnd(h * 0.55, h * 0.95)
+      g.fillStyle(C.bombScorch, rnd(0.6, 0.95))
+      g.fillCircle(Math.cos(a) * r, Math.sin(a) * r, rnd(1.5, 3.5))
     }
   }
 

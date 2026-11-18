@@ -18,6 +18,7 @@
     "retry": "Nochmal",
     "back": "Zurück",
     "home": "Start",
+    "backTo": "Zurück zu {{name}}",
     "moves_one": "{{count}} Zug",
     "moves_other": "{{count}} Züge",
     "best": "Bestwert: {{count}}"
@@ -36,10 +37,12 @@
     "trainingComplete": "Training abgeschlossen",
     "trainingReady": "Du bist jetzt bereit für die Reise.",
     "trainingNext": "{{castle}} wartet.",
-    "startJourney": "Reise beginnen"
+    "startJourney": "Reise beginnen",
+    "unlocked": "Neue Orte freigeschaltet!"
   },
   "levelScreen": {
-    "back": "Home",
+    "back": "Karte",
+    "level": "Stufe {{n}}",
     "cryptMotto": "Vita Colorum",
     "intro": "Einführung",
     "start": "Los",
