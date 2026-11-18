@@ -150,5 +150,14 @@
     "bombIntroColors": "Attention ! L'une des couleurs fait exploser la bombe.",
     "mirrorIntro": "Les cases miroirs sont intriquées : transforme l'une, et l'autre change de la même façon.",
     "clockIntro": "La case horloge ne se touche pas : elle avance chaque fois que tu transformes une autre case."
+  },
+  "wildcard": {
+    "title": "Wildcard",
+    "card": "Wildcard : sauter vers un lieu plus haut",
+    "rule": "Gagne le puzzle avec le nombre minimum de coups : ce lieu et tous les lieux des rangées en dessous s’ouvrent. Essais illimités.",
+    "try": "Essai Wildcard",
+    "needMoves": "{{count}} coups pour réussir",
+    "won": "Wildcard gagnée ! Plein de lieux débloqués.",
+    "close": "Fermer"
   }
 }

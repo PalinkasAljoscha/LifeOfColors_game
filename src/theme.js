@@ -178,6 +178,17 @@ export const palette = {
   wsMedalString:    '#d9c7a4',
   wsMotto:          '#2c2e33',   // the crypt's carved motto: dark grey ...
   wsMottoLight:     '#a3a7b0',   // ... and the pale lower edge of the cut
+  wildcardFace:     '#fbf6e6',   // the wildcard (a playing card with a key, WildcardCard.jsx)
+  wildcardEdge:     '#8a6a2c',
+  wildcardKey:      '#d4a24c',
+  wildcardKeyEdge:  '#5a3d12',
+  scrollPaper:      '#f3e3bd',   // the wildcard scroll (WildcardScroll.jsx): parchment ...
+  scrollInk:        '#3d2b17',
+  scrollEntry:      '#fbf0d4',   // ... one wildcard on it
+  scrollEdge:       '#8c6d3c',
+  scrollRoll:       '#c9a96e',   // ... and its rolled ends
+  scrollRollLight:  '#e8d3a0',
+  scrollRollDark:   '#8c6d3c',
   wsBat:            '#14111a',   // the bat passing the tower window
 }
 

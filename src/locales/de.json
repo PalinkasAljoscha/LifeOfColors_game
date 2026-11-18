@@ -150,5 +150,14 @@
     "bombIntroColors": "Achtung! Eine der Farben bringt die Bombe zum Explodieren.",
     "mirrorIntro": "Spiegelfelder sind verschränkt: Verwandle eines, und das andere verwandelt sich genauso.",
     "clockIntro": "Das Uhrfeld lässt sich nicht antippen: Es dreht sich weiter, sobald du ein anderes Feld verwandelst."
+  },
+  "wildcard": {
+    "title": "Wildcard",
+    "card": "Wildcard: zu einem höheren Ort springen",
+    "rule": "Gewinne das Puzzle mit der kleinstmöglichen Anzahl Züge – dann öffnen sich dieser Ort und alle Orte in den Reihen darunter. Beliebig viele Versuche.",
+    "try": "Wildcard-Versuch",
+    "needMoves": "{{count}} Züge zum Bestehen",
+    "won": "Wildcard gewonnen! Viele Orte freigeschaltet.",
+    "close": "Schließen"
   }
 }

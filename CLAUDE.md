@@ -55,6 +55,7 @@ src/
                           # played puzzles, each opens the puzzle again in its castle; pick = 'grid')
   sites.js                # the places on the home map: which level is which site (castle, forest hut, tavern, ...)
   assets/sites/*.svg      # the sites' pictures: open, locked and their landscape
+  wildcards.js            # the wildcards: config (which places, which challenge puzzle) and what a win opens
   workshops.js            # the workshop scenes: which castle shows which picture, where its potions stand,
                           # how each potion looks (no React, tested)
   assets/workshops/*.svg  # the scenes' flat pictures (390 x 844 units)
@@ -140,7 +141,7 @@ tests/                    # engine vectors (generated), classic-rule test, catal
 - **Game screen** -- top row (2026-11-18): 🗺️ (home: back to the map, telemetry reason 'home'),
   Retry, Back -- the picture of the puzzle's place (`sites.js` `siteFor(instance.level)`, its open
   `<site>.svg`; aria-label "Back to <name>", `game.backTo`) -- and an info button (circled "i") that opens the
-  rules pop-up (RulesDialog, "How it works"). Below: puzzle name and the moves counter only. No
+  rules pop-up (RulesDialog, "How it works"). Below: the puzzle name with its colour tile (no place name) and the moves counter only. No
   goal / rules line under the board; in training the notebook peek starts right at the board's
   lower edge and reaches the screen bottom: the board box takes the board's aspect ratio, the free
   space goes mostly into the notebook (grow 4, 5.5-13rem) and the rest above the board; the
@@ -192,6 +193,26 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   training-complete message, moves and "Best: X". Afterwards only the board is left as it is: the
   scene takes no more taps after a win, and the player goes on with Retry or Back. Random within
   limits, drawn once per win. Colours `win*` in theme.js, keyframes `win-*` in index.css.
+- **Wildcards** (2026-11-18) -- a way up for strong players, `src/wildcards.js` (config + pure
+  functions, `tests/wildcards.test.js`). `WILDCARDS`: one place on each of the map rows 3, 5, 7, 8
+  and 9 (levels 6, 13, 19, 22, 24; the upper rows only the usual way), each with a fixed challenge
+  puzzle (its place's hardest puzzle without special cells, export of 2026-11-13; if an export moves
+  it away, `wildcardPuzzle` falls back to the place's hardest one without special cells). While such
+  a place is locked the map shows the wildcard -- a playing card with a key and a gold star in each
+  corner (`WildcardCard.jsx`) -- at the top right of its picture (no sticky card). Tapping any card
+  opens the wildcard scroll (`WildcardScroll.jsx`, parchment with rolled ends, title "Wildcard" in
+  every language): the rule (win with the minimum number of moves -- the same as 5 stars; unlimited
+  tries) and every wildcard whose place is still locked (picture, name, level; no move numbers). Picking one opens its puzzle (App `playWildcard`, telemetry
+  pick 'grid') with "Wildcard try" in orange, tilted, over the puzzle name, and "Need n moves to pass"
+  (`wildcard.needMoves`, n = `moves_to_win_min`) over the moves counter. A 5-star win
+  (`WILDCARD_STARS`) opens the place and EVERY place on a lower map row (`wildcardOpens`), saved as
+  their own list (`engine/progress.js` `recordWildcard`, stored field `w`, same opt-in) -- never as
+  stars: opened places are open, not done (`castleStates(..., { opened })`, state `wildcard`), what
+  lies above still needs its 20 stars; the puzzle's own stars count as usual. The win shows the
+  copper plate with "Wildcard won! Many places unlocked." (`wildcard.won`, one line per sentence);
+  a smaller win repeats "Need n moves to pass" in the result box. Back from a
+  game whose castle is still locked goes to the map. A path into a wildcard-opened place is drawn
+  open once the place it comes from is open. Texts `wildcard.*`, colours `wildcard*` / `scroll*`.
 - **Map layout** (2026-11-13) -- `components/CastleMap.jsx` draws the level graph: one band per
   graph row from the bottom (training castle) up, the graph's columns spread over the map's width.
   Inside a band the places are staggered by column (`stagger`: the order of heights that keeps
@@ -364,7 +385,7 @@ tests/                    # engine vectors (generated), classic-rule test, catal
     opens with its explanation (`special.bombIntro` / `mirrorIntro` / `clockIntro`) as one line of
     grey text (`bombTicker`) between two marks (⚠️ / 🪞 / 🕰️, `INTRO_MARKS`) passing from right to
     left, visible only between the outer edges of the board's outer cells, just above the board
-    (lifted 0.3 em), 3 times (`IntroTicker`, `TICKER_PASSES`, 6.6 s a pass, CSS
+    (lifted 0.3 em), twice (`IntroTicker`, `TICKER_PASSES`, 7.8 s a pass, CSS
     `ticker-pass`; each time opened, not on Retry; taps do not stop it, an explosion does; with
     "reduce motion" it stands still for 4.5 s) -- no opening callouts any more; the first tap
     on a blocked / clock cell per screen explains it; each bomb tap shows "Oh, careful!" with 😱 (2 s);

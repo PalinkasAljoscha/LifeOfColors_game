@@ -9,7 +9,8 @@ import {
   assignCastles, castleStates as computeStates, earnedUnlocks, highestUnlocked, CASTLE_COUNT,
 } from './engine/castles.js'
 import { chainGraph, parseLevelGraph } from './engine/levelGraph.js'
-import { castleStars, progressTotals, recentlyPlayed, seedCastleStars, storageConsent, CONSENT_GRANTED } from './engine/progress.js'
+import { castleStars, progressTotals, recentlyPlayed, seedCastleStars, storageConsent, wildcardOpened, CONSENT_GRANTED } from './engine/progress.js'
+import { availableWildcards, wildcardOpens } from './wildcards.js'
 import { useProgress } from './hooks/useProgress.js'
 import { siteName } from './sites.js'
 import { fitToScenes } from './workshops.js'
@@ -39,7 +40,7 @@ export default function App() {
     () => castles && computeStates(castles, (pool, c) => ({
       solved: progressTotals(pool.map((i) => i.id)).solved,
       stars: castleStars(c),                      // the castle's own counter (engine/progress.js)
-    }), graph, { allOpen: review }),
+    }), graph, { allOpen: review, opened: wildcardOpened() }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [castles, graph, progressVersion],
   )
@@ -112,6 +113,22 @@ export default function App() {
     return { count: next.length }
   }
 
+  // Wildcards (src/wildcards.js): the ones whose place is still locked, and starting a try.
+  const wildcards = useMemo(() => (states && castles ? availableWildcards(states, castles) : []), [states, castles])
+  function playWildcard(level) {
+    const w = wildcards.find((x) => x.level === level)
+    if (!w) return
+    markPlayed(w.inst)
+    setCastle(level)
+    setGame({ instance: w.inst, pick: 'grid', wildcard: level })   // telemetry: 'grid'
+  }
+  // Back from a game: to its castle's workshop -- or to the map when that castle is locked
+  // (a wildcard try, or a puzzle opened by a link).
+  function backFromGame() {
+    leaveGame()
+    if (castle !== null && !states?.[castle]?.unlocked) setCastle(null)
+  }
+
   function playPicked(inst) {
     markPlayed(inst)
     setGame({ instance: inst, pick: 'grid' })
@@ -158,8 +175,9 @@ export default function App() {
           next: opensNext(castle)?.one ?? null,
         } : null}
         pick={game.pick}
-        onPickNew={leaveGame}
+        onPickNew={backFromGame}
         onHome={() => { leaveGame(); setCastle(null) }}
+        wildcard={game.wildcard !== undefined && graph ? { level: game.wildcard, opens: wildcardOpens(graph, game.wildcard) } : null}
         // still locked places this castle leads to: reaching its stars here opens (some of) them
         canUnlock={castle !== null && !!states?.[castle]?.unlocked && !states[castle].training
           && (states[castle].children ?? []).some((c) => !states[c]?.unlocked)}
@@ -195,6 +213,8 @@ export default function App() {
       onSelectCastle={setCastle}
       recent={recent}
       onPlayRecent={playRecent}
+      wildcards={review ? [] : wildcards}
+      onWildcard={playWildcard}
       nudging={nudge !== null}
     />
     </>

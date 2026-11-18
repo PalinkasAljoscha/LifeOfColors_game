@@ -16,6 +16,8 @@
 //                        c              = stars collected per castle (see below)
 //                        h              = recently played puzzle ids, newest first, at most
 //                                         HISTORY_MAX (homepage history; optional, omitted when empty)
+//                        w              = castles opened by a won wildcard (src/wildcards.js),
+//                                         ascending (optional, omitted when empty)
 //                        ({"v":1,"p":...} from before the castle counters is still read.)
 //
 // Totals: solved = number of solved puzzles; stars = sum of each solved puzzle's BEST rating
@@ -66,6 +68,7 @@ let consent = null              // null = not asked yet, else CONSENT_GRANTED / 
 let entries = new Map()         // id -> TRIED | 0..5
 let castleCounts = new Map()    // castle number -> stars collected there
 let history = []                // recently played ids, newest first (at most HISTORY_MAX)
+let opened = new Set()          // castles opened by a won wildcard
 let needsSeed = false           // true after loading v1 progress (no castle counters yet)
 let version = 0                 // bumped on every change (useSyncExternalStore snapshot)
 const listeners = new Set()
@@ -83,20 +86,23 @@ function cleanHistory(ids) {
   return [...new Set(ids.filter((id) => typeof id === 'string'))].slice(0, HISTORY_MAX)
 }
 
-/** { entries, castles, history }: castles = Map, or null for v1 progress (no castle counters yet). */
+const cleanOpened = (list) => new Set(list.filter((c) => Number.isInteger(c) && c >= 0))
+
+/** { entries, castles, history, opened }: castles = Map, or null for v1 progress (no castle counters yet). */
 function parseStored(text) {
-  const empty = { entries: new Map(), castles: new Map(), history: [] }
+  const empty = { entries: new Map(), castles: new Map(), history: [], opened: new Set() }
   try {
     const data = JSON.parse(text)
     if ((data?.v !== 1 && data?.v !== 2) || typeof data.p !== 'object' || data.p === null) return empty
     const entries = new Map(Object.entries(data.p).filter(([id, v]) => typeof id === 'string' && isEntry(v)))
     const history = Array.isArray(data.h) ? cleanHistory(data.h) : []
-    if (data.v === 1) return { entries, castles: null, history }
+    const opened = Array.isArray(data.w) ? cleanOpened(data.w) : new Set()
+    if (data.v === 1) return { entries, castles: null, history, opened }
     const c = typeof data.c === 'object' && data.c !== null ? data.c : {}
     const castles = new Map(Object.entries(c)
       .map(([k, v]) => [Number(k), v])
       .filter(([k, v]) => Number.isInteger(k) && k >= 0 && isCount(v)))
-    return { entries, castles, history }
+    return { entries, castles, history, opened }
   } catch {
     return empty
   }
@@ -106,6 +112,7 @@ function persist() {
   if (consent === CONSENT_GRANTED) {
     const data = { v: 2, p: Object.fromEntries(entries), c: Object.fromEntries(castleCounts) }
     if (history.length) data.h = history
+    if (opened.size) data.w = [...opened].sort((a, b) => a - b)
     write(PROGRESS_KEY, JSON.stringify(data))
   }
 }
@@ -121,11 +128,12 @@ export function initProgress(testStorage) {
   if (testStorage !== undefined) storageOverride = testStorage
   const c = read(STORAGE_CONSENT_KEY)
   consent = c === CONSENT_GRANTED || c === CONSENT_DENIED ? c : null
-  const stored = consent === CONSENT_GRANTED ? parseStored(read(PROGRESS_KEY)) : { entries: new Map(), castles: new Map(), history: [] }
+  const stored = consent === CONSENT_GRANTED ? parseStored(read(PROGRESS_KEY)) : { entries: new Map(), castles: new Map(), history: [], opened: new Set() }
   if (consent !== CONSENT_GRANTED) remove(PROGRESS_KEY)    // never keep progress without consent
   for (const [id, v] of entries) stored.entries.set(id, merge(stored.entries.get(id), v))
   entries = stored.entries
   history = cleanHistory([...history, ...stored.history])  // this visit's plays are the newest
+  opened = new Set([...stored.opened, ...opened])
   if (stored.castles === null) {
     needsSeed = true                                       // v1: converted by seedCastleStars
   } else {
@@ -141,6 +149,7 @@ export function resetProgressForTests() {
   entries = new Map()
   castleCounts = new Map()
   history = []
+  opened = new Set()
   needsSeed = false
   consent = null
   changed()
@@ -205,6 +214,15 @@ export function recordSolved(id, stars, castle = null) {
   return { previousBest, best, newBest: previousBest !== null && best > previousBest, gained }
 }
 
+/** A wildcard was won: these castles are open from now on (src/wildcards.js wildcardOpens).
+ *  Returns how many of them were not opened by a wildcard before. */
+export function recordWildcard(castles) {
+  let added = 0
+  for (const c of castles) if (Number.isInteger(c) && c >= 0 && !opened.has(c)) { opened.add(c); added++ }
+  if (added) { persist(); changed() }
+  return added
+}
+
 /** Convert progress saved before the castle counters existed (v1), once: every castle's counter
  *  starts at the best stars of the puzzles it holds now. castles = [{ castle, pool }]
  *  (engine/castles.js assignCastles). Does nothing for current progress. */
@@ -240,6 +258,11 @@ export function bestStars(id) {
 /** Recently played puzzle ids, newest first (at most HISTORY_MAX). */
 export function recentlyPlayed() {
   return [...history]
+}
+
+/** The castles opened by won wildcards (a copy). */
+export function wildcardOpened() {
+  return new Set(opened)
 }
 
 /** Stars collected in a castle (its counter; see the top of this file). */

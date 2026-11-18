@@ -34,8 +34,8 @@ const BAM_LETTERS = [
 ]
 const DUST_DRIFT_S = 40   // seconds for the dust to cross the board once (slowest puffs a bit more)
 
-export const TICKER_PASSES = 3
-const TICKER_PASS_MS = 6600      // one pass over the cells' width
+export const TICKER_PASSES = 2
+const TICKER_PASS_MS = 7800      // one pass over the cells' width
 const TICKER_LIFT_EM = 0.3       // the line sits this much higher (about twice a full stop's height)
 export const INTRO_MARKS = { bomb: '⚠️', mirror: '🪞', clock: '🕰️' }   // at both ends of the line
 const TICKER_STILL_MS = 4500     // "reduce motion": the line just stands there this long

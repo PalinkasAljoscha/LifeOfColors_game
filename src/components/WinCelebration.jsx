@@ -35,8 +35,25 @@ const GAME_FONT = '"Arial Black", Arial, sans-serif'
 
 // The copper plate on its two chains, hanging `drop` px below the top of the screen (the chains'
 // length); drawn like the workshop's plate (medal gradient, edge, inner ring, rivets).
+/** The plate's text in lines: one per sentence, a sentence longer than SPLIT_AT letters cut in two
+ *  at the space nearest its middle. */
+const SPLIT_AT = 18
+export function plateLines(text) {
+  const sentences = text.split(/(?<=[!.?])\s+/).filter(Boolean)
+  return sentences.flatMap((s) => {
+    if (s.length <= SPLIT_AT) return [s]
+    const spaces = [...s.matchAll(/ /g)].map((m) => m.index)
+    const cut = spaces.sort((a, b) => Math.abs(a - s.length / 2) - Math.abs(b - s.length / 2))[0]
+    return cut === undefined ? [s] : [s.slice(0, cut), s.slice(cut + 1)]
+  })
+}
+const plateHeight = (lines, size) => Math.max(PLATE_H, Math.round(lines * size * 1.15 + 30))
+const plateSize = (lines) => Math.min(lines.length > 1 ? 23 : 21, (PLATE_W - 30) / (Math.max(...lines.map((l) => l.length)) * 0.7))
+
 function UnlockPlate({ drop, text }) {
-  const W = PLATE_W, H = PLATE_H, top = drop
+  const lines = plateLines(text)
+  const size = plateSize(lines)
+  const W = PLATE_W, H = plateHeight(lines.length, size), top = drop
   const links = Math.ceil(top / LINK) + 1
   const chain = (x) => Array.from({ length: links }, (_, k) => {
     const y = top - (k + 0.5) * LINK
@@ -44,12 +61,6 @@ function UnlockPlate({ drop, text }) {
       ? <ellipse key={k} cx={x} cy={y} rx="2.6" ry={LINK * 0.62} fill="none" stroke={palette.wsMedalLo} strokeWidth="1.6" />
       : <rect key={k} x={x - 0.9} y={y - LINK * 0.6} width="1.8" height={LINK * 1.2} rx="0.9" fill={palette.wsMedalMid} />
   })
-  // the text in one or two lines (split at the space nearest the middle), as big as fits
-  const spaces = [...text.matchAll(/ /g)].map((m) => m.index)
-  const cut = spaces.sort((a, b) => Math.abs(a - text.length / 2) - Math.abs(b - text.length / 2))[0]
-  const lines = cut === undefined ? [text] : [text.slice(0, cut), text.slice(cut + 1)]
-  const longest = Math.max(...lines.map((l) => l.length))
-  const size = Math.min(lines.length > 1 ? 23 : 21, (W - 30) / (longest * 0.7))
   return (
     <svg width={W} height={top + H + 4} viewBox={`0 0 ${W} ${top + H + 4}`} aria-hidden="true" style={{ overflow: 'visible' }}>
       <defs>
@@ -103,7 +114,7 @@ function Glint({ size }) {
 /** training: null or { day, complete, next }; moves, best (null = unknown), stars (1-5 or null),
  *  newBest. */
 export default function WinCelebration({ boardRef, training = null, moves, best = null, stars = null,
-                                         newBest = false, unlocked = false, onDone }) {
+                                         newBest = false, unlocked = false, unlockText = null, note = null, onDone }) {
   const { t } = useTranslation()
   const [mode] = useState(() => winMode({ training, stars, reduced: reducedMotion() }))
   const still = mode === 'text'
@@ -195,9 +206,9 @@ export default function WinCelebration({ boardRef, training = null, moves, best 
         return (
           <div className={reducedMotion() ? 'absolute' : 'absolute win-plate'}
                style={{ left: board.left + board.width / 2 - PLATE_W / 2, top: 0,
-                        '--rise': `${-(drop + PLATE_H + 12)}px`, animationDelay: `${UNLOCK_AT}ms`,
+                        '--rise': `${-(drop + plateHeight(4, 23) + 12)}px`, animationDelay: `${UNLOCK_AT}ms`,
                         animationDuration: `${doneAt - UNLOCK_AT}ms` }}>
-            <UnlockPlate drop={drop} text={t('win.unlocked')} />
+            <UnlockPlate drop={drop} text={unlockText ?? t('win.unlocked')} />
           </div>
         )
       })()}
@@ -227,6 +238,7 @@ export default function WinCelebration({ boardRef, training = null, moves, best 
             )}
             <p className="mt-2 first:mt-0 font-sans font-bold text-xl text-white">{t('win.moves', { count: moves })}</p>
             {best !== null && <p className="font-sans font-semibold text-game-silver">{t('game.best', { count: best })}</p>}
+            {note && <p className="mt-2 max-w-[16rem] mx-auto font-sans font-bold text-sm text-game-orange">{note}</p>}
           </div>
         </div>
       )}

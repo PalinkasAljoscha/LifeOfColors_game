@@ -9,6 +9,8 @@
 // once ANY castle with a path into it (its parents in the graph) is open AND done: the player has
 // collected its required stars there (UNLOCK_STARS, 20, however many puzzles it holds).
 // Review: castleStates(..., { allOpen: true }) opens every castle (App: ?map=all in the URL).
+// Wildcards (src/wildcards.js): castleStates(..., { opened }) also opens the castles in `opened` (a
+// Set; engine/progress.js wildcardOpened) -- open, not done: their stars count as usual.
 // Unlocking is derived from the per-castle star counters (engine/progress.js castleStars), not
 // from the stars of the puzzles currently in a castle: a counter only grows, so a castle stays
 // done when puzzles move between castles after a new catalog.
@@ -67,7 +69,7 @@ export function requiredStars() {
  *  (engine/progress.js castleStars), solved = solved puzzles of the pool (progressTotals). Castle 0
  *  is the training castle: required = every puzzle, done = all solved. Castles 0 and 1 are open
  *  from the start (castle 1 does not wait for training). fromStart = open without having earned it. */
-export function castleStates(castles, totalsIn, graph = chainGraph(Math.max(2, castles.length)), { allOpen = false } = {}) {
+export function castleStates(castles, totalsIn, graph = chainGraph(Math.max(2, castles.length)), { allOpen = false, opened = null } = {}) {
   const out = []
   const openAtStart = 2                       // castles 0 (training) and 1
   for (const { castle, pool } of castles) {
@@ -77,10 +79,11 @@ export function castleStates(castles, totalsIn, graph = chainGraph(Math.max(2, c
     const done = isTraining ? pool.length > 0 && solved >= pool.length : stars >= required
     const parents = graph.parents[castle] ?? []
     const fromStart = castle < openAtStart
-    const unlocked = pool.length > 0 && (fromStart || allOpen
-      || parents.some((p) => out[p]?.unlocked === true && out[p].done === true))
+    const earned = parents.some((p) => out[p]?.unlocked === true && out[p].done === true)
+    const wildcard = opened?.has(castle) === true && !fromStart && !earned
+    const unlocked = pool.length > 0 && (fromStart || allOpen || earned || wildcard)
     out.push({
-      castle, count: pool.length, stars, solved, required, done, unlocked, fromStart, training: isTraining,
+      castle, count: pool.length, stars, solved, required, done, unlocked, fromStart, wildcard, training: isTraining,
       parents, children: graph.children[castle] ?? [],
     })
   }

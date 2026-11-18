@@ -150,5 +150,14 @@
     "bombIntroColors": "Watch out! One of the colors triggers the bomb.",
     "mirrorIntro": "Mirror fields are entangled: transform one and the other changes the same way.",
     "clockIntro": "The clock field can't be tapped: it moves on each time you transform another field."
+  },
+  "wildcard": {
+    "title": "Wildcard",
+    "card": "Wildcard: jump up to a higher place",
+    "rule": "Win the puzzle with the minimum number of moves – then this place and every place on the rows below it open. Unlimited tries.",
+    "try": "Wildcard try",
+    "needMoves": "Need {{count}} moves to pass",
+    "won": "Wildcard won! Many places unlocked.",
+    "close": "Close"
   }
 }

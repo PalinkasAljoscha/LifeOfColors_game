@@ -8,7 +8,8 @@ import NotebookOpen, { NotebookPeek } from './TrainingNotes.jsx'
 import NoteFlight from './NoteFlight.jsx'
 import TrainingIntro, { INTRO_STEPS } from './TrainingIntro.jsx'
 import { markSolved } from '../engine/catalog.js'
-import { castleStars, progressTotals } from '../engine/progress.js'
+import { castleStars, progressTotals, recordWildcard } from '../engine/progress.js'
+import { WILDCARD_STARS } from '../wildcards.js'
 import { UNLOCK_STARS } from '../config.js'
 import { siteFor } from '../sites.js'
 import { minMovesOf, starsForWin } from '../engine/stars.js'
@@ -24,7 +25,8 @@ import { SpecialTile, isSpecial } from './LevelScreen.jsx'
 
 // One instance. Retry remounts the board (fresh start of the same instance); Back goes to the
 // level's grid. `pick` (how the puzzle was chosen) is passed on to telemetry.
-// `place`: the label in front of the puzzle name (the castle it belongs to).
+// `place`: the name of the castle it belongs to (only in the Back button's label; the screen shows
+// just the puzzle's name with its colour tile).
 // `training`: null, or in the training castle { day (the puzzle's place in the plan, 1-based),
 // ids (every training puzzle), next (name of the castle it opens) } -- board helps, the notebook of
 // observed transformations (src/engine/training.js; the notes survive Retry, the rules stay the
@@ -38,7 +40,7 @@ import { SpecialTile, isSpecial } from './LevelScreen.jsx'
 // when its first puzzle opens, TrainingIntro explains the goal there) and in the first
 // GOAL_INTRO_LEVELS levels after it (GOAL_INTRO_MS, src/config.js).
 // Special cells (src/engine/engine.js, components/SpecialOverlays.jsx): a bomb, mirror or clock
-// puzzle opens with its explanation passing just above the board, three times (IntroTicker; each
+// puzzle opens with its explanation passing just above the board, twice (IntroTicker; each
 // time the puzzle is opened, not on Retry; taps do not stop it); the first tap on a blocked / clock cell (per screen) explains
 // it; a tap on the bomb shows "Oh, careful!" with a scared face (BOMB_WARN_MS). When the bomb goes
 // off: the explosion (the whole screen shakes, EXPLOSION_MS), then the rubble with a Retry button --
@@ -51,7 +53,10 @@ const BOMB_WARN_MS = 2000
 const SITE_PICTURES = import.meta.glob(['../assets/sites/*.svg', '!../assets/sites/*-land.svg', '!../assets/sites/*-locked.svg'],
   { eager: true, import: 'default' })
 
-export default function GameScreen({ instance, place, training = null, pick, onPickNew, onHome, canUnlock = false }) {
+// Wildcard try (`wildcard` = { level, opens }, src/wildcards.js): "Wildcard try" over the puzzle's
+// name (orange, tilted) and "Need n to pass" over the moves counter (n = moves_to_win_min); a WILDCARD_STARS win opens `opens` (engine/progress.js recordWildcard) and
+// the copper plate says so; a smaller win says that only a 5-star win counts. Tries are unlimited.
+export default function GameScreen({ instance, place, training = null, pick, onPickNew, onHome, canUnlock = false, wildcard = null }) {
   const { t } = useTranslation()
   const special = specials(instance)
   // special cells: the callout on the board ({ key, at, text, emoji, ms }), the bomb's
@@ -220,7 +225,10 @@ export default function GameScreen({ instance, place, training = null, pick, onP
     const saved = markSolved(instance, stars)              // best rating per puzzle (engine/progress.js)
     // this win brought the castle's stars to UNLOCK_STARS: new places open (the copper plate)
     const unlocked = canUnlock && before < UNLOCK_STARS && castleStars(instance.level) >= UNLOCK_STARS
-    setResult({ stars, ...saved, trainingComplete: !wasComplete && allWon(), unlocked })
+    // a wildcard try: a perfect win opens its places (only the first such win shows the plate)
+    const wildcardWon = wildcard !== null && stars === WILDCARD_STARS && recordWildcard(wildcard.opens) > 0
+    const wildcardMissed = wildcard !== null && stars !== WILDCARD_STARS
+    setResult({ stars, ...saved, trainingComplete: !wasComplete && allWon(), unlocked, wildcardWon, wildcardMissed })
     // Short pause so the player sees the goal cell change before the animation starts. After it the
     // board stays as it is (the scene takes no more taps); Retry or Back go on.
     winTimer.current = setTimeout(() => setWon(true), 400)
@@ -251,12 +259,12 @@ export default function GameScreen({ instance, place, training = null, pick, onP
         <button
           onClick={() => leave(onPickNew, 'back')}
           className="w-20 h-16 rounded-2xl bg-game-panel border-2 border-white/15 active:scale-95 transition-transform
-                     flex items-center justify-center overflow-hidden shrink-0"
+                     flex items-end justify-center overflow-hidden shrink-0 pb-[5px]"
           aria-label={place ? t('game.backTo', { name: place }) : t('game.back')}
           title={place ? t('game.backTo', { name: place }) : t('game.back')}
         >
           <img src={SITE_PICTURES[`../assets/sites/${siteFor(instance.level ?? 0)}.svg`]} alt="" draggable="false"
-               className="h-[4.8rem] w-auto max-w-none mt-1.5" />
+               className="h-[3.45rem] w-auto max-w-none" />
         </button>
         {/* Info: the rules pop-up ("How it works") */}
         <button
@@ -272,9 +280,18 @@ export default function GameScreen({ instance, place, training = null, pick, onP
         </button>
       </div>
 
+      {/* a wildcard try: said in orange, tilted, over the puzzle's name */}
+      {wildcard && (
+        <p className="mx-auto w-full max-w-md mt-2 -mb-1 px-1 flex justify-between items-end gap-3">
+          <span className="inline-block -rotate-3 text-lg font-black text-game-orange">{t('wildcard.try')}</span>
+          {/* what passes: the puzzle's minimum number of moves (= a 5-star win), over the moves counter */}
+          {minMoves !== null && (
+            <span className="text-sm font-sans font-bold text-game-orange">{t('wildcard.needMoves', { count: minMoves })}</span>
+          )}
+        </p>
+      )}
       <div className="mx-auto w-full max-w-md flex justify-between items-baseline gap-3 mt-3 px-1 text-sm font-sans font-bold">
         <span className="min-w-0 flex items-center gap-1.5">
-          {place && <span className="text-game-silver shrink-0">{place}:</span>}
           {/* Puzzle name (the factory finds the puzzle by it), with its tile colour from the level grid. */}
           {instance.name_color && (isSpecial(instance) ? (
             <span className="relative w-5 h-3.5 shrink-0" aria-hidden="true"><SpecialTile color={instance.name_color} /></span>
@@ -335,7 +352,9 @@ export default function GameScreen({ instance, place, training = null, pick, onP
         <WinCelebration key={round} boardRef={boardBoxRef}
                         training={training && { day: training.day, next: training.next, complete: result?.trainingComplete === true }}
                         moves={moves} best={minMoves} stars={result?.stars ?? null} newBest={result?.newBest ?? false}
-                        unlocked={result?.unlocked === true}
+                        unlocked={result?.unlocked === true || result?.wildcardWon === true}
+                        unlockText={result?.wildcardWon ? t('wildcard.won') : null}
+                        note={result?.wildcardMissed ? t('wildcard.needMoves', { count: minMoves ?? 0 }) : null}
                         onDone={() => setWon(false)} />
       )}
     </div>

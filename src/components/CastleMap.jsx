@@ -6,6 +6,7 @@ import { SITE_BOX, SITE_SOLID, parseLand, siteFor, siteName } from '../sites.js'
 import { giveWay, onAnyPath, placeFlat } from './mapClear.js'
 import { PATH_HALF, PATH_REACH, STONE_ROUND, pathStones } from './mapPath.js'
 import { relax } from './mapLayout.js'
+import WildcardCard from './WildcardCard.jsx'
 
 // The home-screen map: the levels ("castles" in the code) as different places -- a castle, a forest
 // hut, a tavern, ... (src/sites.js: which level is which place) -- each with its own bit of
@@ -28,6 +29,9 @@ import { relax } from './mapLayout.js'
 // tooltip and aria-label, "Amethyst Hut: 12 stars"). A locked place shows its name (bold) and what
 // opens it -- "Get 20 stars in a preceding place first" -- in a small bubble over it while the
 // mouse is over it, it has the keyboard focus, or for HINT_MS after a tap.
+// Wildcards (src/wildcards.js): a locked place with a wildcard shows the card (WildcardCard) at the
+// top right of its picture, a little tilted; tapping it opens the wildcard scroll (onWildcard).
+// A path into a place opened by a wildcard is drawn open once the place it starts from is open.
 // Drawing is SVG (decoration only, nothing moves); the places themselves are HTML buttons laid over
 // it.
 // Where a place stands: its row and column (see above), then nudged a little sideways, up or down
@@ -171,7 +175,7 @@ export function stagger(n) {
   return best
 }
 
-export default function CastleMap({ states, graph, review = false, loadingCastle, onSelect }) {
+export default function CastleMap({ states, graph, review = false, loadingCastle, onSelect, wildcards = null, onWildcard }) {
   const { t } = useTranslation()
   const scrollRef = useRef(null)
   const [box, setBox] = useState(null)          // { w, h } of the visible map area
@@ -319,7 +323,7 @@ export default function CastleMap({ states, graph, review = false, loadingCastle
   }
   standing.sort((a, b) => a.foot - b.foot)       // stable: equal feet keep the order above
   const isOpen = (a, b) => states[b].unlocked && states[a].unlocked
-    && (states[a].done || states[b].fromStart || review)
+    && (states[a].done || states[b].fromStart || states[b].wildcard || review)
   // the paths' stones: the same on every visit, laid again only when the map's layout changes
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const paving = useMemo(() => edges.map(([a, b]) => pathStones(foot(a), foot(b), a * 131 + b)),
@@ -416,6 +420,14 @@ export default function CastleMap({ states, graph, review = false, loadingCastle
                     </span>
                   )
                 })()}
+                {/* a wildcard: the card at the top right of the locked place's picture */}
+                {!s.unlocked && wildcards?.has(i) && (
+                  <button onClick={onWildcard} aria-label={t('wildcard.card')} title={t('wildcard.card')}
+                          className="absolute z-[5] active:scale-90 transition-transform"
+                          style={{ left: x + size * 0.3, top: y - size * 0.95, transform: 'rotate(12deg)' }}>
+                    <WildcardCard width={Math.round(size * 0.4)} />
+                  </button>
+                )}
                 {/* the badge: "★ 12" once stars were collected there (✓ when done); "…" while loading */}
                 {(counted || loading) && (
                   <span className={`absolute -translate-x-1/2 whitespace-nowrap rounded-full px-1.5 py-px text-[11px] font-black
