@@ -296,17 +296,17 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   wooden arrow sign on a post points at it (1.3 x its first size), "Training" (`castles.trainingSign`; anchored by its
   tip, so a longer word grows away from the castle; on the castle's left, or its right where the
   left has no room -- then everything is mirrored) with a spider (🕷️) hanging on its thread
-  (`mapSpiderThread`) from the plank, a big dark-grey (not black) cauldron over a small fire
-  behind and above the sign (not hidden by it), with a copper handle (`wsMedalMid` / `wsMedalEdge`)
+  (`mapSpiderThread`) from the plank, a big dark-grey (not black) cauldron over a small fire, both
+  in a ring of stones (`mapStone*`; the back half behind them, the front half in front), behind and above the sign (not hidden by it), with a copper handle (`wsMedalMid` / `wsMedalEdge`)
   and the end of a big wooden spoon sticking out, its fumes in the win animation's
   style (blurred white puffs, `winVapour`, growing and fading as they rise; still, no animation),
   in front of the castle two mirrors drawn like the game's mirror cells (`mirrorLink` frame and
   tint, `mirrorGlint` diagonal glints) standing face to face on wooden stands with an electric
-  flash between them (zigzag, glowing); before them ONE flask lying on the grass -- the workshop's
+  flash between them (zigzag, glowing); between them and the castle ONE small flask lying on the grass -- the workshop's
   round-bottomed flask (Workshop.jsx `FLASK`, its glass and highlights, no stopper) in orchid
   `mapFlaskPotion` (#DA70D6, one of the puzzles' potion colours) with its potion running out
-  into a puddle -- and a bow with three arrows lying around (`mapArrowTip`, `mapFletching`,
-  `mapBowString`); and on the castle's other side six practice targets: sticks in the ground, spread out irregularly, of different heights,
+  into a puddle -- and before the mirrors a bow with three arrows lying around (heads only, no
+  fletching: it read as a second head; `mapArrowTip`, `mapBowString`); and on the castle's other side six practice targets: sticks in the ground, spread out irregularly, of different heights,
   some upright, some tilted, each topped with a round wooden disc like a road sign carrying one of the puzzles'
   emojis (🍄 👑 🐸 💎 🐉 🪨), with the game's bomb (💣) lying among them. All are standing things (each stick on its own foot); the castle's
   own fields make way for them. Colours `mapSign*`, `mapCauldron*`, `mapFire*`, `mapBrew*`, `mapSpiderThread`.

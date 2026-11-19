@@ -117,9 +117,10 @@ export const palette = {
   mapSpiderThread:   '#e8e8e8',   // the spider's thread under the training sign
   mapFlaskPotion:    '#DA70D6',   // the flask lying in front of the training castle: orchid, one of the
   mapFlaskPotionLight: '#eeb8eb',  //   puzzles' potion colours (name_color), and its surface
-  mapArrowTip:       '#b8bcc6',   // the archery there: arrowheads, fletching, bow string
-  mapFletching:      '#e8e2d0',
+  mapArrowTip:       '#b8bcc6',   // the archery there: arrowheads, bow string
   mapBowString:      '#efe6cf',
+  mapStone:          '#8f8c84',   // the ring of stones around the training ground's cauldron
+  mapStoneDark:      '#5c5a54',
   castleWall:        '#e3dccb',
   castleShade:       '#b9b09c',
   castleRoof:        '#b0413e',

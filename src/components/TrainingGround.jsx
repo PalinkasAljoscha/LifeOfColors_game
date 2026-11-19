@@ -3,12 +3,13 @@
 //     pointing at it;
 //   - a spider hanging on its thread from the plank;
 //   - a big dark-grey cauldron with a copper handle behind and above the sign, over a small fire,
+//     pot and fire in a ring of stones,
 //     the end of a big wooden spoon sticking out of it, with fumes rising out of it in the win animation's style (soft white puffs that grow
 //     and fade as they rise; still, like every map picture: no animation);
 //   - in front of the castle two mirrors, as the game draws its mirror cells (cyan frame and tint,
-//     white diagonal glints), standing face to face with an electric flash between them; before
-//     them one flask (the workshop's round-bottomed flask) lying on the grass, its potion running
-//     out, and a bow with arrows lying around;
+//     white diagonal glints), standing face to face with an electric flash between them; between
+//     them and the castle one flask (the workshop's round-bottomed flask) lying on the grass, its
+//     potion running out, and before them a bow with arrows lying around;
 //   - on the castle's other side a few practice targets: sticks in the ground, spread out
 //     irregularly, of different heights, some upright, some tilted, each topped with a round wooden disc like a road sign,
 //     and on each disc one of the puzzles' emojis (the crown, the goal, among them) -- and a bomb
@@ -35,6 +36,9 @@ export const STICKS_REACH = 166
 // The cauldron: behind the sign and above it (not hidden by it), dx out from the post, body
 // radius r.
 const POT = { dx: -24, foot: -44, r: 24 }
+// The stones ringing it: [angle around the ring in degrees (90 = front), size].
+const STONES = [[0, 5.2], [28, 4.4], [55, 5.6], [82, 4.8], [108, 5.4], [134, 4.2], [160, 5], [186, 4.6],
+  [214, 4], [244, 4.4], [276, 3.8], [306, 4.2], [334, 4.6]]
 // Its fumes: [dx, height above the rim, radius] -- growing and fading as they rise.
 const PUFFS = [[-4, 6, 6], [5, 14, 8], [-3, 24, 10], [6, 35, 11.5], [-4, 47, 13], [4, 58, 14]]
 
@@ -57,12 +61,12 @@ const BOMB = [122, 44, 22]
 // other side, a little more = neck a little down), drawn at `scale`.
 const FLASK = 'M-5,-70 V-37.6 A19.4,19.4 0 1 0 5,-37.6 V-70'
 const FLASK_IN = 'M-4,-70 V-37 A18.4,18.4 0 1 0 4,-37 V-70 Z'
-const LYING_FLASK = { x: -70, y: 108, turn: 98, scale: 0.85 }
+const LYING_FLASK = { x: -16, y: 27, turn: 98, scale: 0.51 }   // between the castle and the mirrors
 // The archery lying around: the bow at (x, y), turned by `turn` degrees; arrows [x, y, angle].
-const BOW = { x: 66, y: 110, turn: -24 }
-const ARROWS = [[36, 130, -8], [80, 128, 14], [102, 104, -32]]
+const BOW = { x: 66, y: 118, turn: -24 }
+const ARROWS = [[36, 138, -8], [80, 136, 14], [104, 112, -32]]
 // The two mirrors in front of the castle: their middles at ±MIRROR.x, standing at `foot`.
-const MIRROR = { x: 36, foot: 78, w: 26, h: 36 }
+const MIRROR = { x: 36, foot: 94, w: 26, h: 36 }
 
 /** The training ground's parts for castle 0 standing at (x, ground) with picture size `size`:
  *  standing things [{ el, foot }] (foot = map y) and the boxes nothing flat may touch (map px). */
@@ -104,12 +108,21 @@ export function trainingGround({ x, ground, size, side, text }) {
   // ── the cauldron with its fumes ──
   const POT_X = SIGN.near - w / 2 + POT.dx
   const px = side * POT_X, r = POT.r, rim = POT.foot - r * 1.55
+  // the ring of stones around the pot and its fire, on the ground: [angle around the ring, size]
+  const stones = (back) => STONES.filter(([a]) => (Math.sin((a * Math.PI) / 180) < 0) === back).map(([a, sz], n) => {
+    const t = (a * Math.PI) / 180, cx = px + Math.cos(t) * (r + 7), cy = POT.foot + Math.sin(t) * 8
+    return (
+      <ellipse key={`${back}${n}`} cx={cx} cy={cy} rx={sz} ry={sz * 0.68} fill={palette.mapStone}
+               stroke={palette.mapStoneDark} strokeWidth="1.1" />
+    )
+  })
   const pot = frame('train-pot', (
     <g>
       {/* the fumes' soft edge, as the win animation's puffs (blurred white) */}
       <defs>
         <filter id="train-fume" x="-1" y="-1" width="3" height="3"><feGaussianBlur stdDeviation="3.2" /></filter>
       </defs>
+      {stones(true)}
       {/* the fire under it */}
       <path d={`M ${px - 17} ${POT.foot} q 5 -17 8.5 -5 q 4 -19 8.5 -2 q 5 -18 8.5 -1 q 4 -13 8.5 8 z`} fill={palette.mapFireOuter} />
       <path d={`M ${px - 10} ${POT.foot} q 4 -11 6 -2 q 4 -12 7 0 q 3 -9 7 2 z`} fill={palette.mapFireInner} />
@@ -136,6 +149,7 @@ export function trainingGround({ x, ground, size, side, text }) {
             fill="none" stroke={palette.wsMedalMid} strokeWidth="2.2" strokeLinecap="round" />
       <circle cx={px - r * 0.98} cy={rim + 1} r="2.6" fill={palette.wsMedalMid} stroke={palette.wsMedalEdge} strokeWidth="1" />
       <circle cx={px + r * 0.98} cy={rim + 1} r="2.6" fill={palette.wsMedalMid} stroke={palette.wsMedalEdge} strokeWidth="1" />
+      {stones(false)}
       {/* the fumes: white puffs, growing and fading as they rise */}
       <g filter="url(#train-fume)">
         {PUFFS.map(([dx, dy, pr], n) => (
@@ -186,7 +200,7 @@ export function trainingGround({ x, ground, size, side, text }) {
   const mouth = { x: flx + 52 * F.scale * Math.sin(rad), y: F.y - 52 * F.scale * Math.cos(rad) }
   const flask = (
     <g>
-      {[[8, 0, 9, 5], [21, 3, 15, 7.5], [35, 1, 12, 6.5], [45, 5, 8, 4.6], [19, 10, 8, 4.2]].map(([d, dy, rx, ry], b) => (
+      {[[5, 0, 5.4, 3], [12.6, 1.8, 9, 4.5], [21, 0.6, 7.2, 3.9], [27, 3, 4.8, 2.8], [11.4, 6, 4.8, 2.5]].map(([d, dy, rx, ry], b) => (
         <ellipse key={b} cx={mouth.x + side * d} cy={mouth.y + dy + 2} rx={rx} ry={ry} fill={c} opacity="0.85" />
       ))}
       <g transform={`translate(${flx} ${F.y}) rotate(${fa}) scale(${F.scale}) translate(0 19)`}>
@@ -210,12 +224,10 @@ export function trainingGround({ x, ground, size, side, text }) {
     <g key={n} transform={`translate(${side * ax0} ${ay}) rotate(${side > 0 ? angle : 180 - angle})`}>
       <line x1="-16" y1="0" x2="15" y2="0" stroke={palette.mapSignWoodDark} strokeWidth="1.6" />
       <path d="M 15 -2.6 L 20 0 L 15 2.6 Z" fill={palette.mapArrowTip} />
-      <path d="M -16 0 L -11 -3.4 L -8 -3.4 L -13 0 Z M -16 0 L -11 3.4 L -8 3.4 L -13 0 Z" fill={palette.mapFletching} />
     </g>
   )
   const archery = frame('train-front', (
     <g>
-      {flask}
       <g transform={`translate(${side * BOW.x} ${BOW.y}) rotate(${side * BOW.turn})`}>
         <path d="M -20 0 Q 0 -15 20 0" fill="none" stroke={palette.mapSignWoodDark} strokeWidth="4.2" strokeLinecap="round" />
         <path d="M -20 0 Q 0 -15 20 0" fill="none" stroke={palette.mapSignWood} strokeWidth="2.4" strokeLinecap="round" />
@@ -252,7 +264,8 @@ export function trainingGround({ x, ground, size, side, text }) {
       { el: sign, foot: ground + SIGN.foot * k },
       { el: pot, foot: ground + POT.foot * k },
       { el: mirrors, foot: ground + MIRROR.foot * k },
-      { el: archery, foot: ground + 100 * k },
+      { el: archery, foot: ground + 110 * k },
+      { el: frame('train-flask', flask), foot: ground + (LYING_FLASK.y + 8) * k },
       { el: bomb, foot: ground + BOMB[1] * k },
       ...sticks,
     ],
@@ -261,7 +274,8 @@ export function trainingGround({ x, ground, size, side, text }) {
       toMap([POT_X - r - 4, rim - 8, POT_X + r + 4, POT.foot]),   // the fumes may float over fields
       toMap([STICKS[0][0] - DISC - 4, -50, STICKS_REACH, 62]),
       toMap([-MIRROR.x - MIRROR.w, MIRROR.foot - MIRROR.h - 14, MIRROR.x + MIRROR.w, MIRROR.foot + 3]),
-      toMap([-95, 88, 124, 140]),   // the flask and the archery
+      toMap([-32, 100, 124, 148]),   // the archery
+      toMap([-34, 20, 26, 40]),     // the flask and its puddle
     ],
   }
 }
