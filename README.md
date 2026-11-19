@@ -1,122 +1,136 @@
 # Life of Colors
 
-The game is presented to players as **Life of Colors** in every language (it was called
-*Sorcerer's Apprentice* from 2026-11-02 to 2026-11-10). The sorcerer theme stays as the look.
-
-A logic puzzle with secret rules. When you tap a cell, its new colour depends on the colours of its
-neighbours. Every puzzle has its own hidden rules. Work them out, then turn the goal cell green.
+A logic puzzle with secret rules. When you tap a field, its new color depends on the colors of its
+neighbors. Every puzzle has its own hidden rules: work them out and bring the winning object onto
+the gold-framed field in as few moves as possible. The game is called **Life of Colors** in every
+language and uses the sorcerer theme.
 
 **Play:** https://palinkasaljoscha.github.io/LifeOfColors_game/ (no sign-up, no cookies).
 
-This repo holds only the web app and its telemetry definition. The puzzles are generated, tested
-and analysed in a separate private repo, the factory. Its README is the full guide to the
-workflow: creating and testing instances, shipping them, and using the telemetry.
+This repo holds only the web app and its telemetry definition. The puzzles are generated, tested,
+ranked and analyzed in the separate private repo `LifeOfColors_factory`; its README is the full
+guide to the workflow (creating puzzles, shipping them, using the telemetry). `CLAUDE.md` describes
+the code in detail.
 
 ## Develop
 
 ```
 npm ci
-npm run dev                  # http://localhost:5173  (?instance=<name or id> opens one puzzle,
-                             #  ?catalog=dev plays the factory's --dev export)
-npm test                     # engine vs. factory golden vectors, classic rule, catalog validation
+npm run dev                  # http://localhost:5173
+                             #   ?instance=<name or id>  opens one puzzle
+                             #   ?catalog=dev            plays the factory's --dev export
+                             #   ?map=all                opens every place (review; saves nothing)
+                             #   ?theme=<name>           previews another theme
+npm test                     # engine vs. factory golden vectors, unit tests, catalog validation
 npm run build && npm run preview
 ```
 
-Copy `.env.example` to `.env.local` if you want to send telemetry while testing locally. Rows from
-local testing are tagged `env='dev'`.
+Copy `.env.example` to `.env.local` to send telemetry while testing locally (also set
+`VITE_TELEMETRY_IN_DEV=1`). Rows from local testing are tagged `env='dev'`.
 
-## Configuration
-
-`src/config.js` has one switch, `HIDE_START_CELL_IF_NOT_REQUIRED` (default `false`).
-- When it's `true`, puzzles marked `start_cell_required: false` by the factory start on an empty
-  board, with no green start cell. Their recorded solution also works without it.
-- All other puzzles keep their start cell.
-
-The puzzle id is the same either way, so keep the setting fixed once the game is live.
-
-### Themes
-
-`src/themes.js` lists every visual theme and how it is defined. There are two now: `classic`
-(the colour cells) and `halloween`. Halloween shows 🎃 orange, 👻 blue, 🍬 green and a dimmed 🕸️ for
-uncolored cells, a witch-hand mouse cursor, its own homepage texts and decorations.
-- **Variation per game.** A cell's `emoji` can be a list of choices and `emojiColor` a list of
-  colours; one of each is drawn at random whenever a game screen opens. Retry keeps the draw;
-  going back and opening any game (also the same one again) draws anew. In `halloween`, orange
-  and blue cells get two different objects out of 🎃 👻 🕷️ 🧙‍♀️ 💀 🧛, and the goal candy 🍬 is
-  green, blue, red or yellow. The goal reminder and the win title show this game's candy.
-  Outside a game (homepage) the first choice of everything is used. A new theme gets this by
-  listing choices.
-- `ACTIVE_THEME` picks the theme everyone sees (change it, then redeploy). It is `sorcerer`
-  (Sorcerer's apprentice) since 2026-11-02 (`halloween` from 2026-10-26); `?theme=halloween` or
-  `?theme=classic` show the other looks.
-- `?theme=<name>` in the URL previews any theme, e.g. `…/LifeOfColors_game/?theme=halloween`.
-- A theme only changes the look: rules, puzzle ids, the catalog and telemetry are the same in
-  every theme. Telemetry doesn't record the theme.
-- Theme colours live in `src/theme.js`; themed texts in the locale files under `themes.<name>`.
-- On the home map every level is a place: the training level a castle, then forest hut, tavern,
-  manor, castle, wizard's tower, windmill, yurt and forest lodge in a loop (`src/sites.js`,
-  pictures in `src/assets/sites/`); every level has its own name, e.g. "Amethyst Hut" (`siteNames.*` in the locales).
-- A castle's puzzles are picked in a workshop scene drawn in the flat look of the home map: one
-  potion per puzzle (test tube, or a round flask for a special puzzle). Scenes, their pictures (SVG)
-  and potion places: `src/workshops.js`, `src/assets/workshops/`, `src/components/Workshop.jsx`.
-  `tests/themes.test.js` checks that every theme is complete.
-- Emojis are drawn by the player's device, so they look a little different on iPhone, Android and
-  Windows. The cursor only appears with a mouse.
+Branches: `main` is always stable and deploys; `dev` is the integration branch; one
+`feature/<short-description>` branch per feature.
 
 ## Deploy
 
-Every push to `main` runs `.github/workflows/deploy.yml`: it installs, tests, builds and publishes
-to GitHub Pages. Pushes to other branches only run tests and the build (`ci.yml`).
+Every push to `main` runs `.github/workflows/deploy.yml`: install, test, build, publish to GitHub
+Pages. Pushes to other branches only run tests and the build (`ci.yml`).
 
 One-time setup:
 - Settings → Pages → Source: **GitHub Actions**.
 - Settings → Secrets and variables → Actions → **Variables**: `SUPABASE_URL` and
   `SUPABASE_PUBLISHABLE_KEY`. Both are public values that can only insert.
 
+## Configuration
+
+`src/config.js` (build time — change, then redeploy):
+
+| Setting | Value | Meaning |
+|---|---|---|
+| `HIDE_START_CELL_IF_NOT_REQUIRED` | `true` | Puzzles the factory marks `start_cell_required: false` start on an all-uncolored board. The puzzle id is the same either way, so keep this fixed; the factory's telemetry analysis must use the same value. |
+| `UNLOCK_STARS` | `20` | Stars to collect in a place to open the places it leads to. |
+| `GOAL_INTRO_LEVELS`, `GOAL_INTRO_MS` | `3`, `3000` | In the first levels after training, every puzzle start shows the goal object blinking with a pointing hand. |
+| `CASTLE_COUNT` | `30` | Only used when the catalog has no level graph: that many places in one line. |
+
+### Themes
+
+`src/themes.js` defines the visual themes: `sorcerer` (live, `ACTIVE_THEME`), `classic` (plain
+colored cells) and `halloween`. `?theme=<name>` previews another one.
+- A theme only changes the look: rules, puzzle ids, catalog and telemetry are the same in every
+  theme, and telemetry doesn't record the theme.
+- A cell's `emoji` / `emojiColor` can be a list; one choice of each is drawn when a game screen
+  opens (Retry keeps it). Objects without an emoji (the sorcerer's potion) are drawn in
+  `src/game/drawnObjects.js`.
+- Colors live in `src/theme.js`; themed texts in the locale files under `themes.<name>`.
+  `tests/themes.test.js` checks that every theme is complete.
+- Emojis are drawn by the player's device, so they look a little different on iPhone, Android and
+  Windows.
+
 ## How it fits together
 
 | Path | What |
 |---|---|
-| `public/catalog/` | Puzzles, generated by the factory's `export_catalog.py` (`index.json` + `puzzles.json`), and the map, `level_graph.json` (factory `export_level_graph.py`). Don't edit by hand. Each puzzle has a name (e.g. "Cerulean Gorge"), a tile colour and a publication order (`seq`); the factory assigns them and never changes them. Shipped puzzles also carry their `difficulty_ranking` (1 = easiest) and, for the training castle, a `training_position`. |
-| `schema/instance.schema.json` | The game-instance format shared with the factory. |
-| `src/engine/engine.js` | The rule engine. It must behave like the factory's `instance.py`, and `tests/vectors.json` checks that. |
-| `src/engine/stars.js` | Star rating of a win: 5 stars at the puzzle's `moves_to_win_min` (shown as "Best: X" in the win animation), 2 stars at 1.4 × it, linear in between (rounded to the nearest star), 1 star above. Puzzles without `moves_to_win_min` show no "Best" and no stars. |
+| `public/catalog/` | Generated by the factory — don't edit. `index.json` + `puzzles.json` (`export_catalog.py`) and the map `level_graph.json` (`export_level_graph.py`). Each puzzle has a name (e.g. "Cerulean Gorge"), a tile color and a publication order (`seq`), assigned once by the factory. Shipped puzzles carry their `difficulty_ranking` (1 = easiest) and either a `training_position` or their `site` (place on the map). |
+| `schema/instance.schema.json` | The puzzle format shared with the factory. |
+| `src/engine/engine.js` | The rule engine. It must behave exactly like the factory's `instance.py`; `tests/vectors.json` checks that. |
+| `src/engine/castles.js`, `levelGraph.js` | Places on the map, which puzzles they hold, unlocking (see below). |
+| `src/engine/stars.js` | Star rating of a win: 5 stars at the puzzle's `moves_to_win_min` (shown as "Best: X" in the win animation), 2 stars at 1.4 × it, linear in between (rounded), 1 star above. Puzzles without `moves_to_win_min` show neither. |
+| `src/engine/progress.js` | Saved progress (opt-in, see below). |
 | `src/telemetry/telemetry.js` | Anonymous telemetry (see below). |
-| `telemetry/schema.sql` | Supabase tables (`screen_views`, `puzzle_plays`) and insert-only access policies. Run it in the SQL editor once, and again whenever it changes (safe to re-run). Run it before deploying an app version that sends new columns, otherwise those inserts are rejected. |
+| `telemetry/schema.sql` | Supabase tables and insert-only policies. Run it in the SQL editor once and again whenever it changes (safe to re-run) — before deploying an app version that sends new columns, otherwise those inserts are rejected. |
+
+## Places on the map
+
+The factory ships an order, not levels: `difficulty_ranking`, the training puzzles'
+`training_position`, each other puzzle's `site`, and the **level graph**
+`public/catalog/level_graph.json` (how many places there are and which paths join them).
+`src/engine/castles.js` builds the places from it (in the code they are called castles):
+
+- Place 0 is the training castle: the training puzzles, played in order.
+- Every other ranked puzzle goes to its `site`. A puzzle keeps its site across exports, so new
+  puzzles never push known ones elsewhere. (If not every ranked puzzle has a valid site, the app
+  falls back to cutting the ranking into places of nearly equal size.)
+- The training castle and place 1 are open from the start. Any other place opens when ANY place
+  with a path into it has collected `UNLOCK_STARS` (20) stars.
+- **Wildcards** (`src/wildcards.js`): a few locked places offer a challenge puzzle; solving it with
+  5 stars opens that place and every place on a lower map row.
+- Each place has its own look and name (`src/sites.js`; forest hut, tavern, manor, castle, wizard's
+  tower, windmill, yurt and forest lodge in a loop), and its puzzles are potions in a workshop scene
+  (`src/workshops.js`, `src/components/Workshop.jsx`).
+
+**To change the map, export another graph from the factory.** To review the whole map with every
+place open, add `?map=all` to the URL.
 
 ## Special cells
 
-Puzzles can have one kind of special cell (schema 1.1, `board.special_cells`, feature tag in
-`requires`): blocked cells, a bomb with a trigger colour, a mirror pair, or a clock cell with a colour
+A puzzle can have one kind of special cell (schema 1.1, `board.special_cells`, feature tag in
+`requires`): blocked fields, a bomb with a trigger color, a mirror pair, or a clock with a color
 cycle. The rules are in `src/engine/engine.js` (`tap`) and must match the factory's `instance.py`
-exactly; `tests/engine.test.js` replays the factory's golden vectors to check that. The drawing and
-the animations are in `src/game/GameScene.js` and `src/components/SpecialOverlays.jsx`; see
-CLAUDE.md for the details and the rules that must never change.
+exactly; `tests/engine.test.js` replays the factory's golden vectors to check that. Drawing and
+animations are in `src/game/GameScene.js` and `src/components/SpecialOverlays.jsx`; see `CLAUDE.md`
+for the rules that must never change.
 
 ## Telemetry and privacy
 
-The app records anonymous usage data to see how much the site is used and how the puzzles are
-played. Two tables:
+The app records anonymous usage data to see how much the game is played and how the puzzles are
+solved. Two tables:
 
-- **`screen_views`**: one row per screen shown (home, castle grid, puzzle), with its castle number and,
-  on the puzzle screen, the puzzle id and how it was chosen (Random pick, a grid tile, or a link).
-- **`puzzle_plays`**: one *play* runs from opening a puzzle until leaving it; Retry stays in the
-  same play. A play sends a snapshot row at every win, whenever the page is hidden (tab or app
-  switch, screen lock, closing), and when the player leaves with a button. Each snapshot has the
-  running totals: visible play time, time of the last tap, taps, moves (taps that changed a
-  colour), how often each colour was produced, restarts, wins, fewest taps and moves to a win,
-  the rule-table entries that changed a cell, and the reason for the snapshot (`won`, `hidden`,
-  `back`, `pick_new`, `home`). It also carries the taps since the previous snapshot as a compact
-  list (time, cell, changed; Retry marked). The encoding is documented at the top of
+- **`screen_views`**: one row per screen shown (`home` = map, `level` = a place, `game` = a
+  puzzle), with the place number and, on the puzzle screen, the puzzle id and how it was chosen
+  (`grid` = picked in the app, `link` = an `?instance=` URL).
+- **`puzzle_plays`**: a *play* runs from opening a puzzle until leaving it; Retry stays in the
+  same play. A play sends a snapshot row at every win (`won`), whenever the page is hidden
+  (`hidden`: tab or app switch, screen lock, closing) and when the player leaves with a button
+  (`home` = the map button, `back` = back to the place). Each snapshot has the running totals:
+  visible play time, time of the last tap, taps, moves (taps that changed a color), how often each
+  color was produced, restarts, wins, fewest taps and moves to a win, and the rule-table entries that
+  changed a field. It also carries the taps since the previous snapshot as a compact list (time,
+  field, changed; Retry marked); the encoding is documented at the top of
   `src/telemetry/telemetry.js`.
 
-Analysis: take the latest snapshot per `play_id` for the totals and the exit route; join the
-`clicks` of all snapshots in `snapshot` order for the full tap list. Inactivity is decided from
-`last_click_ms` versus `active_ms`.
-
 Every row carries a **visit id**: a random id that lives only in the page's memory, so a reload
-starts a new visit. It only groups what happened during one visit. Rows also carry the app
-version, the puzzle-catalog version and `env` (`prod`, or `dev` for local testing).
+starts a new visit. Rows also carry the app version, the catalog version and `env` (`prod`, or
+`dev` for local testing).
 
 The app stores no cookies or other identifiers. It doesn't record IP address, device, browser,
 language, location or the browser's clock time; the only clock time is the database's
@@ -124,47 +138,30 @@ language, location or the browser's clock time; the only clock time is the datab
 
 ## Saved progress (opt-in)
 
-The app remembers which puzzles a player tried and solved, and each puzzle's best star rating
-(`src/engine/progress.js`). Totals: solved puzzles, and stars = the sum of each puzzle's best
-rating (at most 5 per puzzle). They are shown on the home page (totals and per castle), in the
-castle header, on the puzzle tiles (best stars), and in the win animation ("New best!").
+The app remembers which puzzles a player tried and solved, each puzzle's best star rating, each
+place's star counter, the last 20 played puzzles and the places opened by wildcards
+(`src/engine/progress.js`). Total stars = the sum of each puzzle's best rating (at most 5 per
+puzzle).
 
-Each castle also has its own star counter: every time a solve raises a puzzle's best rating, the
-gain is added to the castle the puzzle is in at that moment. Unlocking the next castle uses these
-counters. A new catalog can move puzzles to another castle; their stars go with them and the
-counters stay, so a counter can be higher than its current puzzles' stars and never goes down.
+Each place's star counter grows every time a solve raises a puzzle's best rating there; unlocking
+uses these counters, and they never go down.
 
 - Without consent this lives in memory only and is gone when the page is closed.
 - On the first visit a banner asks "Save your progress?" ("Yes, save" / "No thanks", equally
-  prominent; it never covers a game). Only after "Yes" is the progress kept in this browser's
-  `localStorage` (key `loc-progress-v1`; format version 2 adds the castle counters, version 1 is
-  converted on the first load). The answer itself is stored under `loc-storage-consent`.
+  prominent; it never covers a game). If progress isn't saved, the banner appears once more per
+  visit when the player opens a new place. Only after "Yes" is progress kept in this browser's
+  `localStorage` (key `loc-progress-v1`); the answer itself is stored under `loc-storage-consent`.
   The choice can be changed at any time at the bottom of the home page; "No thanks" deletes the
   saved progress.
-- Nothing of it is ever sent: it is not part of the telemetry, and no cookies are used.
+- Nothing of it is ever sent: it is not part of the telemetry.
 
 Why opt-in: under the EU ePrivacy rules, storing anything on the player's device needs consent
 unless it is strictly necessary for a service the player explicitly asked for. That applies to
-`localStorage` as much as to cookies, and whether or not the data is personal. The game works
-without saved progress, so remembering it across visits is a convenience that needs consent.
-Swiss law only requires information and an opt-out; the stricter EU rule is followed because the
-game is public. Storing the consent answer itself needs no consent.
+`localStorage` as much as to cookies, whether or not the data is personal. The game works without
+saved progress, so remembering it across visits is a convenience that needs consent. Swiss law only
+requires information and an opt-out; the stricter EU rule is followed because the game is public.
+Storing the consent answer itself needs no consent.
 
 ## License
 
 CC BY-NC-SA 4.0 (see `LICENSE`).
-
-## Castles (levels)
-
-The factory ships an order, not levels: `difficulty_ranking` (1 = easiest) and the training
-puzzles' `training_position` -- plus the **level graph** `public/catalog/level_graph.json`
-(factory `export_level_graph.py`): how many castles there are and which paths join them on the
-home map. The app turns that into castles (`src/engine/castles.js`): castle 0 holds the training
-puzzles in their order; the other ranked puzzles are cut, in ranking order, into the graph's other
-castles (nearly equal sizes; castle numbers grow up the map). The training castle and castle 1 are
-open from the start (castle 1 does not wait for the training to be finished); any other castle
-opens when ANY castle with a path into it is done: `UNLOCK_STARS` (`src/config.js`, 20) stars
-collected there, whatever its size. **To change the map, export another graph from the factory.**
-Without a level graph the app falls back to `CASTLE_COUNT` castles in one line.
-
-To review the whole map with every castle open, add `?map=all` to the URL (nothing is saved for it).
