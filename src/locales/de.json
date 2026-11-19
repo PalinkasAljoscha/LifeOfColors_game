@@ -3,8 +3,8 @@
     "title": "Life of Colors"
   },
   "home": {
-    "description": "Das Ziel: 🟩 auf dem gold umrandeten Feld. Tippe auf ein Feld um es zu verwandeln - oder auch nicht - je nachdem, welche Farben drumherum sind. Die versteckten Regeln sind bei jedem Puzzle anders.",
-    "chooseLevel": "Wähle eine Stufe",
+    "description": "Das Ziel: 🟩 auf dem gold umrandeten Feld. Tippe auf ein Feld, um es zu verwandeln – oder auch nicht –, je nachdem, welche Farben drumherum sind. Die versteckten Regeln sind bei jedem Puzzle anders.",
+    "chooseLevel": "Wähle ein Level",
     "puzzleCount_one": "{{count}} Puzzle",
     "puzzleCount_other": "{{count}} Puzzles",
     "loading": "Puzzles werden geladen…",
@@ -42,7 +42,7 @@
   },
   "levelScreen": {
     "back": "Karte",
-    "level": "Stufe {{n}}",
+    "level": "Level {{n}}",
     "cryptMotto": "Vita Colorum",
     "intro": "Einführung",
     "start": "Los",
@@ -63,34 +63,34 @@
   },
   "consent": {
     "title": "Fortschritt speichern?",
-    "body": "Das Spiel kann sich auf diesem Gerät merken, welche Puzzles du gelöst hast und deine besten Sterne – so bleiben sie beim nächsten Mal erhalten. Gespeichert wird nur in diesem Browser, nichts wird gesendet.",
+    "body": "Das Spiel kann sich auf diesem Gerät merken, welche Puzzles du gelöst hast, und deine besten Sterne – so bleiben sie beim nächsten Mal erhalten. Gespeichert wird nur in diesem Browser, nichts wird gesendet.",
     "accept": "Ja, speichern",
     "decline": "Nein, danke",
     "statusOn": "Fortschritt wird auf diesem Gerät gespeichert",
     "statusOff": "Fortschritt wird nicht gespeichert (nur dieser Besuch)",
     "declineDeletes": "„Nein, danke“ löscht den gespeicherten Fortschritt aus diesem Browser.",
-    "nudgeNews": "🏰 {{name}} ist offen!",
-    "nudgeBody": "Dein Fortschritt wird noch nicht gespeichert – die geöffneten Burgen wären beim nächsten Mal weg. In diesem Browser speichern? Er wird nirgendwohin gesendet."
+    "nudgeNews": "🏰 {{name}} ist freigespielt!",
+    "nudgeBody": "Dein Fortschritt wird noch nicht gespeichert – die freigespielten Burgen wären beim nächsten Mal weg. In diesem Browser speichern? Er wird nicht geteilt."
   },
   "themes": {
     "halloween": {
       "tagline": "Halloween-Edition",
-      "description": "Das Ziel: 🍬 auf dem gold umrandeten Feld. Tippe auf ein Feld um es zu verwandeln - oder auch nicht - je nachdem, welche Farben drumherum sind. Die versteckten Regeln sind bei jedem Puzzle anders.",
-      "chooseLevel": "Wähle deine Gruselstufe",
+      "description": "Das Ziel: 🍬 auf dem gold umrandeten Feld. Tippe auf ein Feld, um es zu verwandeln – oder auch nicht –, je nachdem, welche Dinge drumherum sind. Die versteckten Regeln sind bei jedem Puzzle anders.",
+      "chooseLevel": "Wähle dein Grusel-Level",
       "winTitle": "Gewonnen! 🍬"
     },
     "sorcerer": {
       "description": "Das Ziel: 👑 auf dem gold umrandeten Feld. Tippe auf ein Feld, um es zu verwandeln – oder auch nicht –, je nachdem, welche Dinge drumherum sind. Die geheimen Zauber sind bei jedem Puzzle anders.",
-      "chooseLevel": "Wähle deine Zauberstufe",
+      "chooseLevel": "Wähle dein Zauber-Level",
       "winTitle": "Gekrönt! 👑"
     }
   },
   "rules": {
     "title": "So funktioniert es",
-    "p1": "Jedes Puzzle hat ein versteckte Regeln, wie sich ein Feld beim Antippen verwandelt. Die Regeln beruhen auf den Farben der Nachbarfelder.",
+    "p1": "Jedes Puzzle hat versteckte Regeln, wie sich ein Feld beim Antippen verwandelt. Die Regeln beruhen auf den Farben der Nachbarfelder.",
     "p2": "Verstehe die Regeln und schmiede einen Plan, wie du in das gold umrandete Feld das richtige Objekt zauberst.",
     "p3": "Schaffst du es mit möglichst wenigen Zügen? Je weniger du brauchst, desto mehr Sterne gibt es.",
-    "p4": "Experimentiere einfach und starte jederzeit neu mit „{{retry}}“. Auch nach einem Erfolg kannst du es nochmal versuchen um mit weniger Zügen mehr Sterne zu holen.",
+    "p4": "Experimentiere einfach und starte jederzeit neu mit „{{retry}}“. Auch nach einem Erfolg kannst du es nochmal versuchen, um mit weniger Zügen mehr Sterne zu holen.",
     "close": "Los geht's"
   },
   "training": {
@@ -122,12 +122,12 @@
     "trainingSign": "Training",
     "progressTraining": "{{solved}} von {{required}} Puzzles gelöst",
     "locked": "gesperrt",
-    "lockedHint": "Hole zuerst {{count}} Sterne an einem Ort davor",
+    "lockedHint": "Sammle erst {{count}} Sterne an einem Ort davor",
     "starsNeeded": "{{count}} Sterne öffnen den nächsten Ort",
     "starsNeededMany": "{{count}} Sterne öffnen die nächsten Orte",
     "nextOpen": "{{name}} ist freigespielt!",
     "nextOpenMany": "{{count}} neue Orte sind freigespielt!",
-    "review": "Ansicht: alle Stufen frei"
+    "review": "Ansicht: alle Level frei"
   },
   "history": {
     "title": "Zuletzt gezaubert",
@@ -136,16 +136,16 @@
   },
   "intro": {
     "tap": "Tippe auf ein Feld, um etwas ver- oder herzu-zaubern.",
-    "hood": "Die Nachbarn eines Feldes bestimmen, wie es sich verwandeln kann.",
-    "goal": "Um zu gewinnen, zaubere ein {{goal}} auf das gold umrandete Feld.",
+    "hood": "Die Nachbarn eines Feldes bestimmen, wie dein Zauber es verwandeln wird.",
+    "goal": "Das Ziel: Zaubere ein {{goal}} auf das gold umrandete Feld.",
     "next": "Weiter",
     "start": "Los geht's!",
     "notes": "Hier stehen die Regeln, die du schon beobachtet hast.",
-    "notesHint": "Schau hinein, um einen Weg zu finden, auf dem {{goal}} in den goldenen Rahmen kommt."
+    "notesHint": "Schau nach und überlege, wie du also {{goal}} ins golden gerahmte Feld zaubern kannst."
   },
   "special": {
-    "blockedTap": "Dieses Feld ist außer Reichweite.",
-    "clockTap": "Hier kannst du nichts tun. Es dreht sich weiter, wenn du andere Felder verwandelst.",
+    "blockedTap": "Dieses Feld widersteht deiner Zauberei.",
+    "clockTap": "Dein Zauber ist machtlos. Es dreht sich einfach weiter, wenn du andere Felder verwandelst.",
     "bombCareful": "He, Vorsicht!",
     "bombIntro": "Vorsicht! Eines der Objekte lässt die Bombe explodieren.",
     "bombIntroColors": "Vorsicht! Eine der Farben bringt die Bombe zum Explodieren.",
@@ -155,9 +155,10 @@
   "wildcard": {
     "title": "Wildcard",
     "card": "Wildcard: springe zu einem höheren Level",
-    "rule": "Schaffe das Puzzle mit der kleinsten Anzahl an Zügen – dann öffnen sich dieser Ort und alle Orte in den Reihen darunter. Beliebig viele Versuche.",
+    "rule": "Löse das Puzzle mit der kleinsten Anzahl an Zügen – dann öffnen sich dieser Ort und alle Orte in den Reihen darunter. Beliebig viele Versuche.",
     "try": "Wildcard-Versuch",
-    "needMoves": "{{count}} Züge erlaubt",
+    "needMoves_one": "{{count}} Zug erlaubt",
+    "needMoves_other": "{{count}} Züge erlaubt",
     "won": "Wildcard gewonnen! Viele neue Orte stehen dir offen.",
     "close": "Schließen"
   }

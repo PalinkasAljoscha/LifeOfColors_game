@@ -3,15 +3,15 @@
     "title": "Life of Colors"
   },
   "home": {
-    "description": "Your goal: Get 🟩 on the gold framed cell. How? Tap a cell and it might transform, depending on what colors are around it. The hidden rules are different for each puzzle.",
+    "description": "Your goal: Get 🟩 on the gold framed field. How? Tap a field and it might transform, depending on what colors are around it. The hidden rules are different for each puzzle.",
     "chooseLevel": "Choose a level",
     "puzzleCount_one": "{{count}} puzzle",
     "puzzleCount_other": "{{count}} puzzles",
     "loading": "Loading puzzles…",
     "loadError": "The puzzles could not be loaded. Please check your connection and reload the page.",
-    "privacyBefore": "No cookies. Progress saved on browser (",
+    "privacyBefore": "No cookies. Progress is saved in your browser (",
     "privacyLink": "opt in/out",
-    "privacyAfter": "). Telemetry is collected without identifying data points only.",
+    "privacyAfter": "). Telemetry is collected only without identifying data.",
     "more": "More"
   },
   "game": {
@@ -34,7 +34,7 @@
     "pickNew": "Pick new",
     "trainingDay": "Passed training day {{n}}",
     "trainingPlan": "Training plan",
-    "trainingComplete": "Training Complete",
+    "trainingComplete": "Training complete",
     "trainingReady": "You are ready for the journey now.",
     "trainingNext": "{{castle}} is waiting.",
     "startJourney": "Start journey",
@@ -80,22 +80,22 @@
       "winTitle": "Sweet victory! 🍬"
     },
     "sorcerer": {
-      "description": "Your goal: Make👑 appear on the gold framed field. How? Tap a field and it might transform, depending on what objects are around it. The hidden spells are different for each puzzle.",
+      "description": "Your goal: Make 👑 appear on the gold framed field. How? Tap a field and it might transform, depending on what objects are around it. The hidden spells are different for each puzzle.",
       "chooseLevel": "Choose your level of magic",
       "winTitle": "Crowned! 👑"
     }
   },
   "rules": {
     "title": "How it works",
-    "p1": "Each puzzle has a hidden rule that determines how a field transforms when tapped. The rule considers the colors of the neighboring fields.",
-    "p2": "Understand the rules and make a plan how to get the winning object on the gold framed field.",
-    "p3": "Can you achieve the least number of moves possible? The fewer you need, the more stars you get.",
-    "p4": "Use {{retry}} anytime to start the puzzle from the beginning. Experiment to find out the hidden rules. After a win you can retry to get more stars by using less moves.",
+    "p1": "Each puzzle has hidden rules that determine how a field transforms when tapped. The rules consider the colors of the neighboring fields.",
+    "p2": "Understand the rules and make a plan for how to get the winning object on the gold framed field.",
+    "p3": "Can you solve it with the fewest moves possible? The fewer you need, the more stars you get.",
+    "p4": "Use “{{retry}}” anytime to start the puzzle from the beginning. Experiment to find out the hidden rules. After a win you can retry to get more stars by using fewer moves.",
     "close": "Got it"
   },
   "training": {
     "notes": "Observations",
-    "nothing": "no coloured neighbours"
+    "nothing": "no colored neighbors"
   },
   "sites": {
     "castle": "Castle",
@@ -120,11 +120,11 @@
   "castles": {
     "tutorial": "Training castle",
     "trainingSign": "Training",
-    "progressTraining": "{{solved}} of {{required}} puzzles won",
+    "progressTraining": "{{solved}} of {{required}} puzzles solved",
     "locked": "locked",
     "lockedHint": "Get {{count}} stars in a preceding place first",
-    "starsNeeded": "{{count}} stars needed to open the next site",
-    "starsNeededMany": "{{count}} stars needed to open next sites",
+    "starsNeeded": "{{count}} stars needed to open the next place",
+    "starsNeededMany": "{{count}} stars needed to open the next places",
     "nextOpen": "{{name}} is open!",
     "nextOpenMany": "{{count}} new places are open!",
     "review": "Review: every level open"
@@ -136,7 +136,7 @@
   },
   "intro": {
     "tap": "Tap a field to try your transforming spell.",
-    "hood": "The neighbours of a field decide how it transforms.",
+    "hood": "The neighbors of a field decide how it transforms.",
     "goal": "To win, conjure a {{goal}} onto the gold-framed field.",
     "next": "Next",
     "start": "Let's go!",
@@ -144,7 +144,7 @@
     "notesHint": "Have a look to come up with a path that puts the {{goal}} into the golden frame."
   },
   "special": {
-    "blockedTap": "This cell is out of bounds.",
+    "blockedTap": "This field resists your magic.",
     "clockTap": "You can't do anything here. This moves on as you transform other fields.",
     "bombCareful": "Oh, careful!",
     "bombIntro": "Watch out! One of the objects triggers the bomb.",
@@ -155,9 +155,10 @@
   "wildcard": {
     "title": "Wildcard",
     "card": "Wildcard: jump up to a higher level",
-    "rule": "Win the puzzle with the minimum number of moves – then this place and every place on the rows below it open. Unlimited tries.",
+    "rule": "Solve the puzzle with the minimum number of moves – then this place and every place on the rows below it open. Unlimited tries.",
     "try": "Wildcard try",
-    "needMoves": "Need {{count}} moves to pass",
+    "needMoves_one": "{{count}} move allowed",
+    "needMoves_other": "{{count}} moves allowed",
     "won": "Wildcard won! Many new places unlocked.",
     "close": "Close"
   }
