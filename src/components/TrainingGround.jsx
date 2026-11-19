@@ -61,7 +61,7 @@ const BOMB = [122, 44, 22]
 // other side, a little more = neck a little down), drawn at `scale`.
 const FLASK = 'M-5,-70 V-37.6 A19.4,19.4 0 1 0 5,-37.6 V-70'
 const FLASK_IN = 'M-4,-70 V-37 A18.4,18.4 0 1 0 4,-37 V-70 Z'
-const LYING_FLASK = { x: -16, y: 27, turn: 98, scale: 0.51 }   // between the castle and the mirrors
+const LYING_FLASK = { x: -88, y: 34, turn: 98, scale: 0.51 }   // between the sign's post and the left mirror
 // The archery lying around: the bow at (x, y), turned by `turn` degrees; arrows [x, y, angle].
 const BOW = { x: 66, y: 118, turn: -24 }
 const ARROWS = [[36, 138, -8], [80, 136, 14], [104, 112, -32]]
@@ -275,7 +275,7 @@ export function trainingGround({ x, ground, size, side, text }) {
       toMap([STICKS[0][0] - DISC - 4, -50, STICKS_REACH, 62]),
       toMap([-MIRROR.x - MIRROR.w, MIRROR.foot - MIRROR.h - 14, MIRROR.x + MIRROR.w, MIRROR.foot + 3]),
       toMap([-32, 100, 124, 148]),   // the archery
-      toMap([-34, 20, 26, 40]),     // the flask and its puddle
+      toMap([-106, 24, -46, 46]),   // the flask and its puddle
     ],
   }
 }

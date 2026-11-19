@@ -302,7 +302,7 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   style (blurred white puffs, `winVapour`, growing and fading as they rise; still, no animation),
   in front of the castle two mirrors drawn like the game's mirror cells (`mirrorLink` frame and
   tint, `mirrorGlint` diagonal glints) standing face to face on wooden stands with an electric
-  flash between them (zigzag, glowing); between them and the castle ONE small flask lying on the grass -- the workshop's
+  flash between them (zigzag, glowing); between the sign's post and the left mirror ONE small flask lying on the grass -- the workshop's
   round-bottomed flask (Workshop.jsx `FLASK`, its glass and highlights, no stopper) in orchid
   `mapFlaskPotion` (#DA70D6, one of the puzzles' potion colours) with its potion running out
   into a puddle -- and before the mirrors a bow with three arrows lying around (heads only, no
