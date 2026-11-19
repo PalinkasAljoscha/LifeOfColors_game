@@ -44,7 +44,7 @@ const POT = { dx: -24, foot: -44, r: 24 }
 const STONES = [[0, 10.4], [36, 8.8], [72, 11.2], [108, 9.6], [144, 10.8], [180, 9.2], [216, 8], [252, 8.8],
   [288, 7.6], [324, 8.4]]
 // Its fumes: [dx, height above the rim, radius] -- growing and fading as they rise.
-const PUFFS = [[-4, 6, 6], [5, 14, 8], [-3, 24, 10], [6, 35, 11.5], [-4, 47, 13], [4, 58, 14]]
+const PUFFS = [[-3, 4, 5], [3, 11, 6]]   // just a wisp (the chimney's cloud is the big smoke)
 
 // The practice targets: [x, foot, height of the stick up to the disc's middle, tilt in degrees
 // (positive leans away from the castle), emoji]. Disc radius DISC.
@@ -190,7 +190,7 @@ export function trainingGround({ x, ground, size, side, text }) {
       {/* the fumes: white puffs, growing and fading as they rise */}
       <g filter="url(#train-fume)">
         {PUFFS.map(([dx, dy, pr], n) => (
-          <circle key={n} cx={px + side * dx} cy={rim - dy} r={pr} fill={palette.winVapour} opacity={0.8 - n * 0.11} />
+          <circle key={n} cx={px + side * dx} cy={rim - dy} r={pr} fill={palette.winVapour} opacity={0.85 - n * 0.2} />
         ))}
       </g>
     </g>

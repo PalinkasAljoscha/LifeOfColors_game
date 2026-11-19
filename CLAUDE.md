@@ -298,8 +298,8 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   left has no room -- then everything is mirrored) with a spider (🕷️) hanging on its thread
   (`mapSpiderThread`) from the plank, a big dark-grey (not black) cauldron over a small fire, both
   in a ring of big stones (`mapStone*`, 2 x their first size; the back half behind them, the front half in front), behind and above the sign (not hidden by it), with a copper handle (`wsMedalMid` / `wsMedalEdge`)
-  and the end of a big wooden spoon sticking out, its fumes in the win animation's
-  style (blurred white puffs, `winVapour`, growing and fading as they rise; still, no animation),
+  and the end of a big wooden spoon sticking out, only a faint wisp of fumes over it in the win
+  animation's style (two small blurred white puffs, `winVapour`; still, no animation),
   in front of the castle (a little to the sign's side) two mirrors drawn like the game's mirror cells (`mirrorLink` frame and
   tint, `mirrorGlint` diagonal glints) standing face to face on wooden stands with an electric
   flash between them (zigzag, glowing); between the sign's post and the left mirror ONE small flask lying on the grass -- the workshop's
