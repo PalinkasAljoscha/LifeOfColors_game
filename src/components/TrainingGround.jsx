@@ -1,15 +1,16 @@
 // The training ground around the training castle (castle 0) on the home map (CastleMap.jsx):
 //   - a wooden arrow sign, "Training" (castles.trainingSign), on a post beside the castle and
 //     pointing at it;
-//   - a big cauldron on its other side, over a small fire, with fumes in the puzzles' colours rising
-//     out of it (still, like every map picture: no animation);
-//   - a small practice board lying on the grass: 3 x 3 cells of the sorcerer theme's night-blue
-//     page with the puzzles' own emojis (stones, mushroom, frog, gem) and the crown on its
-//     gold-framed goal cell.
+//   - a big dark-grey cauldron in front of the sign, over a small fire, with fumes rising out of
+//     it in the win animation's style (soft white puffs that grow and fade as they rise; still,
+//     like every map picture: no animation);
+//   - on the castle's other side a few practice targets: sticks in the ground, of different
+//     heights, some upright, some tilted, each topped with a round wooden disc like a road sign,
+//     and on each disc one of the puzzles' emojis (the crown, the goal, among them).
 // Everything is in the landscape's units (size / 100) around the middle of the castle's ground
-// line, like a <site>-land.svg; `side` = 1 puts the sign on the left (pointing right) and the
-// cauldron on the right, -1 mirrors that; the board lies in front of the castle. Boxes are [x0, y0, x1, y1] in those units
-// (for the map's "what lies flat stays clear" rule, components/mapClear.js).
+// line, like a <site>-land.svg; `side` = 1 puts the sign and the cauldron on the left and the
+// sticks on the right, -1 mirrors that. Boxes are [x0, y0, x1, y1] (for the map's "what lies flat
+// stays clear" rule, components/mapClear.js).
 import { palette } from '../theme.js'
 
 const FONT = "'Arial Black', Arial, sans-serif"
@@ -22,22 +23,28 @@ const TIP = 12
 const signWidth = (text) => [...text].length * SIGN.font * 0.72 + 26
 /** How far the sign reaches out from the castle's middle, in the landscape's units. */
 export const signReach = (text) => -SIGN.near + signWidth(text)
+/** How far the sticks reach out on the other side. */
+export const STICKS_REACH = 166
 
 // The cauldron: standing at (x, foot), body radius r.
-const POT = { x: 104, foot: 46, r: 25 }
+const POT = { x: -96, foot: 78, r: 24 }
+// Its fumes: [dx, height above the rim, radius] -- growing and fading as they rise.
+const PUFFS = [[-4, 6, 6], [5, 14, 8], [-3, 24, 10], [6, 35, 11.5], [-4, 47, 13], [4, 58, 14]]
 
-// The practice board: top left corner, cell size, tilt (degrees).
-const BOARD = { x: -40, y: 34, cell: 22, tilt: -6 }
-const BOARD_DROPS = [0, 16, 32, 48]   // where else it may lie: further down, in these units
-const CELLS = [
-  ['🪨', '🍄', '👑'],
-  ['🐸', '🪨', '🪨'],
-  ['🪨', '💎', '🪨'],
+// The practice targets: [x, foot, height of the stick up to the disc's middle, tilt in degrees
+// (positive leans away from the castle), emoji]. Disc radius DISC.
+const STICKS = [
+  [64, 26, 44, -4, '🍄'],
+  [82, 10, 60, 3, '👑'],
+  [100, 34, 36, 12, '🐸'],
+  [118, 16, 52, -9, '💎'],
+  [136, 36, 34, 5, '🐉'],
+  [152, 20, 46, 15, '🪨'],
 ]
+const DISC = 12.5
 
 /** The training ground's parts for castle 0 standing at (x, ground) with picture size `size`:
- *  { sign, pot } each { el, box, foot } (box in map pixels, foot = map y), and board = its
- *  spots [{ el, box }], the first one where it is free. */
+ *  standing things [{ el, foot }] (foot = map y) and the boxes nothing flat may touch (map px). */
 export function trainingGround({ x, ground, size, side, text }) {
   const k = size / 100
   const toMap = ([x0, y0, x1, y1]) => {
@@ -65,66 +72,62 @@ export function trainingGround({ x, ground, size, side, text }) {
 
   // ── the cauldron with its fumes ──
   const px = side * POT.x, r = POT.r, rim = POT.foot - r * 1.55
-  const puffs = [
-    // [dx, dy above the rim, radius, colour]
-    [-7, 9, 8, palette.cellGreenFill],
-    [6, 18, 10, palette.cellBlueFill],
-    [-5, 31, 11.5, palette.mapFumePurple],
-    [9, 44, 10, palette.cellOrangeFill],
-    [-3, 57, 12, palette.cellGreenFill],
-    [12, 70, 9, palette.mapFumePurple],
-    [2, 81, 8, palette.cellBlueFill],
-    [-9, 90, 6, palette.cellOrangeFill],
-  ]
   const pot = frame('train-pot', (
     <g>
+      {/* the fumes' soft edge, as the win animation's puffs (blurred white) */}
+      <defs>
+        <filter id="train-fume" x="-1" y="-1" width="3" height="3"><feGaussianBlur stdDeviation="3.2" /></filter>
+      </defs>
       {/* the fire under it */}
       <path d={`M ${px - 17} ${POT.foot} q 5 -17 8.5 -5 q 4 -19 8.5 -2 q 5 -18 8.5 -1 q 4 -13 8.5 8 z`} fill={palette.mapFireOuter} />
       <path d={`M ${px - 10} ${POT.foot} q 4 -11 6 -2 q 4 -12 7 0 q 3 -9 7 2 z`} fill={palette.mapFireInner} />
       {/* legs */}
-      <rect x={px - r * 0.8} y={POT.foot - 9} width="4" height="9" fill={palette.mapCauldron} />
-      <rect x={px + r * 0.8 - 4} y={POT.foot - 9} width="4" height="9" fill={palette.mapCauldron} />
+      <rect x={px - r * 0.8} y={POT.foot - 9} width="4.5" height="9" fill={palette.mapCauldron} />
+      <rect x={px + r * 0.8 - 4.5} y={POT.foot - 9} width="4.5" height="9" fill={palette.mapCauldron} />
       {/* the pot: a round body under a thick rim, a glint, the brew at the top */}
       <ellipse cx={px} cy={POT.foot - r * 0.95} rx={r} ry={r * 0.85} fill={palette.mapCauldron} />
       <path d={`M ${px - r * 0.62} ${POT.foot - r * 1.35} a ${r * 0.7} ${r * 0.6} 0 0 0 -${r * 0.15} ${r * 0.75}`}
             fill="none" stroke={palette.mapCauldronGlint} strokeWidth="2.5" strokeLinecap="round" />
       <ellipse cx={px} cy={rim} rx={r * 1.02} ry={r * 0.28} fill={palette.mapCauldronRim} />
-      <ellipse cx={px} cy={rim} rx={r * 0.8} ry={r * 0.17} fill={palette.mapFumePurple} />
+      <ellipse cx={px} cy={rim} rx={r * 0.8} ry={r * 0.17} fill={palette.mapBrew} />
       <circle cx={px - 5} cy={rim - 1} r="2.2" fill={palette.mapBrewBubble} />
       <circle cx={px + 6} cy={rim} r="1.6" fill={palette.mapBrewBubble} />
-      {/* the fumes: puffs in the puzzles' colours, growing and fading as they rise */}
-      {puffs.map(([dx, dy, pr, c], n) => (
-        <circle key={n} cx={px + side * dx} cy={rim - dy} r={pr} fill={c} opacity={0.85 - n * 0.08} />
-      ))}
+      {/* the fumes: white puffs, growing and fading as they rise */}
+      <g filter="url(#train-fume)">
+        {PUFFS.map(([dx, dy, pr], n) => (
+          <circle key={n} cx={px + side * dx} cy={rim - dy} r={pr} fill={palette.winVapour} opacity={0.8 - n * 0.11} />
+        ))}
+      </g>
     </g>
   ))
 
-  // ── the practice board ──
-  const n = CELLS.length, c = BOARD.cell, bw = n * c
-  const bx = side > 0 ? BOARD.x : -BOARD.x - bw
-  const boardAt = (drop) => frame('train-board', (
-    <g transform={`translate(0 ${drop}) rotate(${side * BOARD.tilt} ${bx + bw / 2} ${BOARD.y + bw / 2})`}>
-      <rect x={bx - 4} y={BOARD.y - 4} width={bw + 8} height={bw + 8} rx="5" fill={palette.mapSignWoodDark} />
-      {CELLS.flatMap((row, r) => row.map((e, col) => {
-        const goal = e === '👑', cx = bx + col * c, cy = BOARD.y + r * c
-        return (
-          <g key={`${r}-${col}`}>
-            <rect x={cx + 1} y={cy + 1} width={c - 2} height={c - 2} rx="3" fill={palette.scCellFill}
-                  stroke={goal ? palette.starGold : palette.scCellBorder} strokeWidth={goal ? 2 : 1} />
-            <text x={cx + c / 2} y={cy + c / 2 + 1} textAnchor="middle" dominantBaseline="central"
-                  fontSize={c * 0.62} opacity={e === '🪨' ? 0.6 : 1}>{e}</text>
-          </g>
-        )
-      }))}
-    </g>
-  ))
+  // ── the practice targets: one standing thing per stick, so they cover each other by their feet ──
+  const sticks = STICKS.map(([sx0, foot, h, tilt, e], n) => {
+    const bx = side * sx0
+    return {
+      foot: ground + foot * k,
+      el: frame(`train-stick-${n}`, (
+        <g transform={`rotate(${side * tilt} ${bx} ${foot})`}>
+          <rect x={bx - 2} y={foot - h} width="4" height={h} fill={palette.mapSignWoodDark} />
+          <circle cx={bx} cy={foot - h} r={DISC} fill={palette.mapSignWood} stroke={palette.mapSignWoodDark} strokeWidth="2.2" />
+          <circle cx={bx} cy={foot - h} r={DISC - 3.2} fill="none" stroke={palette.mapSignWoodDark} strokeWidth="0.8" opacity="0.45" />
+          <text x={bx} y={foot - h + 0.8} textAnchor="middle" dominantBaseline="central" fontSize={DISC * 1.25}
+                transform={`rotate(${-side * tilt * 0.5} ${bx} ${foot - h})`}>{e}</text>
+        </g>
+      )),
+    }
+  })
 
   return {
-    sign: { el: sign, foot: ground + SIGN.foot * k, box: toMap([SIGN.near - w, top, SIGN.near + tip, SIGN.foot]) },
-    pot: { el: pot, foot: ground + POT.foot * k, box: toMap([POT.x - r - 4, rim - 8, POT.x + r + 4, POT.foot]) },   // the fumes may float over fields
-    // the board's spots (placed like a landscape's flat thing): as planned, then further down
-    board: BOARD_DROPS.map((d) => ({
-      el: boardAt(d), box: toMap([BOARD.x - 6, BOARD.y + d - 6, BOARD.x + bw + 6, BOARD.y + d + bw + 6]),
-    })),
+    standing: [
+      { el: sign, foot: ground + SIGN.foot * k },
+      { el: pot, foot: ground + POT.foot * k },
+      ...sticks,
+    ],
+    taken: [
+      toMap([SIGN.near - w, top, SIGN.near + tip, SIGN.foot]),
+      toMap([POT.x - r - 4, rim - 8, POT.x + r + 4, POT.foot]),   // the fumes may float over fields
+      toMap([STICKS[0][0] - DISC - 4, -40, STICKS_REACH, 40]),
+    ],
   }
 }

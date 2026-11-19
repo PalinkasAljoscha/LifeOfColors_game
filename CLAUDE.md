@@ -295,12 +295,14 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   **Training ground** (2026-11-19, `components/TrainingGround.jsx`): around the training castle a
   wooden arrow sign on a post points at it, "Training" (`castles.trainingSign`; anchored by its
   tip, so a longer word grows away from the castle; on the castle's left, or its right where the
-  left has no room), a big cauldron over a small fire on its other side with fumes in the puzzles'
-  colours (still puffs, no animation), and a small 3 x 3 practice board on the grass in front of
-  it (the sorcerer theme's night-blue cells with the puzzles' emojis, the crown on the gold-framed
-  goal cell). Sign and cauldron stand like a landscape's standing things; the board is the first
-  flat thing served (the castle's own fields make way), further down if its spot is taken.
-  Colours `mapSign*`, `mapCauldron*`, `mapFire*`, `mapFumePurple`, `mapBrewBubble`.
+  left has no room -- then everything is mirrored), a big dark-grey (not black) cauldron over a
+  small fire in front of the sign, its fumes in the win animation's style (blurred white puffs,
+  `winVapour`, growing and fading as they rise; still, no animation), and on the castle's other
+  side six practice targets: sticks in the ground of different heights, some upright, some
+  tilted, each topped with a round wooden disc like a road sign carrying one of the puzzles'
+  emojis (🍄 👑 🐸 💎 🐉 🪨). All are standing things (each stick on its own foot); the castle's
+  own fields make way for them. Colours `mapSign*`, `mapCauldron*`, `mapFire*`, `mapBrew*`.
+  (A practice board of emoji cells on the grass was tried first and dropped.)
 - **Workshop scenes** (2026-11-11, flat look 2026-11-12) -- every castle except the training castle
   picks its puzzles in a sorcerer's workshop instead of a tile grid (`components/Workshop.jsx`, data
   in `src/workshops.js`). Six scenes (hut, cupboard, lab, tower, study, crypt); castle n uses scene

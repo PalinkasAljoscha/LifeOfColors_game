@@ -7,7 +7,7 @@ import { giveWay, onAnyPath, placeFlat } from './mapClear.js'
 import { PATH_HALF, PATH_REACH, STONE_ROUND, pathStones } from './mapPath.js'
 import { relax } from './mapLayout.js'
 import WildcardCard from './WildcardCard.jsx'
-import { signReach, trainingGround } from './TrainingGround.jsx'
+import { STICKS_REACH, signReach, trainingGround } from './TrainingGround.jsx'
 
 // The home-screen map: the levels ("castles" in the code) as different places -- a castle, a forest
 // hut, a tavern, ... (src/sites.js: which level is which place) -- each with its own bit of
@@ -294,15 +294,15 @@ export default function CastleMap({ states, graph, review = false, loadingCastle
   const ids = Array.from({ length: count }, (_, i) => i)
   const edges = ids.flatMap((a) => graph.children[a].filter((b) => b < count).map((b) => [a, b]))
   const lines = edges.map(([a, b]) => [foot(a), foot(b)])
-  // The training ground around castle 0 (TrainingGround.jsx): the sign on the side with room for
-  // it, the cauldron and the practice board in front. The board is the first flat thing served (so
-  // the castle's own fields make way for it); sign and cauldron stand like the landscape's things.
+  // The training ground around castle 0 (TrainingGround.jsx): sign and cauldron on the left, the
+  // sticks with the emoji discs on the right -- mirrored where the left has no room for the sign.
+  // They stand like the landscape's standing things; the castle's own fields make way for them.
   if (count > 0) {
-    const { x } = pos(0), text = t('castles.trainingSign')
-    const side = x - (signReach(text) * size) / 100 >= 4 ? 1 : -1
+    const { x } = pos(0), text = t('castles.trainingSign'), k = size / 100
+    const side = x - signReach(text) * k >= 4 && x + STICKS_REACH * k <= W - 4 ? 1 : -1
     const tg = trainingGround({ x, ground: foot(0).y, size, side, text })
-    flatWish.push({ spots: tg.board.map((b) => b.box), els: tg.board.map((b) => b.el) })
-    for (const part of [tg.sign, tg.pot]) { standing.push({ foot: part.foot, el: part.el }); taken.push(part.box) }
+    standing.push(...tg.standing)
+    taken.push(...tg.taken)
   }
   for (const i of ids) {
     const { x, y } = pos(i), site = siteFor(i), ground = y + size * 0.4
