@@ -297,7 +297,7 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   tip, so a longer word grows away from the castle; on the castle's left, or its right where the
   left has no room -- then everything is mirrored) with a spider (🕷️) hanging on its thread
   (`mapSpiderThread`) from the plank, a big dark-grey (not black) cauldron over a small fire, both
-  in a ring of stones (`mapStone*`; the back half behind them, the front half in front), behind and above the sign (not hidden by it), with a copper handle (`wsMedalMid` / `wsMedalEdge`)
+  in a ring of big stones (`mapStone*`, 2 x their first size; the back half behind them, the front half in front), behind and above the sign (not hidden by it), with a copper handle (`wsMedalMid` / `wsMedalEdge`)
   and the end of a big wooden spoon sticking out, its fumes in the win animation's
   style (blurred white puffs, `winVapour`, growing and fading as they rise; still, no animation),
   in front of the castle (a little to the sign's side) two mirrors drawn like the game's mirror cells (`mirrorLink` frame and
@@ -308,8 +308,11 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   into a puddle -- and before the mirrors a bow with three arrows lying around (heads only, no
   fletching: it read as a second head; `mapArrowTip`, `mapBowString`); and on the castle's other side six practice targets: sticks in the ground, spread out irregularly, of different heights,
   some upright, some tilted, each topped with a round wooden disc like a road sign carrying one of the puzzles'
-  emojis (🍄 👑 🐸 💎 🐉 🪨), with the game's bomb (💣) lying among them; and an orc (the
-  puzzles' 🧌) standing in front of the castle between the mirrors and the sticks. All are standing things (each stick on its own foot); the castle's
+  emojis (🍄 👑 🐸 💎 🐉 🪨), with the game's bomb (💣) lying among them; an orc (the
+  puzzles' 🧌, twice the emojis' size) standing in front of the castle between the mirrors and the
+  sticks; and two clusters of mushrooms drawn as in the workshop pictures (pale stem, half-round cap
+  in red / orange / purple with two white dots; `mapMushroom*`), one by the sign's post, one
+  beyond the sticks (so `STICKS_REACH` includes them). All are standing things (each stick on its own foot); the castle's
   own fields make way for them. Colours `mapSign*`, `mapCauldron*`, `mapFire*`, `mapBrew*`, `mapSpiderThread`.
   (Tried and dropped: a practice board of emoji cells on the grass; a drawn crow on the sign;
   three small flasks in the cell colours.)

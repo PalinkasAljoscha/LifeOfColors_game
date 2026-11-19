@@ -121,6 +121,11 @@ export const palette = {
   mapBowString:      '#efe6cf',
   mapStone:          '#8f8c84',   // the ring of stones around the training ground's cauldron
   mapStoneDark:      '#5c5a54',
+  mapMushroomRed:    '#b0413e',   // the training ground's mushrooms, as in the workshop pictures:
+  mapMushroomOrange: '#e67e22',   //   cap colours ...
+  mapMushroomPurple: '#8e44ad',
+  mapMushroomStem:   '#e3dccb',   //   ... stem and the cap's dots
+  mapMushroomDot:    '#ffffff',
   castleWall:        '#e3dccb',
   castleShade:       '#b9b09c',
   castleRoof:        '#b0413e',

@@ -3,7 +3,7 @@
 //     pointing at it;
 //   - a spider hanging on its thread from the plank;
 //   - a big dark-grey cauldron with a copper handle behind and above the sign, over a small fire,
-//     pot and fire in a ring of stones,
+//     pot and fire in a ring of big stones,
 //     the end of a big wooden spoon sticking out of it, with fumes rising out of it in the win animation's style (soft white puffs that grow
 //     and fade as they rise; still, like every map picture: no animation);
 //   - in front of the castle two mirrors, as the game draws its mirror cells (cyan frame and tint,
@@ -14,7 +14,8 @@
 //     irregularly, of different heights, some upright, some tilted, each topped with a round wooden disc like a road sign,
 //     and on each disc one of the puzzles' emojis (the crown, the goal, among them) -- and a bomb
 //     (the game's 💣) lying on the ground among them;
-//   - an orc (the puzzles' 🧌) standing in front of the castle, between the mirrors and the sticks.
+//   - two clusters of mushrooms (as in the workshop pictures): by the sign's post and beyond the sticks;
+//   - an orc (the puzzles' 🧌), twice the emojis' size, standing in front of the castle, between the mirrors and the sticks.
 // Everything is in the landscape's units (size / 100) around the middle of the castle's ground
 // line, like a <site>-land.svg; `side` = 1 puts the sign and the cauldron on the left and the
 // sticks on the right, -1 mirrors that. Boxes are [x0, y0, x1, y1] (for the map's "what lies flat
@@ -32,14 +33,15 @@ const signWidth = (text) => [...text].length * SIGN.font * 0.72 + 34
 /** How far the sign reaches out from the castle's middle, in the landscape's units. */
 export const signReach = (text) => -SIGN.near + signWidth(text)
 /** How far the sticks reach out on the other side. */
-export const STICKS_REACH = 166
+export const STICKS_REACH = 216   // with the mushrooms beyond them
 
 // The cauldron: behind the sign and above it (not hidden by it), dx out from the post, body
 // radius r.
 const POT = { dx: -24, foot: -44, r: 24 }
 // The stones ringing it: [angle around the ring in degrees (90 = front), size].
-const STONES = [[0, 5.2], [28, 4.4], [55, 5.6], [82, 4.8], [108, 5.4], [134, 4.2], [160, 5], [186, 4.6],
-  [214, 4], [244, 4.4], [276, 3.8], [306, 4.2], [334, 4.6]]
+// (2 x their first size; the ring wider and the stones fewer, so they still lie side by side)
+const STONES = [[0, 10.4], [36, 8.8], [72, 11.2], [108, 9.6], [144, 10.8], [180, 9.2], [216, 8], [252, 8.8],
+  [288, 7.6], [324, 8.4]]
 // Its fumes: [dx, height above the rim, radius] -- growing and fading as they rise.
 const PUFFS = [[-4, 6, 6], [5, 14, 8], [-3, 24, 10], [6, 35, 11.5], [-4, 47, 13], [4, 58, 14]]
 
@@ -56,9 +58,19 @@ const STICKS = [
 const DISC = 12.5
 // The bomb among the sticks: [x, foot, size].
 const BOMB = [122, 44, 22]
+// Mushrooms, as the workshop pictures draw them (a pale stem, a half-round cap in red, orange or
+// purple with two white dots), in two clusters: by the sign's post, and beyond the sticks. Each
+// [x, foot, stem height, cap radius, colour], in the pictures' units, drawn MUSHROOM_SCALE x.
+const MUSHROOMS = [
+  [-130, 92, 11, 6, 'mapMushroomRed'], [-117, 89, 18, 7.5, 'mapMushroomOrange'],
+  [-105, 94, 9, 5, 'mapMushroomPurple'], [-94, 90, 14, 6.5, 'mapMushroomRed'],
+  [150, 80, 10, 6, 'mapMushroomOrange'], [162, 76, 17, 7.5, 'mapMushroomPurple'],
+  [175, 73, 12, 6, 'mapMushroomRed'], [189, 67, 18, 8, 'mapMushroomRed'], [201, 63, 9, 5, 'mapMushroomOrange'],
+]
+const MUSHROOM_SCALE = 1.6
 // The orc (the puzzles' 🧌) standing in front of the castle, between the mirrors and the sticks:
 // [x, foot, size].
-const ORC = [20, 36, 24]
+const ORC = [20, 46, 48]
 // One flask lying on the grass in front of the castle, its potion running out: the workshop's
 // round-bottomed flask (Workshop.jsx FLASK, its units), in one of the puzzles' potion colours
 // (mapFlaskPotion). Bulb middle at (x, y), turned by `turn` degrees (90 = neck towards the castle's
@@ -114,10 +126,10 @@ export function trainingGround({ x, ground, size, side, text }) {
   const px = side * POT_X, r = POT.r, rim = POT.foot - r * 1.55
   // the ring of stones around the pot and its fire, on the ground: [angle around the ring, size]
   const stones = (back) => STONES.filter(([a]) => (Math.sin((a * Math.PI) / 180) < 0) === back).map(([a, sz], n) => {
-    const t = (a * Math.PI) / 180, cx = px + Math.cos(t) * (r + 7), cy = POT.foot + Math.sin(t) * 8
+    const t = (a * Math.PI) / 180, cx = px + Math.cos(t) * (r + 14), cy = POT.foot + Math.sin(t) * 13
     return (
       <ellipse key={`${back}${n}`} cx={cx} cy={cy} rx={sz} ry={sz * 0.68} fill={palette.mapStone}
-               stroke={palette.mapStoneDark} strokeWidth="1.1" />
+               stroke={palette.mapStoneDark} strokeWidth="1.6" />
     )
   })
   const pot = frame('train-pot', (
@@ -241,6 +253,22 @@ export function trainingGround({ x, ground, size, side, text }) {
     </g>
   ))
 
+  // ── the mushrooms: one standing thing each ──
+  const mushrooms = MUSHROOMS.map(([mx, foot, h, cr, colour], n) => {
+    const x0 = side * mx, m = MUSHROOM_SCALE
+    return {
+      foot: ground + foot * k,
+      el: frame(`train-mushroom-${n}`, (
+        <g transform={`translate(${x0} ${foot}) scale(${m})`}>
+          <rect x="-2" y={-h} width="4" height={h} rx="1.5" fill={palette.mapMushroomStem} />
+          <path d={`M${-cr},${-h + 1} a${cr},${cr * 1.05} 0 0 1 ${2 * cr},0 z`} fill={palette[colour]} />
+          <circle cx={-cr * 0.35} cy={-h + 1 - cr * 0.57} r="1.3" fill={palette.mapMushroomDot} />
+          <circle cx={cr * 0.4} cy={-h + 1 - cr * 0.42} r="1" fill={palette.mapMushroomDot} />
+        </g>
+      )),
+    }
+  })
+
   // ── the orc ──
   const orc = frame('train-orc', (
     <text x={side * ORC[0]} y={ORC[1] - ORC[2] * 0.48} textAnchor="middle" dominantBaseline="central" fontSize={ORC[2]}>🧌</text>
@@ -278,13 +306,15 @@ export function trainingGround({ x, ground, size, side, text }) {
       { el: bomb, foot: ground + BOMB[1] * k },
       { el: orc, foot: ground + ORC[1] * k },
       ...sticks,
+      ...mushrooms,
     ],
     taken: [
       toMap([SIGN.near - w, top, SIGN.near + tip, SIGN.foot]),
-      toMap([POT_X - r - 4, rim - 8, POT_X + r + 4, POT.foot]),   // the fumes may float over fields
-      toMap([STICKS[0][0] - DISC - 4, -50, STICKS_REACH, 62]),
+      toMap([POT_X - r - 26, rim - 8, POT_X + r + 26, POT.foot + 22]),   // the fumes may float over fields
+      toMap([STICKS[0][0] - DISC - 4, -50, STICKS_REACH, 84]),
+      toMap([-142, 60, -80, 98]),   // the mushrooms by the sign's post
       toMap([MIRROR.dx - MIRROR.x - MIRROR.w, MIRROR.foot - MIRROR.h - 14, MIRROR.dx + MIRROR.x + MIRROR.w, MIRROR.foot + 3]),
-      toMap([ORC[0] - 14, ORC[1] - 26, ORC[0] + 14, ORC[1] + 2]),
+      toMap([ORC[0] - 26, ORC[1] - 50, ORC[0] + 26, ORC[1] + 2]),
       toMap([-32, 100, 124, 148]),   // the archery
       toMap([-106, 24, -46, 46]),   // the flask and its puddle
     ],
