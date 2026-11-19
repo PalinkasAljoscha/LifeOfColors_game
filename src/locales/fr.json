@@ -119,6 +119,7 @@
   },
   "castles": {
     "tutorial": "Château d’entraînement",
+    "trainingSign": "Entraînement",
     "progressTraining": "{{solved}} puzzles résolus sur {{required}}",
     "locked": "verrouillé",
     "lockedHint": "Gagne d’abord {{count}} étoiles dans un lieu précédent",

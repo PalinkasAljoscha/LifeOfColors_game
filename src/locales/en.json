@@ -119,6 +119,7 @@
   },
   "castles": {
     "tutorial": "Training castle",
+    "trainingSign": "Training",
     "progressTraining": "{{solved}} of {{required}} puzzles won",
     "locked": "locked",
     "lockedHint": "Get {{count}} stars in a preceding place first",

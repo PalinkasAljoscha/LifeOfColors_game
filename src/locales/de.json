@@ -119,6 +119,7 @@
   },
   "castles": {
     "tutorial": "Übungsburg",
+    "trainingSign": "Übung",
     "progressTraining": "{{solved}} von {{required}} Puzzles gelöst",
     "locked": "gesperrt",
     "lockedHint": "Hole zuerst {{count}} Sterne an einem Ort davor",

@@ -103,6 +103,17 @@ export const palette = {
   mapPath:           '#bfa36e',   // a path's stones: two close sand tones
   mapPathAlt:        '#b2955f',
   mapPathLocked:     '#8a8f9c',
+  // the training ground around the training castle (components/TrainingGround.jsx)
+  mapSignWood:       '#9a6a3a',
+  mapSignWoodDark:   '#5e3b1c',
+  mapSignInk:        '#fff3d6',
+  mapCauldron:       '#26262e',
+  mapCauldronRim:    '#3d3d48',
+  mapCauldronGlint:  '#6b6b7a',
+  mapFireOuter:      '#e8702a',
+  mapFireInner:      '#ffd24a',
+  mapFumePurple:     '#9b59b6',
+  mapBrewBubble:     '#d7b8ee',
   castleWall:        '#e3dccb',
   castleShade:       '#b9b09c',
   castleRoof:        '#b0413e',
