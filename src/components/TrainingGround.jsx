@@ -1,13 +1,16 @@
 // The training ground around the training castle (castle 0) on the home map (CastleMap.jsx):
 //   - a wooden arrow sign, "Training" (castles.trainingSign), on a post beside the castle and
 //     pointing at it;
-//   - a crow sitting on the sign, just above its post;
-//   - a big dark-grey cauldron behind the sign, over a small fire, with fumes rising out of it in
-//     the win animation's style (soft white puffs that grow and fade as they rise; still, like
-//     every map picture: no animation);
+//   - a spider hanging on its thread from the plank;
+//   - a big dark-grey cauldron behind the sign (the plank covers only its bottom), over a small
+//     fire, with fumes rising out of it in the win animation's style (soft white puffs that grow
+//     and fade as they rise; still, like every map picture: no animation);
+//   - in front of the castle two mirrors, as the game draws its mirror cells (cyan frame and tint,
+//     white diagonal glints), standing face to face with an electric flash between them;
 //   - on the castle's other side a few practice targets: sticks in the ground, spread out
 //     irregularly, of different heights, some upright, some tilted, each topped with a round wooden disc like a road sign,
-//     and on each disc one of the puzzles' emojis (the crown, the goal, among them).
+//     and on each disc one of the puzzles' emojis (the crown, the goal, among them) -- and a bomb
+//     (the game's 💣) lying on the ground among them.
 // Everything is in the landscape's units (size / 100) around the middle of the castle's ground
 // line, like a <site>-land.svg; `side` = 1 puts the sign and the cauldron on the left and the
 // sticks on the right, -1 mirrors that. Boxes are [x0, y0, x1, y1] (for the map's "what lies flat
@@ -19,7 +22,7 @@ const FONT = "'Arial Black', Arial, sans-serif"
 // The sign: its plank ends at `near` on the castle's side (the pointed tip reaches TIP further),
 // its middle at height y, the post's foot at `foot`. Its width follows its text, so a longer word
 // (French) grows away from the castle, never into it.
-const SIGN = { near: -74, y: -34, h: 24, foot: 26, font: 14 }
+const SIGN = { near: -74, y: -20, h: 24, foot: 40, font: 14 }
 const TIP = 12
 const signWidth = (text) => [...text].length * SIGN.font * 0.72 + 26
 /** How far the sign reaches out from the castle's middle, in the landscape's units. */
@@ -27,8 +30,9 @@ export const signReach = (text) => -SIGN.near + signWidth(text)
 /** How far the sticks reach out on the other side. */
 export const STICKS_REACH = 166
 
-// The cauldron: behind the sign (its foot above the post's), dx out from the post, body radius r.
-const POT = { dx: -28, foot: 20, r: 24 }
+// The cauldron: behind the sign, just above it (the plank covers only its bottom), dx out from the
+// post, body radius r.
+const POT = { dx: -24, foot: -24, r: 24 }
 // Its fumes: [dx, height above the rim, radius] -- growing and fading as they rise.
 const PUFFS = [[-4, 6, 6], [5, 14, 8], [-3, 24, 10], [6, 35, 11.5], [-4, 47, 13], [4, 58, 14]]
 
@@ -43,6 +47,10 @@ const STICKS = [
   [152, 46, 38, 18, '🪨'],
 ]
 const DISC = 12.5
+// The bomb among the sticks: [x, foot, size].
+const BOMB = [122, 44, 22]
+// The two mirrors in front of the castle: their middles at ±MIRROR.x, standing at `foot`.
+const MIRROR = { x: 36, foot: 78, w: 26, h: 36 }
 
 /** The training ground's parts for castle 0 standing at (x, ground) with picture size `size`:
  *  standing things [{ el, foot }] (foot = map y) and the boxes nothing flat may touch (map px). */
@@ -61,30 +69,25 @@ export function trainingGround({ x, ground, size, side, text }) {
   // the plank: a board whose end towards the castle is pointed
   const near = sx + (side * w) / 2, far = sx - (side * w) / 2, top = SIGN.y - SIGN.h / 2, bot = SIGN.y + SIGN.h / 2
   const plank = `M ${far} ${top} L ${near} ${top} L ${near + side * tip} ${SIGN.y} L ${near} ${bot} L ${far} ${bot} Z`
-  const signEl = () => frame('train-sign', (
+  // the spider, hanging on its thread from the plank's lower edge, near its far end
+  const spX = far + side * 16, spY = bot + 26
+  const spider = (
+    <g>
+      <line x1={spX} y1={bot} x2={spX} y2={spY - 7} stroke={palette.mapSpiderThread} strokeWidth="0.8" />
+      <text x={spX} y={spY} textAnchor="middle" dominantBaseline="central" fontSize="18">🕷️</text>
+    </g>
+  )
+
+  const sign = frame('train-sign', (
     <g>
       <rect x={sx - 3.5} y={SIGN.y} width="7" height={SIGN.foot - SIGN.y} fill={palette.mapSignWoodDark} />
       <path d={plank} fill={palette.mapSignWood} stroke={palette.mapSignWoodDark} strokeWidth="2.5" strokeLinejoin="round" />
       <line x1={far + side * 4} x2={near} y1={SIGN.y + 6.5} y2={SIGN.y + 6.5} stroke={palette.mapSignWoodDark} strokeWidth="1" opacity="0.5" />
       <text x={sx + (side * tip) / 2} y={SIGN.y + 1} textAnchor="middle" dominantBaseline="central"
             fontFamily={FONT} fontWeight="900" fontSize={SIGN.font} fill={palette.mapSignInk}>{text}</text>
-      {crow}
+      {spider}
     </g>
   ))
-
-  // the crow on the plank, just above the post, looking towards the castle
-  const crow = (
-    <g transform={`translate(${sx + side * 2} ${top}) scale(${side} 1)`}>
-      <path d="M -12 -7 L -20 -3 L -11 -3 Z" fill={palette.mapCrow} />
-      <ellipse cx="-3" cy="-7.5" rx="9.5" ry="6.5" fill={palette.mapCrow} />
-      <path d="M -9 -9 Q -2 -15 4 -8 Q -2 -6 -9 -9 Z" fill={palette.mapCrowWing} />
-      <circle cx="6.5" cy="-14" r="5" fill={palette.mapCrow} />
-      <path d="M 10.5 -15.5 L 16 -13.2 L 10.5 -11.6 Z" fill={palette.mapCrowBeak} />
-      <circle cx="7.6" cy="-15" r="1.1" fill={palette.mapCrowEye} />
-      <line x1="-4" y1="-1.5" x2="-5" y2="0.5" stroke={palette.mapCrowBeak} strokeWidth="1.2" strokeLinecap="round" />
-      <line x1="0" y1="-1.5" x2="1" y2="0.5" stroke={palette.mapCrowBeak} strokeWidth="1.2" strokeLinecap="round" />
-    </g>
-  )
 
   // ── the cauldron with its fumes ──
   const POT_X = SIGN.near - w / 2 + POT.dx
@@ -118,6 +121,44 @@ export function trainingGround({ x, ground, size, side, text }) {
     </g>
   ))
 
+  // ── the two mirrors, face to face, an electric flash between them ──
+  const glass = (cx, turn, n) => {
+    const { w: mw, h: mh, foot } = MIRROR, y0 = foot - 8 - mh
+    return (
+      <g key={n} transform={`translate(${cx} 0) skewY(${turn * 14}) scale(0.72 1) translate(${-cx} 0)`}>
+        <rect x={cx - 1.5} y={foot - 10} width="3" height="10" fill={palette.mapSignWoodDark} />
+        <rect x={cx - 7} y={foot - 2} width="14" height="2.5" rx="1" fill={palette.mapSignWoodDark} />
+        <rect x={cx - mw / 2} y={y0} width={mw} height={mh} rx="3" fill={palette.scCellFill} />
+        <rect x={cx - mw / 2} y={y0} width={mw} height={mh} rx="3" fill={palette.mirrorLink} opacity="0.3" />
+        {[[0.15, 7], [0.5, 4]].map(([at, gw], g) => (
+          <path key={g} d={`M ${cx - mw / 2 + mw * at} ${y0 + mh} l ${gw} 0 l ${mw * 0.5} ${-mh} l ${-gw} 0 Z`}
+                fill={palette.mirrorGlint} opacity="0.35" clipPath={`url(#train-glass-${n})`} />
+        ))}
+        <clipPath id={`train-glass-${n}`}><rect x={cx - mw / 2} y={y0} width={mw} height={mh} rx="3" /></clipPath>
+        <rect x={cx - mw / 2} y={y0} width={mw} height={mh} rx="3" fill="none" stroke={palette.mirrorLink} strokeWidth="2.2" />
+      </g>
+    )
+  }
+  const fy = MIRROR.foot - 8 - MIRROR.h / 2, fx = MIRROR.x - MIRROR.w * 0.36
+  const bolt = `M ${-fx} ${fy - 3} L ${-fx * 0.55} ${fy + 3} L ${-fx * 0.2} ${fy - 4} L ${fx * 0.15} ${fy + 4} L ${fx * 0.5} ${fy - 3} L ${fx} ${fy + 2}`
+  const mirrors = frame('train-mirrors', (
+    <g>
+      <defs>
+        <filter id="train-flash" x="-0.5" y="-2" width="2" height="5"><feGaussianBlur stdDeviation="2.2" /></filter>
+      </defs>
+      {glass(-MIRROR.x, 1, 0)}
+      {glass(MIRROR.x, -1, 1)}
+      <path d={bolt} fill="none" stroke={palette.mirrorLink} strokeWidth="5" strokeLinejoin="round" filter="url(#train-flash)" />
+      <path d={bolt} fill="none" stroke={palette.mirrorLink} strokeWidth="2.4" strokeLinejoin="round" />
+      <path d={bolt} fill="none" stroke={palette.mirrorGlint} strokeWidth="1" strokeLinejoin="round" />
+    </g>
+  ))
+
+  // ── the bomb among the sticks ──
+  const bomb = frame('train-bomb', (
+    <text x={side * BOMB[0]} y={BOMB[1] - BOMB[2] * 0.42} textAnchor="middle" dominantBaseline="central" fontSize={BOMB[2]}>💣</text>
+  ))
+
   // ── the practice targets: one standing thing per stick, so they cover each other by their feet ──
   const sticks = STICKS.map(([sx0, foot, h, tilt, e], n) => {
     const bx = side * sx0
@@ -137,14 +178,17 @@ export function trainingGround({ x, ground, size, side, text }) {
 
   return {
     standing: [
-      { el: signEl(), foot: ground + SIGN.foot * k },
+      { el: sign, foot: ground + SIGN.foot * k },
       { el: pot, foot: ground + POT.foot * k },
+      { el: mirrors, foot: ground + MIRROR.foot * k },
+      { el: bomb, foot: ground + BOMB[1] * k },
       ...sticks,
     ],
     taken: [
       toMap([SIGN.near - w, top, SIGN.near + tip, SIGN.foot]),
       toMap([POT_X - r - 4, rim - 8, POT_X + r + 4, POT.foot]),   // the fumes may float over fields
       toMap([STICKS[0][0] - DISC - 4, -50, STICKS_REACH, 62]),
+      toMap([-MIRROR.x - MIRROR.w, MIRROR.foot - MIRROR.h - 14, MIRROR.x + MIRROR.w, MIRROR.foot + 3]),
     ],
   }
 }
