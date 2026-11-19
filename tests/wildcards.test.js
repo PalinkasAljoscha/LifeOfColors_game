@@ -77,6 +77,8 @@ test('wildcard openings are saved as their own list, only with consent', () => {
   resetProgressForTests()
 })
 
-test('no wildcard challenge has special cells', () => {
-  for (const w of WILDCARDS) assert.equal(wildcardPuzzle(castles, w).board.special_cells?.length ?? 0, 0, `wildcard ${w.level}`)
+// Exception chosen by hand (2026-11-19): Argon Castle (level 22) uses Fleeting Fractal, a special puzzle.
+const SPECIAL_OK = new Set([22])
+test('no wildcard challenge has special cells (except the ones chosen so)', () => {
+  for (const w of WILDCARDS.filter((x) => !SPECIAL_OK.has(x.level))) assert.equal(wildcardPuzzle(castles, w).board.special_cells?.length ?? 0, 0, `wildcard ${w.level}`)
 })

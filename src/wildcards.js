@@ -12,7 +12,8 @@
 // The CONFIG below: one wildcard on each of the map rows 3, 5, 7, 8 and 9 (the upper rows are
 // reached the usual way). `level` = the place (castle number = level graph node id), `puzzle` = the
 // challenge (instance id). Chosen from the export of 2026-11-13: per row the place leading to the
-// most places above, and its hardest puzzle without special cells. If an export moves the puzzle
+// most places above, and its hardest puzzle without special cells (except level 22, Argon Castle:
+// Fleeting Fractal, chosen by hand on 2026-11-19). If an export moves the puzzle
 // away, the place's hardest puzzle (without special cells, if it has one) is used instead.
 // No React here, so the tests can load it.
 
@@ -20,7 +21,7 @@ export const WILDCARDS = [
   { level: 6, puzzle: 'loc_6653af70ea938070' },
   { level: 13, puzzle: 'loc_e772c6bfcd967426' },
   { level: 19, puzzle: 'loc_2afe46a046314839' },
-  { level: 22, puzzle: 'loc_b14ef1ca21ceb6bc' },
+  { level: 22, puzzle: 'loc_fc4b0b00bbc2a608' },   // Argon Castle: Fleeting Fractal (special cell; changed 2026-11-19)
   { level: 24, puzzle: 'loc_ef3c7e69b5c6cb47' },
 ]
 
