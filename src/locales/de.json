@@ -15,7 +15,7 @@
     "more": "Mehr"
   },
   "game": {
-    "retry": "Nochmal",
+    "retry": "Von vorn",
     "back": "Zurück",
     "home": "Start",
     "backTo": "Zurück zu {{name}}",
@@ -87,10 +87,10 @@
   },
   "rules": {
     "title": "So funktioniert es",
-    "p1": "Jedes Puzzle hat eine versteckte Regel, wie sich ein Feld beim Antippen verwandelt. Die Regel beruht auf den Farben der Nachbarfelder.",
-    "p2": "Verstehe die Regeln und schmiede einen Plan, wie du das  gold umrandete Feld mit der richtigen Objekt versiehst.",
-    "p3": "Schaffst du es mit kleinst möglichen Zahl an Zügen? Je weniger Züge du brauchst, desto mehr Sterne gibt es.",
-    "p4": "Experimentiere einfach und starte jederzeit neu mit „{{retry}}“. Auch nach einem Sieg kannst du es nochmal versuchen um mit weniger Zügen mehr Sterne zu holen.",
+    "p1": "Jedes Puzzle hat ein versteckte Regeln, wie sich ein Feld beim Antippen verwandelt. Die Regeln beruhen auf den Farben der Nachbarfelder.",
+    "p2": "Verstehe die Regeln und schmiede einen Plan, wie du in das gold umrandete Feld das richtige Objekt zauberst.",
+    "p3": "Schaffst du es mit möglichst wenigen Zügen? Je weniger du brauchst, desto mehr Sterne gibt es.",
+    "p4": "Experimentiere einfach und starte jederzeit neu mit „{{retry}}“. Auch nach einem Erfolg kannst du es nochmal versuchen um mit weniger Zügen mehr Sterne zu holen.",
     "close": "Los geht's"
   },
   "training": {
@@ -100,10 +100,10 @@
   "sites": {
     "castle": "Burg",
     "forestHut": "Waldhütte",
-    "manor": "Herrenhaus",
-    "tavern": "Spukschenke",
-    "wizardTower": "Zaubererturm",
-    "windmill": "Alte Windmühle",
+    "manor": "Landsitz",
+    "tavern": "Wirtshaus",
+    "wizardTower": "Turm",
+    "windmill": "Windmühle",
     "yurt": "Jurte",
     "forestLodge": "Waldhaus"
   },
@@ -118,26 +118,26 @@
     "wizardTower": ["Turm des Merkur", "Turm der Venus", "Turm der Erde", "Turm des Mars", "Turm des Jupiter", "Turm des Saturn", "Turm des Uranus", "Turm des Neptun"]
   },
   "castles": {
-    "tutorial": "Übungsburg",
-    "trainingSign": "Übung",
+    "tutorial": "Trainingsburg",
+    "trainingSign": "Training",
     "progressTraining": "{{solved}} von {{required}} Puzzles gelöst",
     "locked": "gesperrt",
     "lockedHint": "Hole zuerst {{count}} Sterne an einem Ort davor",
     "starsNeeded": "{{count}} Sterne öffnen den nächsten Ort",
     "starsNeededMany": "{{count}} Sterne öffnen die nächsten Orte",
-    "nextOpen": "{{name}} ist offen!",
-    "nextOpenMany": "{{count}} neue Orte sind offen!",
-    "review": "Ansicht: alle Stufen offen"
+    "nextOpen": "{{name}} ist freigespielt!",
+    "nextOpenMany": "{{count}} neue Orte sind freigespielt!",
+    "review": "Ansicht: alle Stufen frei"
   },
   "history": {
-    "title": "Zuletzt gespielt",
-    "empty": "Noch keine Puzzles gespielt.",
+    "title": "Zuletzt gezaubert",
+    "empty": "Noch nichts gezaubert.",
     "close": "Schließen"
   },
   "intro": {
-    "tap": "Tippe auf ein Feld, um es zu verwandeln.",
-    "hood": "Die Nachbarn eines Feldes bestimmen, wie es sich verwandelt.",
-    "goal": "Um zu gewinnen, bring ein {{goal}} auf das gold umrandete Feld.",
+    "tap": "Tippe auf ein Feld, um etwas ver- oder herzu-zaubern.",
+    "hood": "Die Nachbarn eines Feldes bestimmen, wie es sich verwandeln kann.",
+    "goal": "Um zu gewinnen, zaubere ein {{goal}} auf das gold umrandete Feld.",
     "next": "Weiter",
     "start": "Los geht's!",
     "notes": "Hier stehen die Regeln, die du schon beobachtet hast.",
@@ -146,19 +146,19 @@
   "special": {
     "blockedTap": "Dieses Feld ist außer Reichweite.",
     "clockTap": "Hier kannst du nichts tun. Es dreht sich weiter, wenn du andere Felder verwandelst.",
-    "bombCareful": "Oh, Vorsicht!",
-    "bombIntro": "Achtung! Eines der Objekte bringt die Bombe zum Explodieren.",
-    "bombIntroColors": "Achtung! Eine der Farben bringt die Bombe zum Explodieren.",
-    "mirrorIntro": "Spiegelfelder sind verschränkt: Verwandle eines, und das andere verwandelt sich genauso.",
+    "bombCareful": "He, Vorsicht!",
+    "bombIntro": "Vorsicht! Eines der Objekte lässt die Bombe explodieren.",
+    "bombIntroColors": "Vorsicht! Eine der Farben bringt die Bombe zum Explodieren.",
+    "mirrorIntro": "Spiegelfelder sind verschränkt: Verzaubere eines, und das andere verwandelt sich genauso.",
     "clockIntro": "Das Uhrfeld lässt sich nicht antippen: Es dreht sich weiter, sobald du ein anderes Feld verwandelst."
   },
   "wildcard": {
     "title": "Wildcard",
-    "card": "Wildcard: zu einem höheren Ort springen",
-    "rule": "Gewinne das Puzzle mit der kleinstmöglichen Anzahl Züge – dann öffnen sich dieser Ort und alle Orte in den Reihen darunter. Beliebig viele Versuche.",
+    "card": "Wildcard: springe zu einem höheren Level",
+    "rule": "Schaffe das Puzzle mit der kleinsten Anzahl an Zügen – dann öffnen sich dieser Ort und alle Orte in den Reihen darunter. Beliebig viele Versuche.",
     "try": "Wildcard-Versuch",
-    "needMoves": "{{count}} Züge zum Bestehen",
-    "won": "Wildcard gewonnen! Viele Orte freigeschaltet.",
+    "needMoves": "{{count}} Züge erlaubt",
+    "won": "Wildcard gewonnen! Viele neue Orte stehen dir offen.",
     "close": "Schließen"
   }
 }

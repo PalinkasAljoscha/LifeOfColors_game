@@ -75,12 +75,12 @@
   "themes": {
     "halloween": {
       "tagline": "Halloween edition",
-      "description": "Your goal: Get 🍬 on the gold framed field. How? Tap a field and it might transform, depending on what objects are around it. The hidden rules are different for each puzzle.",
+      "description": "Your goal: Make 🍬 appear on the gold framed field. How? Tap a field and it might transform, depending on what objects are around it. The hidden rules are different for each puzzle.",
       "chooseLevel": "Choose your level of fright",
       "winTitle": "Sweet victory! 🍬"
     },
     "sorcerer": {
-      "description": "Your goal: Get 👑 on the gold framed field. How? Tap a field and it might transform, depending on what objects are around it. The hidden spells are different for each puzzle.",
+      "description": "Your goal: Make👑 appear on the gold framed field. How? Tap a field and it might transform, depending on what objects are around it. The hidden spells are different for each puzzle.",
       "chooseLevel": "Choose your level of magic",
       "winTitle": "Crowned! 👑"
     }
@@ -89,7 +89,7 @@
     "title": "How it works",
     "p1": "Each puzzle has a hidden rule that determines how a field transforms when tapped. The rule considers the colors of the neighboring fields.",
     "p2": "Understand the rules and make a plan how to get the winning object on the gold framed field.",
-    "p3": "Can you achieve the least number of moves possible? The fewer moves you need, the more stars you get.",
+    "p3": "Can you achieve the least number of moves possible? The fewer you need, the more stars you get.",
     "p4": "Use {{retry}} anytime to start the puzzle from the beginning. Experiment to find out the hidden rules. After a win you can retry to get more stars by using less moves.",
     "close": "Got it"
   },
@@ -135,9 +135,9 @@
     "close": "Close"
   },
   "intro": {
-    "tap": "Tap a field to try transforming it.",
+    "tap": "Tap a field to try your transforming spell.",
     "hood": "The neighbours of a field decide how it transforms.",
-    "goal": "To win, get a {{goal}} onto the gold-framed field.",
+    "goal": "To win, conjure a {{goal}} onto the gold-framed field.",
     "next": "Next",
     "start": "Let's go!",
     "notes": "Rules you have already observed are noted here.",
@@ -154,11 +154,11 @@
   },
   "wildcard": {
     "title": "Wildcard",
-    "card": "Wildcard: jump up to a higher place",
+    "card": "Wildcard: jump up to a higher level",
     "rule": "Win the puzzle with the minimum number of moves – then this place and every place on the rows below it open. Unlimited tries.",
     "try": "Wildcard try",
     "needMoves": "Need {{count}} moves to pass",
-    "won": "Wildcard won! Many places unlocked.",
+    "won": "Wildcard won! Many new places unlocked.",
     "close": "Close"
   }
 }
