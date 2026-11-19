@@ -296,7 +296,8 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   wooden arrow sign on a post points at it (1.3 x 1.2 x its first size), "Training"
   (`castles.trainingSign`) in Mystery Quest (a magic / mystery / fun lettering, BUNDLED like Cinzel:
   npm `@fontsource/mystery-quest`, latin 400, imported in main.jsx; `CHAR_W` = its measured letter
-  width). Anchored by its tip, so a longer word grows away from the castle; a word too long for
+  width). Anchored by its tip, which stops a small gap short of the castle wall (`SIGN.near`), so a
+  longer word grows away from the castle; a word too long for
   the room left of the castle gets a smaller font (`signFont`, not below 14) rather than the
   layout flipping. Everything is on the castle's left / sticks on its right, mirrored only where
   the sticks have no room on the right with a spider (🕷️) hanging on its thread

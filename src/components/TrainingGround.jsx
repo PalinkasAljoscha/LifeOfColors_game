@@ -31,7 +31,7 @@ const SIGN_FONT = "'Mystery Quest', 'Arial Black', cursive"
 // its middle at height y, the post's foot at `foot`. Its width follows its text, so a longer word
 // (French) grows away from the castle, never into it; a word too long for the room left of the
 // castle gets a smaller font (signFont).
-const SIGN = { near: -74, y: -6, h: 37.2, foot: 54, font: 24 }   // 1.3 x 1.2 x the first size
+const SIGN = { near: -96, y: -6, h: 37.2, foot: 54, font: 24 }   // 1.3 x 1.2 x the first size; near: its tip stops a small gap short of the castle wall
 const TIP = 18.7
 const SIGN_PAD = 52   // the plank's room around the text, tip included
 const CHAR_W = 0.54   // Mystery Quest's widest mean letter width of the three words (Übung), in em
