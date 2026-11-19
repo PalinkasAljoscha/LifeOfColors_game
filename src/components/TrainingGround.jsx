@@ -2,11 +2,13 @@
 //   - a wooden arrow sign, "Training" (castles.trainingSign), on a post beside the castle and
 //     pointing at it;
 //   - a spider hanging on its thread from the plank;
-//   - a big dark-grey cauldron behind the sign (the plank covers only its bottom), over a small
-//     fire, with fumes rising out of it in the win animation's style (soft white puffs that grow
+//   - a big dark-grey cauldron with a copper handle behind and above the sign, over a small fire,
+//     the end of a big wooden spoon sticking out of it, with fumes rising out of it in the win animation's style (soft white puffs that grow
 //     and fade as they rise; still, like every map picture: no animation);
 //   - in front of the castle two mirrors, as the game draws its mirror cells (cyan frame and tint,
-//     white diagonal glints), standing face to face with an electric flash between them;
+//     white diagonal glints), standing face to face with an electric flash between them; before
+//     them a few flasks lying on the grass, coloured potion running out of them, and a bow with
+//     arrows lying around;
 //   - on the castle's other side a few practice targets: sticks in the ground, spread out
 //     irregularly, of different heights, some upright, some tilted, each topped with a round wooden disc like a road sign,
 //     and on each disc one of the puzzles' emojis (the crown, the goal, among them) -- and a bomb
@@ -22,7 +24,7 @@ const FONT = "'Arial Black', Arial, sans-serif"
 // The sign: its plank ends at `near` on the castle's side (the pointed tip reaches TIP further),
 // its middle at height y, the post's foot at `foot`. Its width follows its text, so a longer word
 // (French) grows away from the castle, never into it.
-const SIGN = { near: -74, y: -20, h: 24, foot: 40, font: 14 }
+const SIGN = { near: -74, y: -6, h: 24, foot: 54, font: 14 }
 const TIP = 12
 const signWidth = (text) => [...text].length * SIGN.font * 0.72 + 26
 /** How far the sign reaches out from the castle's middle, in the landscape's units. */
@@ -30,9 +32,9 @@ export const signReach = (text) => -SIGN.near + signWidth(text)
 /** How far the sticks reach out on the other side. */
 export const STICKS_REACH = 166
 
-// The cauldron: behind the sign, just above it (the plank covers only its bottom), dx out from the
-// post, body radius r.
-const POT = { dx: -24, foot: -24, r: 24 }
+// The cauldron: behind the sign and above it (not hidden by it), dx out from the post, body
+// radius r.
+const POT = { dx: -24, foot: -44, r: 24 }
 // Its fumes: [dx, height above the rim, radius] -- growing and fading as they rise.
 const PUFFS = [[-4, 6, 6], [5, 14, 8], [-3, 24, 10], [6, 35, 11.5], [-4, 47, 13], [4, 58, 14]]
 
@@ -49,6 +51,12 @@ const STICKS = [
 const DISC = 12.5
 // The bomb among the sticks: [x, foot, size].
 const BOMB = [122, 44, 22]
+// Flasks lying on the grass in front of the castle, potion running out: [x, y, angle of the
+// flask (degrees, 0 = neck to the right), colour key].
+const FLASKS = [[-82, 104, 195, 'cellOrangeFill'], [-30, 122, -15, 'cellBlueFill'], [-8, 98, 165, 'cellGreenFill']]
+// The archery lying around: the bow at (x, y), turned by `turn` degrees; arrows [x, y, angle].
+const BOW = { x: 48, y: 108, turn: -24 }
+const ARROWS = [[22, 128, -8], [64, 126, 14], [88, 104, -32]]
 // The two mirrors in front of the castle: their middles at ±MIRROR.x, standing at `foot`.
 const MIRROR = { x: 36, foot: 78, w: 26, h: 36 }
 
@@ -112,6 +120,18 @@ export function trainingGround({ x, ground, size, side, text }) {
       <ellipse cx={px} cy={rim} rx={r * 0.8} ry={r * 0.17} fill={palette.mapBrew} />
       <circle cx={px - 5} cy={rim - 1} r="2.2" fill={palette.mapBrewBubble} />
       <circle cx={px + 6} cy={rim} r="1.6" fill={palette.mapBrewBubble} />
+      {/* the big wooden spoon, its end sticking out over the rim */}
+      <line x1={px + side * 3} y1={rim + 1} x2={px - side * 20} y2={rim - 30} stroke={palette.mapSignWoodDark}
+            strokeWidth="5.5" strokeLinecap="round" />
+      <line x1={px + side * 3} y1={rim + 1} x2={px - side * 20} y2={rim - 30} stroke={palette.mapSignWood}
+            strokeWidth="3.5" strokeLinecap="round" />
+      {/* the copper handle: a bail from rim to rim */}
+      <path d={`M ${px - r * 0.98} ${rim + 1} C ${px - r * 0.98} ${rim - r * 1.15} ${px + r * 0.98} ${rim - r * 1.15} ${px + r * 0.98} ${rim + 1}`}
+            fill="none" stroke={palette.wsMedalEdge} strokeWidth="4" strokeLinecap="round" />
+      <path d={`M ${px - r * 0.98} ${rim + 1} C ${px - r * 0.98} ${rim - r * 1.15} ${px + r * 0.98} ${rim - r * 1.15} ${px + r * 0.98} ${rim + 1}`}
+            fill="none" stroke={palette.wsMedalMid} strokeWidth="2.2" strokeLinecap="round" />
+      <circle cx={px - r * 0.98} cy={rim + 1} r="2.6" fill={palette.wsMedalMid} stroke={palette.wsMedalEdge} strokeWidth="1" />
+      <circle cx={px + r * 0.98} cy={rim + 1} r="2.6" fill={palette.wsMedalMid} stroke={palette.wsMedalEdge} strokeWidth="1" />
       {/* the fumes: white puffs, growing and fading as they rise */}
       <g filter="url(#train-fume)">
         {PUFFS.map(([dx, dy, pr], n) => (
@@ -154,6 +174,47 @@ export function trainingGround({ x, ground, size, side, text }) {
     </g>
   ))
 
+  // ── flasks with potion running out, and the archery, on the grass in front of the castle ──
+  const flask = ([fx0, fy, angle, colour], n) => {
+    const fx = side * fx0, a = side > 0 ? angle : 180 - angle
+    const c = palette[colour]
+    // the puddle runs out of the neck: a few overlapping blobs further along the flask's axis
+    const rad = (a * Math.PI) / 180, ux = Math.cos(rad), uy = Math.sin(rad) * 0.35
+    return (
+      <g key={n}>
+        {[[22, 7, 4], [31, 11, 6], [41, 9, 5.5], [48, 6, 4], [33, 5, 3.4, 7]].map(([d, rx, ry, off = 0], b) => (
+          <ellipse key={b} cx={fx + ux * d} cy={fy + uy * d + 3 + off} rx={rx} ry={ry} fill={c} opacity="0.85" />
+        ))}
+        <g transform={`translate(${fx} ${fy}) rotate(${a}) scale(1.5 1.25)`}>
+          {/* round body, neck towards +x */}
+          <circle cx="0" cy="0" r="7" fill={c} opacity="0.75" />
+          <circle cx="0" cy="0" r="7" fill="none" stroke={palette.mapGlass} strokeWidth="1.4" />
+          <rect x="6" y="-2.2" width="9" height="4.4" fill={palette.mapGlass} opacity="0.35" />
+          <path d="M 6 -2.2 L 15 -2.2 M 6 2.2 L 15 2.2" stroke={palette.mapGlass} strokeWidth="1.2" />
+          <path d="M -3.5 -4 A 4.5 4.5 0 0 1 1 -5" fill="none" stroke={palette.mirrorGlint} strokeWidth="1.2" strokeLinecap="round" />
+        </g>
+      </g>
+    )
+  }
+  const arrow = ([ax0, ay, angle], n) => (
+    <g key={n} transform={`translate(${side * ax0} ${ay}) rotate(${side > 0 ? angle : 180 - angle})`}>
+      <line x1="-16" y1="0" x2="15" y2="0" stroke={palette.mapSignWoodDark} strokeWidth="1.6" />
+      <path d="M 15 -2.6 L 20 0 L 15 2.6 Z" fill={palette.mapArrowTip} />
+      <path d="M -16 0 L -11 -3.4 L -8 -3.4 L -13 0 Z M -16 0 L -11 3.4 L -8 3.4 L -13 0 Z" fill={palette.mapFletching} />
+    </g>
+  )
+  const archery = frame('train-front', (
+    <g>
+      {FLASKS.map(flask)}
+      <g transform={`translate(${side * BOW.x} ${BOW.y}) rotate(${side * BOW.turn})`}>
+        <path d="M -20 0 Q 0 -15 20 0" fill="none" stroke={palette.mapSignWoodDark} strokeWidth="4.2" strokeLinecap="round" />
+        <path d="M -20 0 Q 0 -15 20 0" fill="none" stroke={palette.mapSignWood} strokeWidth="2.4" strokeLinecap="round" />
+        <line x1="-20" y1="0" x2="20" y2="0" stroke={palette.mapBowString} strokeWidth="0.8" />
+      </g>
+      {ARROWS.map(arrow)}
+    </g>
+  ))
+
   // ── the bomb among the sticks ──
   const bomb = frame('train-bomb', (
     <text x={side * BOMB[0]} y={BOMB[1] - BOMB[2] * 0.42} textAnchor="middle" dominantBaseline="central" fontSize={BOMB[2]}>💣</text>
@@ -181,6 +242,7 @@ export function trainingGround({ x, ground, size, side, text }) {
       { el: sign, foot: ground + SIGN.foot * k },
       { el: pot, foot: ground + POT.foot * k },
       { el: mirrors, foot: ground + MIRROR.foot * k },
+      { el: archery, foot: ground + 100 * k },
       { el: bomb, foot: ground + BOMB[1] * k },
       ...sticks,
     ],
@@ -189,6 +251,7 @@ export function trainingGround({ x, ground, size, side, text }) {
       toMap([POT_X - r - 4, rim - 8, POT_X + r + 4, POT.foot]),   // the fumes may float over fields
       toMap([STICKS[0][0] - DISC - 4, -50, STICKS_REACH, 62]),
       toMap([-MIRROR.x - MIRROR.w, MIRROR.foot - MIRROR.h - 14, MIRROR.x + MIRROR.w, MIRROR.foot + 3]),
+      toMap([-90, 92, 110, 138]),   // the flasks and the archery
     ],
   }
 }

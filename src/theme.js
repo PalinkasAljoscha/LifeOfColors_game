@@ -115,6 +115,10 @@ export const palette = {
   mapBrew:           '#9b59b6',
   mapBrewBubble:     '#d7b8ee',
   mapSpiderThread:   '#e8e8e8',   // the spider's thread under the training sign
+  mapGlass:          '#dfeef5',   // the flasks lying in front of the training castle
+  mapArrowTip:       '#b8bcc6',   // the archery there: arrowheads, fletching, bow string
+  mapFletching:      '#e8e2d0',
+  mapBowString:      '#efe6cf',
   castleWall:        '#e3dccb',
   castleShade:       '#b9b09c',
   castleRoof:        '#b0413e',
