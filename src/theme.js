@@ -115,7 +115,8 @@ export const palette = {
   mapBrew:           '#9b59b6',
   mapBrewBubble:     '#d7b8ee',
   mapSpiderThread:   '#e8e8e8',   // the spider's thread under the training sign
-  mapGlass:          '#dfeef5',   // the flasks lying in front of the training castle
+  mapFlaskPotion:    '#DA70D6',   // the flask lying in front of the training castle: orchid, one of the
+  mapFlaskPotionLight: '#eeb8eb',  //   puzzles' potion colours (name_color), and its surface
   mapArrowTip:       '#b8bcc6',   // the archery there: arrowheads, fletching, bow string
   mapFletching:      '#e8e2d0',
   mapBowString:      '#efe6cf',

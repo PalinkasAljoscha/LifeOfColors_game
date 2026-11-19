@@ -7,8 +7,8 @@
 //     and fade as they rise; still, like every map picture: no animation);
 //   - in front of the castle two mirrors, as the game draws its mirror cells (cyan frame and tint,
 //     white diagonal glints), standing face to face with an electric flash between them; before
-//     them a few flasks lying on the grass, coloured potion running out of them, and a bow with
-//     arrows lying around;
+//     them one flask (the workshop's round-bottomed flask) lying on the grass, its potion running
+//     out, and a bow with arrows lying around;
 //   - on the castle's other side a few practice targets: sticks in the ground, spread out
 //     irregularly, of different heights, some upright, some tilted, each topped with a round wooden disc like a road sign,
 //     and on each disc one of the puzzles' emojis (the crown, the goal, among them) -- and a bomb
@@ -24,9 +24,9 @@ const FONT = "'Arial Black', Arial, sans-serif"
 // The sign: its plank ends at `near` on the castle's side (the pointed tip reaches TIP further),
 // its middle at height y, the post's foot at `foot`. Its width follows its text, so a longer word
 // (French) grows away from the castle, never into it.
-const SIGN = { near: -74, y: -6, h: 24, foot: 54, font: 14 }
-const TIP = 12
-const signWidth = (text) => [...text].length * SIGN.font * 0.72 + 26
+const SIGN = { near: -74, y: -6, h: 31, foot: 54, font: 18 }   // 1.3 x the first size
+const TIP = 15.6
+const signWidth = (text) => [...text].length * SIGN.font * 0.72 + 34
 /** How far the sign reaches out from the castle's middle, in the landscape's units. */
 export const signReach = (text) => -SIGN.near + signWidth(text)
 /** How far the sticks reach out on the other side. */
@@ -51,12 +51,16 @@ const STICKS = [
 const DISC = 12.5
 // The bomb among the sticks: [x, foot, size].
 const BOMB = [122, 44, 22]
-// Flasks lying on the grass in front of the castle, potion running out: [x, y, angle of the
-// flask (degrees, 0 = neck to the right), colour key].
-const FLASKS = [[-82, 104, 195, 'cellOrangeFill'], [-30, 122, -15, 'cellBlueFill'], [-8, 98, 165, 'cellGreenFill']]
+// One flask lying on the grass in front of the castle, its potion running out: the workshop's
+// round-bottomed flask (Workshop.jsx FLASK, its units), in one of the puzzles' potion colours
+// (mapFlaskPotion). Bulb middle at (x, y), turned by `turn` degrees (90 = neck towards the castle's
+// other side, a little more = neck a little down), drawn at `scale`.
+const FLASK = 'M-5,-70 V-37.6 A19.4,19.4 0 1 0 5,-37.6 V-70'
+const FLASK_IN = 'M-4,-70 V-37 A18.4,18.4 0 1 0 4,-37 V-70 Z'
+const LYING_FLASK = { x: -70, y: 108, turn: 98, scale: 0.85 }
 // The archery lying around: the bow at (x, y), turned by `turn` degrees; arrows [x, y, angle].
-const BOW = { x: 48, y: 108, turn: -24 }
-const ARROWS = [[22, 128, -8], [64, 126, 14], [88, 104, -32]]
+const BOW = { x: 66, y: 110, turn: -24 }
+const ARROWS = [[36, 130, -8], [80, 128, 14], [102, 104, -32]]
 // The two mirrors in front of the castle: their middles at ±MIRROR.x, standing at `foot`.
 const MIRROR = { x: 36, foot: 78, w: 26, h: 36 }
 
@@ -88,9 +92,9 @@ export function trainingGround({ x, ground, size, side, text }) {
 
   const sign = frame('train-sign', (
     <g>
-      <rect x={sx - 3.5} y={SIGN.y} width="7" height={SIGN.foot - SIGN.y} fill={palette.mapSignWoodDark} />
-      <path d={plank} fill={palette.mapSignWood} stroke={palette.mapSignWoodDark} strokeWidth="2.5" strokeLinejoin="round" />
-      <line x1={far + side * 4} x2={near} y1={SIGN.y + 6.5} y2={SIGN.y + 6.5} stroke={palette.mapSignWoodDark} strokeWidth="1" opacity="0.5" />
+      <rect x={sx - 4.5} y={SIGN.y} width="9" height={SIGN.foot - SIGN.y} fill={palette.mapSignWoodDark} />
+      <path d={plank} fill={palette.mapSignWood} stroke={palette.mapSignWoodDark} strokeWidth="3.2" strokeLinejoin="round" />
+      <line x1={far + side * 5} x2={near} y1={SIGN.y + 8.5} y2={SIGN.y + 8.5} stroke={palette.mapSignWoodDark} strokeWidth="1.3" opacity="0.5" />
       <text x={sx + (side * tip) / 2} y={SIGN.y + 1} textAnchor="middle" dominantBaseline="central"
             fontFamily={FONT} fontWeight="900" fontSize={SIGN.font} fill={palette.mapSignInk}>{text}</text>
       {spider}
@@ -175,27 +179,33 @@ export function trainingGround({ x, ground, size, side, text }) {
   ))
 
   // ── flasks with potion running out, and the archery, on the grass in front of the castle ──
-  const flask = ([fx0, fy, angle, colour], n) => {
-    const fx = side * fx0, a = side > 0 ? angle : 180 - angle
-    const c = palette[colour]
-    // the puddle runs out of the neck: a few overlapping blobs further along the flask's axis
-    const rad = (a * Math.PI) / 180, ux = Math.cos(rad), uy = Math.sin(rad) * 0.35
-    return (
-      <g key={n}>
-        {[[22, 7, 4], [31, 11, 6], [41, 9, 5.5], [48, 6, 4], [33, 5, 3.4, 7]].map(([d, rx, ry, off = 0], b) => (
-          <ellipse key={b} cx={fx + ux * d} cy={fy + uy * d + 3 + off} rx={rx} ry={ry} fill={c} opacity="0.85" />
-        ))}
-        <g transform={`translate(${fx} ${fy}) rotate(${a}) scale(1.5 1.25)`}>
-          {/* round body, neck towards +x */}
-          <circle cx="0" cy="0" r="7" fill={c} opacity="0.75" />
-          <circle cx="0" cy="0" r="7" fill="none" stroke={palette.mapGlass} strokeWidth="1.4" />
-          <rect x="6" y="-2.2" width="9" height="4.4" fill={palette.mapGlass} opacity="0.35" />
-          <path d="M 6 -2.2 L 15 -2.2 M 6 2.2 L 15 2.2" stroke={palette.mapGlass} strokeWidth="1.2" />
-          <path d="M -3.5 -4 A 4.5 4.5 0 0 1 1 -5" fill="none" stroke={palette.mirrorGlint} strokeWidth="1.2" strokeLinecap="round" />
+  // the flask: glass, the potion inside lying level, the workshop's highlights, no stopper; and
+  // the potion that ran out of its neck, a puddle of a few blobs
+  const F = LYING_FLASK, fa = side * F.turn, c = palette.mapFlaskPotion
+  const flx = side * F.x, rad = (fa * Math.PI) / 180
+  const mouth = { x: flx + 52 * F.scale * Math.sin(rad), y: F.y - 52 * F.scale * Math.cos(rad) }
+  const flask = (
+    <g>
+      {[[8, 0, 9, 5], [21, 3, 15, 7.5], [35, 1, 12, 6.5], [45, 5, 8, 4.6], [19, 10, 8, 4.2]].map(([d, dy, rx, ry], b) => (
+        <ellipse key={b} cx={mouth.x + side * d} cy={mouth.y + dy + 2} rx={rx} ry={ry} fill={c} opacity="0.85" />
+      ))}
+      <g transform={`translate(${flx} ${F.y}) rotate(${fa}) scale(${F.scale}) translate(0 19)`}>
+        <clipPath id="train-flask-in"><path d={FLASK_IN} /></clipPath>
+        <path d={`${FLASK} Z`} fill={palette.wsGlassDark} fillOpacity="0.45" />
+        <g clipPath="url(#train-flask-in)">
+          <g transform={`rotate(${-fa} 0 -19)`}>
+            <rect x="-70" y="-17" width="140" height="140" fill={c} />
+            <path d="M-70,-17 h140" stroke={palette.mapFlaskPotionLight} strokeWidth="2.4" opacity="0.8" />
+          </g>
         </g>
+        <path d={FLASK} fill="none" stroke={palette.wsGlass} strokeOpacity="0.75" strokeWidth="2.2" />
+        <path d="M-13,-28 A15,15 0 0 0 -11,-8" fill="none" stroke={palette.white} strokeOpacity="0.55" strokeWidth="2.6" strokeLinecap="round" />
+        <path d="M-2.6,-66 V-42" stroke={palette.white} strokeOpacity="0.45" strokeWidth="2" strokeLinecap="round" />
+        <ellipse cx="0" cy="-70" rx="6.6" ry="2" fill={palette.wsGlassDark} fillOpacity="0.5" stroke={palette.wsGlass} strokeOpacity="0.75" strokeWidth="2" />
+        <path d="M-5,-47 h10" stroke={palette.wsGlass} strokeOpacity="0.6" strokeWidth="2.4" />
       </g>
-    )
-  }
+    </g>
+  )
   const arrow = ([ax0, ay, angle], n) => (
     <g key={n} transform={`translate(${side * ax0} ${ay}) rotate(${side > 0 ? angle : 180 - angle})`}>
       <line x1="-16" y1="0" x2="15" y2="0" stroke={palette.mapSignWoodDark} strokeWidth="1.6" />
@@ -205,7 +215,7 @@ export function trainingGround({ x, ground, size, side, text }) {
   )
   const archery = frame('train-front', (
     <g>
-      {FLASKS.map(flask)}
+      {flask}
       <g transform={`translate(${side * BOW.x} ${BOW.y}) rotate(${side * BOW.turn})`}>
         <path d="M -20 0 Q 0 -15 20 0" fill="none" stroke={palette.mapSignWoodDark} strokeWidth="4.2" strokeLinecap="round" />
         <path d="M -20 0 Q 0 -15 20 0" fill="none" stroke={palette.mapSignWood} strokeWidth="2.4" strokeLinecap="round" />
@@ -251,7 +261,7 @@ export function trainingGround({ x, ground, size, side, text }) {
       toMap([POT_X - r - 4, rim - 8, POT_X + r + 4, POT.foot]),   // the fumes may float over fields
       toMap([STICKS[0][0] - DISC - 4, -50, STICKS_REACH, 62]),
       toMap([-MIRROR.x - MIRROR.w, MIRROR.foot - MIRROR.h - 14, MIRROR.x + MIRROR.w, MIRROR.foot + 3]),
-      toMap([-90, 92, 110, 138]),   // the flasks and the archery
+      toMap([-95, 88, 124, 140]),   // the flask and the archery
     ],
   }
 }

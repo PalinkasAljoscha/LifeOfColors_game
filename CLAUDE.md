@@ -293,7 +293,7 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   site stands. The pictures come from the same drawing script as the workshop scenes (not in this
   repo).
   **Training ground** (2026-11-19, `components/TrainingGround.jsx`): around the training castle a
-  wooden arrow sign on a post points at it, "Training" (`castles.trainingSign`; anchored by its
+  wooden arrow sign on a post points at it (1.3 x its first size), "Training" (`castles.trainingSign`; anchored by its
   tip, so a longer word grows away from the castle; on the castle's left, or its right where the
   left has no room -- then everything is mirrored) with a spider (🕷️) hanging on its thread
   (`mapSpiderThread`) from the plank, a big dark-grey (not black) cauldron over a small fire
@@ -302,13 +302,16 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   style (blurred white puffs, `winVapour`, growing and fading as they rise; still, no animation),
   in front of the castle two mirrors drawn like the game's mirror cells (`mirrorLink` frame and
   tint, `mirrorGlint` diagonal glints) standing face to face on wooden stands with an electric
-  flash between them (zigzag, glowing); before them three round-bottomed flasks lying on the grass
-  with potion (the cell colours) running out into puddles, and a bow with three arrows lying
-  around (`mapGlass`, `mapArrowTip`, `mapFletching`, `mapBowString`); and on the castle's other side six practice targets: sticks in the ground, spread out irregularly, of different heights,
+  flash between them (zigzag, glowing); before them ONE flask lying on the grass -- the workshop's
+  round-bottomed flask (Workshop.jsx `FLASK`, its glass and highlights, no stopper) in orchid
+  `mapFlaskPotion` (#DA70D6, one of the puzzles' potion colours) with its potion running out
+  into a puddle -- and a bow with three arrows lying around (`mapArrowTip`, `mapFletching`,
+  `mapBowString`); and on the castle's other side six practice targets: sticks in the ground, spread out irregularly, of different heights,
   some upright, some tilted, each topped with a round wooden disc like a road sign carrying one of the puzzles'
   emojis (🍄 👑 🐸 💎 🐉 🪨), with the game's bomb (💣) lying among them. All are standing things (each stick on its own foot); the castle's
   own fields make way for them. Colours `mapSign*`, `mapCauldron*`, `mapFire*`, `mapBrew*`, `mapSpiderThread`.
-  (Tried and dropped: a practice board of emoji cells on the grass; a drawn crow on the sign.)
+  (Tried and dropped: a practice board of emoji cells on the grass; a drawn crow on the sign;
+  three small flasks in the cell colours.)
 - **Workshop scenes** (2026-11-11, flat look 2026-11-12) -- every castle except the training castle
   picks its puzzles in a sorcerer's workshop instead of a tile grid (`components/Workshop.jsx`, data
   in `src/workshops.js`). Six scenes (hut, cupboard, lab, tower, study, crypt); castle n uses scene
