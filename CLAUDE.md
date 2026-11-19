@@ -295,13 +295,14 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   **Training ground** (2026-11-19, `components/TrainingGround.jsx`): around the training castle a
   wooden arrow sign on a post points at it, "Training" (`castles.trainingSign`; anchored by its
   tip, so a longer word grows away from the castle; on the castle's left, or its right where the
-  left has no room -- then everything is mirrored), a big dark-grey (not black) cauldron over a
-  small fire in front of the sign, its fumes in the win animation's style (blurred white puffs,
+  left has no room -- then everything is mirrored) with a crow sitting on the plank above the
+  post (drawn, `mapCrow*`), a big dark-grey (not black) cauldron over a small fire just behind the
+  sign (outside its post, its fumes rising behind the plank), its fumes in the win animation's style (blurred white puffs,
   `winVapour`, growing and fading as they rise; still, no animation), and on the castle's other
-  side six practice targets: sticks in the ground of different heights, some upright, some
-  tilted, each topped with a round wooden disc like a road sign carrying one of the puzzles'
+  side six practice targets: sticks in the ground, spread out irregularly, of different heights,
+  some upright, some tilted, each topped with a round wooden disc like a road sign carrying one of the puzzles'
   emojis (🍄 👑 🐸 💎 🐉 🪨). All are standing things (each stick on its own foot); the castle's
-  own fields make way for them. Colours `mapSign*`, `mapCauldron*`, `mapFire*`, `mapBrew*`.
+  own fields make way for them. Colours `mapSign*`, `mapCauldron*`, `mapFire*`, `mapBrew*`, `mapCrow*`.
   (A practice board of emoji cells on the grass was tried first and dropped.)
 - **Workshop scenes** (2026-11-11, flat look 2026-11-12) -- every castle except the training castle
   picks its puzzles in a sorcerer's workshop instead of a tile grid (`components/Workshop.jsx`, data

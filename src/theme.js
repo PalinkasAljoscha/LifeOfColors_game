@@ -114,6 +114,10 @@ export const palette = {
   mapFireInner:      '#ffd24a',
   mapBrew:           '#9b59b6',
   mapBrewBubble:     '#d7b8ee',
+  mapCrow:           '#1d1d26',   // the crow on the training sign
+  mapCrowWing:       '#33334a',
+  mapCrowBeak:       '#3b3b44',
+  mapCrowEye:        '#f2f2f2',
   castleWall:        '#e3dccb',
   castleShade:       '#b9b09c',
   castleRoof:        '#b0413e',

@@ -1,11 +1,12 @@
 // The training ground around the training castle (castle 0) on the home map (CastleMap.jsx):
 //   - a wooden arrow sign, "Training" (castles.trainingSign), on a post beside the castle and
 //     pointing at it;
-//   - a big dark-grey cauldron in front of the sign, over a small fire, with fumes rising out of
-//     it in the win animation's style (soft white puffs that grow and fade as they rise; still,
-//     like every map picture: no animation);
-//   - on the castle's other side a few practice targets: sticks in the ground, of different
-//     heights, some upright, some tilted, each topped with a round wooden disc like a road sign,
+//   - a crow sitting on the sign, just above its post;
+//   - a big dark-grey cauldron behind the sign, over a small fire, with fumes rising out of it in
+//     the win animation's style (soft white puffs that grow and fade as they rise; still, like
+//     every map picture: no animation);
+//   - on the castle's other side a few practice targets: sticks in the ground, spread out
+//     irregularly, of different heights, some upright, some tilted, each topped with a round wooden disc like a road sign,
 //     and on each disc one of the puzzles' emojis (the crown, the goal, among them).
 // Everything is in the landscape's units (size / 100) around the middle of the castle's ground
 // line, like a <site>-land.svg; `side` = 1 puts the sign and the cauldron on the left and the
@@ -26,20 +27,20 @@ export const signReach = (text) => -SIGN.near + signWidth(text)
 /** How far the sticks reach out on the other side. */
 export const STICKS_REACH = 166
 
-// The cauldron: standing at (x, foot), body radius r.
-const POT = { x: -96, foot: 78, r: 24 }
+// The cauldron: behind the sign (its foot above the post's), dx out from the post, body radius r.
+const POT = { dx: -28, foot: 20, r: 24 }
 // Its fumes: [dx, height above the rim, radius] -- growing and fading as they rise.
 const PUFFS = [[-4, 6, 6], [5, 14, 8], [-3, 24, 10], [6, 35, 11.5], [-4, 47, 13], [4, 58, 14]]
 
 // The practice targets: [x, foot, height of the stick up to the disc's middle, tilt in degrees
 // (positive leans away from the castle), emoji]. Disc radius DISC.
 const STICKS = [
-  [64, 26, 44, -4, '🍄'],
-  [82, 10, 60, 3, '👑'],
-  [100, 34, 36, 12, '🐸'],
-  [118, 16, 52, -9, '💎'],
-  [136, 36, 34, 5, '🐉'],
-  [152, 20, 46, 15, '🪨'],
+  [60, 30, 42, -5, '🍄'],
+  [77, 2, 58, 4, '👑'],
+  [106, 20, 40, 13, '🐸'],
+  [93, 54, 34, -8, '💎'],
+  [145, 4, 50, -11, '🐉'],
+  [152, 46, 38, 18, '🪨'],
 ]
 const DISC = 12.5
 
@@ -60,18 +61,34 @@ export function trainingGround({ x, ground, size, side, text }) {
   // the plank: a board whose end towards the castle is pointed
   const near = sx + (side * w) / 2, far = sx - (side * w) / 2, top = SIGN.y - SIGN.h / 2, bot = SIGN.y + SIGN.h / 2
   const plank = `M ${far} ${top} L ${near} ${top} L ${near + side * tip} ${SIGN.y} L ${near} ${bot} L ${far} ${bot} Z`
-  const sign = frame('train-sign', (
+  const signEl = () => frame('train-sign', (
     <g>
       <rect x={sx - 3.5} y={SIGN.y} width="7" height={SIGN.foot - SIGN.y} fill={palette.mapSignWoodDark} />
       <path d={plank} fill={palette.mapSignWood} stroke={palette.mapSignWoodDark} strokeWidth="2.5" strokeLinejoin="round" />
       <line x1={far + side * 4} x2={near} y1={SIGN.y + 6.5} y2={SIGN.y + 6.5} stroke={palette.mapSignWoodDark} strokeWidth="1" opacity="0.5" />
       <text x={sx + (side * tip) / 2} y={SIGN.y + 1} textAnchor="middle" dominantBaseline="central"
             fontFamily={FONT} fontWeight="900" fontSize={SIGN.font} fill={palette.mapSignInk}>{text}</text>
+      {crow}
     </g>
   ))
 
+  // the crow on the plank, just above the post, looking towards the castle
+  const crow = (
+    <g transform={`translate(${sx + side * 2} ${top}) scale(${side} 1)`}>
+      <path d="M -12 -7 L -20 -3 L -11 -3 Z" fill={palette.mapCrow} />
+      <ellipse cx="-3" cy="-7.5" rx="9.5" ry="6.5" fill={palette.mapCrow} />
+      <path d="M -9 -9 Q -2 -15 4 -8 Q -2 -6 -9 -9 Z" fill={palette.mapCrowWing} />
+      <circle cx="6.5" cy="-14" r="5" fill={palette.mapCrow} />
+      <path d="M 10.5 -15.5 L 16 -13.2 L 10.5 -11.6 Z" fill={palette.mapCrowBeak} />
+      <circle cx="7.6" cy="-15" r="1.1" fill={palette.mapCrowEye} />
+      <line x1="-4" y1="-1.5" x2="-5" y2="0.5" stroke={palette.mapCrowBeak} strokeWidth="1.2" strokeLinecap="round" />
+      <line x1="0" y1="-1.5" x2="1" y2="0.5" stroke={palette.mapCrowBeak} strokeWidth="1.2" strokeLinecap="round" />
+    </g>
+  )
+
   // ── the cauldron with its fumes ──
-  const px = side * POT.x, r = POT.r, rim = POT.foot - r * 1.55
+  const POT_X = SIGN.near - w / 2 + POT.dx
+  const px = side * POT_X, r = POT.r, rim = POT.foot - r * 1.55
   const pot = frame('train-pot', (
     <g>
       {/* the fumes' soft edge, as the win animation's puffs (blurred white) */}
@@ -120,14 +137,14 @@ export function trainingGround({ x, ground, size, side, text }) {
 
   return {
     standing: [
-      { el: sign, foot: ground + SIGN.foot * k },
+      { el: signEl(), foot: ground + SIGN.foot * k },
       { el: pot, foot: ground + POT.foot * k },
       ...sticks,
     ],
     taken: [
       toMap([SIGN.near - w, top, SIGN.near + tip, SIGN.foot]),
-      toMap([POT.x - r - 4, rim - 8, POT.x + r + 4, POT.foot]),   // the fumes may float over fields
-      toMap([STICKS[0][0] - DISC - 4, -40, STICKS_REACH, 40]),
+      toMap([POT_X - r - 4, rim - 8, POT_X + r + 4, POT.foot]),   // the fumes may float over fields
+      toMap([STICKS[0][0] - DISC - 4, -50, STICKS_REACH, 62]),
     ],
   }
 }
