@@ -310,9 +310,13 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   some upright, some tilted, each topped with a round wooden disc like a road sign carrying one of the puzzles'
   emojis (🍄 👑 🐸 💎 🐉 🪨), with the game's bomb (💣) lying among them; an orc (the
   puzzles' 🧌, twice the emojis' size) standing in front of the castle between the mirrors and the
-  sticks; and two clusters of mushrooms drawn as in the workshop pictures (pale stem, half-round cap
-  in red / orange / purple with two white dots; `mapMushroom*`), one by the sign's post, one
-  beyond the sticks (so `STICKS_REACH` includes them). All are standing things (each stick on its own foot); the castle's
+  sticks; two small clusters of mushrooms drawn as in the workshop pictures (pale stem, half-round
+  cap in red / orange / purple with two white dots; `mapMushroom*`; the two biggest of each were
+  taken out again), one by the sign's post, one beyond the sticks (so `STICKS_REACH` includes
+  them); and a crooked chimney on the castle's LEFT tower roof (never mirrored, like the castle;
+  drawn right after the castle) with smoke in the win animation's style -- blurred puffs, white
+  `winVapour` and golden `winStar`, rising and drifting away from the path -- and small stars in
+  it, mostly golden, a few in the win's sparkle colours. All are standing things (each stick on its own foot); the castle's
   own fields make way for them. Colours `mapSign*`, `mapCauldron*`, `mapFire*`, `mapBrew*`, `mapSpiderThread`.
   (Tried and dropped: a practice board of emoji cells on the grass; a drawn crow on the sign;
   three small flasks in the cell colours.)

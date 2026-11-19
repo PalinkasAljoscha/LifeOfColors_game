@@ -15,6 +15,7 @@
 //     and on each disc one of the puzzles' emojis (the crown, the goal, among them) -- and a bomb
 //     (the game's 💣) lying on the ground among them;
 //   - two clusters of mushrooms (as in the workshop pictures): by the sign's post and beyond the sticks;
+//   - a crooked chimney on the left tower's roof, smoking white and gold with little stars;
 //   - an orc (the puzzles' 🧌), twice the emojis' size, standing in front of the castle, between the mirrors and the sticks.
 // Everything is in the landscape's units (size / 100) around the middle of the castle's ground
 // line, like a <site>-land.svg; `side` = 1 puts the sign and the cauldron on the left and the
@@ -62,12 +63,24 @@ const BOMB = [122, 44, 22]
 // purple with two white dots), in two clusters: by the sign's post, and beyond the sticks. Each
 // [x, foot, stem height, cap radius, colour], in the pictures' units, drawn MUSHROOM_SCALE x.
 const MUSHROOMS = [
-  [-130, 92, 11, 6, 'mapMushroomRed'], [-117, 89, 18, 7.5, 'mapMushroomOrange'],
-  [-105, 94, 9, 5, 'mapMushroomPurple'], [-94, 90, 14, 6.5, 'mapMushroomRed'],
-  [150, 80, 10, 6, 'mapMushroomOrange'], [162, 76, 17, 7.5, 'mapMushroomPurple'],
-  [175, 73, 12, 6, 'mapMushroomRed'], [189, 67, 18, 8, 'mapMushroomRed'], [201, 63, 9, 5, 'mapMushroomOrange'],
+  [-130, 92, 11, 6, 'mapMushroomRed'], [-105, 94, 9, 5, 'mapMushroomPurple'],
+  [150, 80, 10, 6, 'mapMushroomOrange'], [175, 73, 12, 6, 'mapMushroomRed'], [201, 63, 9, 5, 'mapMushroomOrange'],
 ]
 const MUSHROOM_SCALE = 1.6
+// A crooked chimney on the roof of the castle's LEFT tower (the castle picture is never mirrored,
+// so neither is the chimney): its outline in the castle picture's units (sites/castle.svg: the
+// roof runs from -53.1,-76 up to -37,-109.6), and the smoke out of it, in the win animation's
+// style -- soft blurred puffs, white and golden, growing and fading as they rise and drift away
+// from the castle's path -- with small stars in it, mostly golden, a few coloured (the win's
+// sparkle colours). Puffs [dx, dy, radius, colour key], stars [dx, dy, size, colour key], both
+// from the chimney's top. Still, like everything on the map.
+const CHIMNEY = 'M-49,-84.6 L-48.6,-103.5 L-46.4,-113.6 L-39.6,-112.4 L-41.6,-103 L-42.5,-98.1 Z'
+const CHIMNEY_TOP = { x: -43, y: -116 }
+const SMOKE = [[0, -4, 4, 'winVapour'], [-3, -11, 5.5, 'winStar'], [-7, -20, 7, 'winVapour'], [-12, -30, 8.5, 'winStar'],
+  [-18, -41, 10, 'winVapour'], [-25, -53, 11, 'winStar'], [-33, -66, 12, 'winVapour']]
+const SMOKE_STARS = [[-4, -16, 3.2, 'winStar'], [-14, -27, 2.6, 'winSparkle2'], [-9, -38, 3.6, 'winStar'],
+  [-24, -44, 2.8, 'winSparkle1'], [-20, -58, 3.4, 'winStar'], [-34, -60, 2.6, 'winSparkle4'], [-30, -74, 3, 'winStar']]
+const STAR = 'M0,-1 L0.29,-0.31 L0.95,-0.31 L0.42,0.12 L0.59,0.81 L0,0.42 L-0.59,0.81 L-0.42,0.12 L-0.95,-0.31 L-0.29,-0.31 Z'
 // The orc (the puzzles' 🧌) standing in front of the castle, between the mirrors and the sticks:
 // [x, foot, size].
 const ORC = [20, 46, 48]
@@ -269,6 +282,28 @@ export function trainingGround({ x, ground, size, side, text }) {
     }
   })
 
+  // ── the chimney on the left tower, with its smoke and stars (not mirrored: the castle isn't) ──
+  const chimney = frame('train-chimney', (
+    <g>
+      <defs>
+        <filter id="train-smoke" x="-1" y="-1" width="3" height="3"><feGaussianBlur stdDeviation="2.6" /></filter>
+      </defs>
+      <path d={CHIMNEY} fill={palette.castleShade} stroke={palette.castleGate} strokeWidth="1.1" strokeLinejoin="round" />
+      <path d="M-48.8,-96 L-42,-95.2 M-47.6,-106 L-41,-105" stroke={palette.castleGate} strokeWidth="0.7" opacity="0.6" />
+      <path d="M-47.6,-115.4 L-38.4,-113.6" stroke={palette.castleGate} strokeWidth="3" strokeLinecap="round" />
+      <g filter="url(#train-smoke)">
+        {SMOKE.map(([dx, dy, pr, c], n) => (
+          <circle key={n} cx={CHIMNEY_TOP.x + dx} cy={CHIMNEY_TOP.y + dy} r={pr} fill={palette[c]}
+                  opacity={(c === 'winStar' ? 0.75 : 0.85) - n * 0.07} />
+        ))}
+      </g>
+      {SMOKE_STARS.map(([dx, dy, sz, c], n) => (
+        <path key={n} d={STAR} fill={palette[c]} opacity={0.95 - n * 0.06}
+              transform={`translate(${CHIMNEY_TOP.x + dx} ${CHIMNEY_TOP.y + dy}) rotate(${n * 23}) scale(${sz})`} />
+      ))}
+    </g>
+  ))
+
   // ── the orc ──
   const orc = frame('train-orc', (
     <text x={side * ORC[0]} y={ORC[1] - ORC[2] * 0.48} textAnchor="middle" dominantBaseline="central" fontSize={ORC[2]}>🧌</text>
@@ -305,6 +340,7 @@ export function trainingGround({ x, ground, size, side, text }) {
       { el: frame('train-flask', flask), foot: ground + (LYING_FLASK.y + 8) * k },
       { el: bomb, foot: ground + BOMB[1] * k },
       { el: orc, foot: ground + ORC[1] * k },
+      { el: chimney, foot: ground + 0.01 },   // right after the castle itself, so on its roof
       ...sticks,
       ...mushrooms,
     ],
@@ -312,7 +348,7 @@ export function trainingGround({ x, ground, size, side, text }) {
       toMap([SIGN.near - w, top, SIGN.near + tip, SIGN.foot]),
       toMap([POT_X - r - 26, rim - 8, POT_X + r + 26, POT.foot + 22]),   // the fumes may float over fields
       toMap([STICKS[0][0] - DISC - 4, -50, STICKS_REACH, 84]),
-      toMap([-142, 60, -80, 98]),   // the mushrooms by the sign's post
+      toMap([-142, 70, -96, 98]),   // the mushrooms by the sign's post
       toMap([MIRROR.dx - MIRROR.x - MIRROR.w, MIRROR.foot - MIRROR.h - 14, MIRROR.dx + MIRROR.x + MIRROR.w, MIRROR.foot + 3]),
       toMap([ORC[0] - 26, ORC[1] - 50, ORC[0] + 26, ORC[1] + 2]),
       toMap([-32, 100, 124, 148]),   // the archery
