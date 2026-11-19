@@ -76,10 +76,18 @@ const MUSHROOM_SCALE = 1.6
 // from the chimney's top. Still, like everything on the map.
 const CHIMNEY = 'M-49,-84.6 L-48.6,-103.5 L-46.4,-113.6 L-39.6,-112.4 L-41.6,-103 L-42.5,-98.1 Z'
 const CHIMNEY_TOP = { x: -43, y: -116 }
-const SMOKE = [[0, -4, 4, 'winVapour'], [-3, -11, 5.5, 'winStar'], [-7, -20, 7, 'winVapour'], [-12, -30, 8.5, 'winStar'],
-  [-18, -41, 10, 'winVapour'], [-25, -53, 11, 'winStar'], [-33, -66, 12, 'winVapour']]
-const SMOKE_STARS = [[-4, -16, 3.2, 'winStar'], [-14, -27, 2.6, 'winSparkle2'], [-9, -38, 3.6, 'winStar'],
-  [-24, -44, 2.8, 'winSparkle1'], [-20, -58, 3.4, 'winStar'], [-34, -60, 2.6, 'winSparkle4'], [-30, -74, 3, 'winStar']]
+const SMOKE = [[0, -4, 4, 'winVapour'], [-3, -11, 5.5, 'winStar'], [-7, -20, 7, 'winVapour'], [-12, -29, 8.5, 'winStar'],
+  [1, -33, 8, 'winVapour'], [-21, -38, 10, 'winVapour'], [-7, -44, 10, 'winStar'], [-34, -46, 10, 'winStar'],
+  [4, -50, 8.5, 'winVapour'], [-19, -54, 12, 'winVapour'], [-43, -57, 10, 'winVapour'], [-31, -63, 11, 'winStar'],
+  [-7, -62, 10, 'winVapour'], [-46, -67, 8, 'winStar'], [-19, -69, 9, 'winVapour']]
+const SMOKE_STARS = [[-4, -15, 3.2, 'winStar'], [-14, -25, 2.6, 'winSparkle2'], [-6, -36, 3.6, 'winStar'],
+  [-25, -40, 2.8, 'winSparkle1'], [4, -42, 2.6, 'winStar'], [-38, -50, 3, 'winStar'], [-16, -48, 2.4, 'winSparkle4'],
+  [-28, -58, 3.4, 'winStar'], [-8, -58, 2.8, 'winSparkle3'], [-46, -62, 2.6, 'winStar'], [2, -60, 3, 'winStar'],
+  [-36, -70, 2.6, 'winSparkle5'], [-18, -70, 3.2, 'winStar'], [-52, -50, 2.4, 'winStar']]
+// The whole cloud is drawn SMOKE_SCALE x around the chimney's top (puffs, their blur and the stars'
+// places, so its texture stays the same); the stars themselves only STAR_SCALE x.
+const SMOKE_SCALE = 2.0
+const STAR_SCALE = 1.4
 const STAR = 'M0,-1 L0.29,-0.31 L0.95,-0.31 L0.42,0.12 L0.59,0.81 L0,0.42 L-0.59,0.81 L-0.42,0.12 L-0.95,-0.31 L-0.29,-0.31 Z'
 // The orc (the puzzles' 🧌) standing in front of the castle, between the mirrors and the sticks:
 // [x, foot, size].
@@ -291,16 +299,18 @@ export function trainingGround({ x, ground, size, side, text }) {
       <path d={CHIMNEY} fill={palette.castleShade} stroke={palette.castleGate} strokeWidth="1.1" strokeLinejoin="round" />
       <path d="M-48.8,-96 L-42,-95.2 M-47.6,-106 L-41,-105" stroke={palette.castleGate} strokeWidth="0.7" opacity="0.6" />
       <path d="M-47.6,-115.4 L-38.4,-113.6" stroke={palette.castleGate} strokeWidth="3" strokeLinecap="round" />
+      <g transform={`translate(${CHIMNEY_TOP.x} ${CHIMNEY_TOP.y}) scale(${SMOKE_SCALE}) translate(${-CHIMNEY_TOP.x} ${-CHIMNEY_TOP.y})`}>
       <g filter="url(#train-smoke)">
         {SMOKE.map(([dx, dy, pr, c], n) => (
           <circle key={n} cx={CHIMNEY_TOP.x + dx} cy={CHIMNEY_TOP.y + dy} r={pr} fill={palette[c]}
-                  opacity={(c === 'winStar' ? 0.75 : 0.85) - n * 0.07} />
+                  opacity={(c === 'winStar' ? 0.75 : 0.85) + dy * 0.0055} />
         ))}
       </g>
       {SMOKE_STARS.map(([dx, dy, sz, c], n) => (
-        <path key={n} d={STAR} fill={palette[c]} opacity={0.95 - n * 0.06}
-              transform={`translate(${CHIMNEY_TOP.x + dx} ${CHIMNEY_TOP.y + dy}) rotate(${n * 23}) scale(${sz})`} />
+        <path key={n} d={STAR} fill={palette[c]} opacity={0.95 - (n % 7) * 0.06}
+              transform={`translate(${CHIMNEY_TOP.x + dx} ${CHIMNEY_TOP.y + dy}) rotate(${n * 23}) scale(${(sz * STAR_SCALE) / SMOKE_SCALE})`} />
       ))}
+      </g>
     </g>
   ))
 

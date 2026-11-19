@@ -315,8 +315,10 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   taken out again), one by the sign's post, one beyond the sticks (so `STICKS_REACH` includes
   them); and a crooked chimney on the castle's LEFT tower roof (never mirrored, like the castle;
   drawn right after the castle) with smoke in the win animation's style -- blurred puffs, white
-  `winVapour` and golden `winStar`, rising and drifting away from the path -- and small stars in
-  it, mostly golden, a few in the win's sparkle colours. All are standing things (each stick on its own foot); the castle's
+  `winVapour` and golden `winStar`, rising and drifting away from the path into a wide cloud
+  above the castle's left half (the user's sketch: `SMOKE_SCALE` 2 x, puffs and blur scaled
+  together so the texture stays) -- and small stars in it, mostly golden, a few in the win's
+  sparkle colours. All are standing things (each stick on its own foot); the castle's
   own fields make way for them. Colours `mapSign*`, `mapCauldron*`, `mapFire*`, `mapBrew*`, `mapSpiderThread`.
   (Tried and dropped: a practice board of emoji cells on the grass; a drawn crow on the sign;
   three small flasks in the cell colours.)
