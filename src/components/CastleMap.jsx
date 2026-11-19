@@ -7,7 +7,7 @@ import { giveWay, onAnyPath, placeFlat } from './mapClear.js'
 import { PATH_HALF, PATH_REACH, STONE_ROUND, pathStones } from './mapPath.js'
 import { relax } from './mapLayout.js'
 import WildcardCard from './WildcardCard.jsx'
-import { STICKS_REACH, signReach, trainingGround } from './TrainingGround.jsx'
+import { STICKS_REACH, trainingGround } from './TrainingGround.jsx'
 
 // The home-screen map: the levels ("castles" in the code) as different places -- a castle, a forest
 // hut, a tavern, ... (src/sites.js: which level is which place) -- each with its own bit of
@@ -299,8 +299,10 @@ export default function CastleMap({ states, graph, review = false, loadingCastle
   // They stand like the landscape's standing things; the castle's own fields make way for them.
   if (count > 0) {
     const { x } = pos(0), text = t('castles.trainingSign'), k = size / 100
-    const side = x - signReach(text) * k >= 4 && x + STICKS_REACH * k <= W - 4 ? 1 : -1
-    const tg = trainingGround({ x, ground: foot(0).y, size, side, text })
+    // the sticks need their room on the right; the sign takes what is left on the other side
+    const side = x + STICKS_REACH * k <= W - 4 ? 1 : -1
+    const maxReach = (side > 0 ? x - 4 : W - 4 - x) / k
+    const tg = trainingGround({ x, ground: foot(0).y, size, side, text, maxReach })
     standing.push(...tg.standing)
     taken.push(...tg.taken)
   }

@@ -23,16 +23,25 @@
 // stays clear" rule, components/mapClear.js).
 import { palette } from '../theme.js'
 
-const FONT = "'Arial Black', Arial, sans-serif"
+// The sign's lettering: Mystery Quest (magic, mystery and fun), bundled with the app
+// (@fontsource/mystery-quest, latin 400, imported in main.jsx) -- never loaded from another server.
+const SIGN_FONT = "'Mystery Quest', 'Arial Black', cursive"
 
 // The sign: its plank ends at `near` on the castle's side (the pointed tip reaches TIP further),
 // its middle at height y, the post's foot at `foot`. Its width follows its text, so a longer word
-// (French) grows away from the castle, never into it.
-const SIGN = { near: -74, y: -6, h: 31, foot: 54, font: 18 }   // 1.3 x the first size
-const TIP = 15.6
-const signWidth = (text) => [...text].length * SIGN.font * 0.72 + 34
-/** How far the sign reaches out from the castle's middle, in the landscape's units. */
-export const signReach = (text) => -SIGN.near + signWidth(text)
+// (French) grows away from the castle, never into it; a word too long for the room left of the
+// castle gets a smaller font (signFont).
+const SIGN = { near: -74, y: -6, h: 37.2, foot: 54, font: 24 }   // 1.3 x 1.2 x the first size
+const TIP = 18.7
+const SIGN_PAD = 52   // the plank's room around the text, tip included
+const CHAR_W = 0.54   // Mystery Quest's widest mean letter width of the three words (Übung), in em
+/** The sign's font size for `text` when it may reach `maxReach` out from the castle's middle (in the
+ *  landscape's units): SIGN.font, or smaller (not below 14) for a word too long for the room --
+ *  so the training ground keeps its side and the sign never runs off the map. */
+export function signFont(text, maxReach = Infinity) {
+  const room = (maxReach + SIGN.near - SIGN_PAD) / ([...text].length * CHAR_W)
+  return Math.max(14, Math.min(SIGN.font, room))
+}
 /** How far the sticks reach out on the other side. */
 export const STICKS_REACH = 216   // with the mushrooms beyond them
 
@@ -107,7 +116,7 @@ const MIRROR = { x: 36, dx: -16, foot: 104, w: 26, h: 36 }   // dx: the pair's m
 
 /** The training ground's parts for castle 0 standing at (x, ground) with picture size `size`:
  *  standing things [{ el, foot }] (foot = map y) and the boxes nothing flat may touch (map px). */
-export function trainingGround({ x, ground, size, side, text }) {
+export function trainingGround({ x, ground, size, side, text, maxReach = Infinity }) {
   const k = size / 100
   const toMap = ([x0, y0, x1, y1]) => {
     const a = x + side * x0 * k, b = x + side * x1 * k
@@ -118,7 +127,8 @@ export function trainingGround({ x, ground, size, side, text }) {
   )
 
   // ── the sign ──
-  const w = signWidth(text), tip = TIP, sx = side * (SIGN.near - w / 2)
+  const font = signFont(text, maxReach), w = [...text].length * font * CHAR_W + SIGN_PAD
+  const tip = TIP, sx = side * (SIGN.near - w / 2)
   // the plank: a board whose end towards the castle is pointed
   const near = sx + (side * w) / 2, far = sx - (side * w) / 2, top = SIGN.y - SIGN.h / 2, bot = SIGN.y + SIGN.h / 2
   const plank = `M ${far} ${top} L ${near} ${top} L ${near + side * tip} ${SIGN.y} L ${near} ${bot} L ${far} ${bot} Z`
@@ -133,11 +143,11 @@ export function trainingGround({ x, ground, size, side, text }) {
 
   const sign = frame('train-sign', (
     <g>
-      <rect x={sx - 4.5} y={SIGN.y} width="9" height={SIGN.foot - SIGN.y} fill={palette.mapSignWoodDark} />
-      <path d={plank} fill={palette.mapSignWood} stroke={palette.mapSignWoodDark} strokeWidth="3.2" strokeLinejoin="round" />
-      <line x1={far + side * 5} x2={near} y1={SIGN.y + 8.5} y2={SIGN.y + 8.5} stroke={palette.mapSignWoodDark} strokeWidth="1.3" opacity="0.5" />
+      <rect x={sx - 5.4} y={SIGN.y} width="10.8" height={SIGN.foot - SIGN.y} fill={palette.mapSignWoodDark} />
+      <path d={plank} fill={palette.mapSignWood} stroke={palette.mapSignWoodDark} strokeWidth="3.8" strokeLinejoin="round" />
+      <line x1={far + side * 6} x2={near} y1={SIGN.y + 10.2} y2={SIGN.y + 10.2} stroke={palette.mapSignWoodDark} strokeWidth="1.5" opacity="0.5" />
       <text x={sx + (side * tip) / 2} y={SIGN.y + 1} textAnchor="middle" dominantBaseline="central"
-            fontFamily={FONT} fontWeight="900" fontSize={SIGN.font} fill={palette.mapSignInk}>{text}</text>
+            fontFamily={SIGN_FONT} fontSize={font} fill={palette.mapSignInk}>{text}</text>
       {spider}
     </g>
   ))

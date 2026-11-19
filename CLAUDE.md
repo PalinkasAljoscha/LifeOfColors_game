@@ -293,9 +293,13 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   site stands. The pictures come from the same drawing script as the workshop scenes (not in this
   repo).
   **Training ground** (2026-11-19, `components/TrainingGround.jsx`): around the training castle a
-  wooden arrow sign on a post points at it (1.3 x its first size), "Training" (`castles.trainingSign`; anchored by its
-  tip, so a longer word grows away from the castle; on the castle's left, or its right where the
-  left has no room -- then everything is mirrored) with a spider (🕷️) hanging on its thread
+  wooden arrow sign on a post points at it (1.3 x 1.2 x its first size), "Training"
+  (`castles.trainingSign`) in Mystery Quest (a magic / mystery / fun lettering, BUNDLED like Cinzel:
+  npm `@fontsource/mystery-quest`, latin 400, imported in main.jsx; `CHAR_W` = its measured letter
+  width). Anchored by its tip, so a longer word grows away from the castle; a word too long for
+  the room left of the castle gets a smaller font (`signFont`, not below 14) rather than the
+  layout flipping. Everything is on the castle's left / sticks on its right, mirrored only where
+  the sticks have no room on the right with a spider (🕷️) hanging on its thread
   (`mapSpiderThread`) from the plank, a big dark-grey (not black) cauldron over a small fire, both
   in a ring of big stones (`mapStone*`, 2 x their first size; the back half behind them, the front half in front), behind and above the sign (not hidden by it), with a copper handle (`wsMedalMid` / `wsMedalEdge`)
   and the end of a big wooden spoon sticking out, only a faint wisp of fumes over it in the win
@@ -333,7 +337,7 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   (`slots`), rack rails, flame spots and, for the crypt only, where the motto "Vita Colorum"
   (`levelScreen.cryptMotto`, Latin for "life of colours", the same in every language; drawn as a
   worn inscription by `Motto`: Roman capitals in Cinzel -- the one font the app bundles itself,
-  `@fontsource/cinzel`, latin 700 only, never from another server -- dark grey `wsMotto` with a
+  `@fontsource/cinzel`, latin 700 only (the map's training sign bundles Mystery Quest the same way), never from another server -- dark grey `wsMotto` with a
   pale lower edge `wsMottoLight`, rough edges and missing patches (SVG filter) and fixed scratches
   and chipped holes (mask, seeded)) sits (on its stone lintel; the other scenes have no such line).
   A castle with fewer puzzles than its scene has places (since the level graph: about 18 per
@@ -381,7 +385,7 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   books (book backs vary: gold strip, gold symbol, dark red stripes, or an unreadable black title;
   symbol and title books with silver stripes of varying width at the top, the bottom or both); no
   skulls. Colours of the live parts: `ws*` in theme.js. Fonts: the app's own (Arial Black) --
-  never load fonts (or anything else) from another server; the one exception in look, Cinzel for the crypt's motto, is bundled with the app (npm `@fontsource/cinzel`).
+  never load fonts (or anything else) from another server; the exceptions in look, Cinzel for the crypt's motto and Mystery Quest for the map's training sign, are bundled with the app (npm `@fontsource/cinzel`, `@fontsource/mystery-quest`).
 - **Mobile first** -- portrait phones are the main target; boards up to 9 rows x 6 cols must fit.
 - **Special cells** (2026-11-06; schema 1.1, feature tags `special-blocked`, `special-bomb`,
   `special-mirror`, `special-clock`, one entry in `board.special_cells`). CRITICAL: the rules live in

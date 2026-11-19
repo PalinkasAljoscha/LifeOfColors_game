@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@fontsource/cinzel": "^5.3.0",
+    "@fontsource/mystery-quest": "^5.3.0",
     "i18next": "^25.8.17",
     "phaser": "^3.87.0",
     "react": "^18.3.1",
