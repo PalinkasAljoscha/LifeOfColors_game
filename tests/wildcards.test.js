@@ -15,9 +15,9 @@ const graph = parseLevelGraph(JSON.parse(readFileSync(new URL('../public/catalog
 const catalog = JSON.parse(readFileSync(new URL('../public/catalog/puzzles.json', import.meta.url))).instances
 const { castles } = fitToScenes(assignCastles(catalog, graph.count))
 
-test('the config: one wildcard on each of the rows 3, 5, 8 and 9, its puzzle in its place', () => {
+test('the config: one wildcard on each of the rows 3, 6, 8 and 9, its puzzle in its place', () => {
   assert.equal(WILDCARD_STARS, 5)
-  assert.deepEqual(WILDCARDS.map((w) => graph.layer[w.level]), [3, 5, 8, 9])
+  assert.deepEqual(WILDCARDS.map((w) => graph.layer[w.level]), [3, 6, 8, 9])
   for (const w of WILDCARDS) {
     const inst = wildcardPuzzle(castles, w)
     assert.equal(inst?.id, w.puzzle, `wildcard ${w.level}: its configured puzzle is in its place`)
@@ -77,8 +77,9 @@ test('wildcard openings are saved as their own list, only with consent', () => {
   resetProgressForTests()
 })
 
-// Exception chosen by hand (2026-11-19): Argon Castle (level 22) uses Pondering Dune, a special puzzle.
-const SPECIAL_OK = new Set([22])
+// Exceptions chosen by hand (2026-11-19): Argon Castle (level 22) uses Pondering Dune and Yurt of the
+// Wind (level 15) White Helix, both special puzzles.
+const SPECIAL_OK = new Set([15, 22])
 test('no wildcard challenge has special cells (except the ones chosen so)', () => {
   for (const w of WILDCARDS.filter((x) => !SPECIAL_OK.has(x.level))) assert.equal(wildcardPuzzle(castles, w).board.special_cells?.length ?? 0, 0, `wildcard ${w.level}`)
 })

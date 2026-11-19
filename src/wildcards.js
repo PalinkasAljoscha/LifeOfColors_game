@@ -9,18 +9,19 @@
 // are saved as their own list (engine/progress.js `w`), never as stars. The puzzle's own stars count
 // for its place as usual. Telemetry records the play as pick 'grid'.
 //
-// The CONFIG below: one wildcard on each of the map rows 3, 5, 8 and 9 (row 7, House of the Tulip,
-// level 19, dropped 2026-11-19; the upper rows are
+// The CONFIG below: one wildcard on each of the map rows 3, 6, 8 and 9 (row 7, House of the Tulip,
+// level 19, dropped 2026-11-19; row 5's Tower of Venus, level 13, moved to row 6's Yurt of the
+// Wind, level 15, 2026-11-19; the upper rows are
 // reached the usual way). `level` = the place (castle number = level graph node id), `puzzle` = the
 // challenge (instance id). Chosen from the export of 2026-11-13: per row the place leading to the
 // most places above, and its hardest puzzle without special cells (except level 22, Argon Castle:
-// Pondering Dune, chosen by hand on 2026-11-19). If an export moves the puzzle
+// Pondering Dune, and level 15, Yurt of the Wind: White Helix, both chosen by hand on 2026-11-19). If an export moves the puzzle
 // away, the place's hardest puzzle (without special cells, if it has one) is used instead.
 // No React here, so the tests can load it.
 
 export const WILDCARDS = [
   { level: 6, puzzle: 'loc_6653af70ea938070' },
-  { level: 13, puzzle: 'loc_e772c6bfcd967426' },
+  { level: 15, puzzle: 'loc_0d8d52fbf3431622' },   // Yurt of the Wind: White Helix (special cell; replaces Tower of Venus, level 13, 2026-11-19)
   { level: 22, puzzle: 'loc_fab22bddba31f028' },   // Argon Castle: Pondering Dune (special cell; changed 2026-11-19)
   { level: 24, puzzle: 'loc_ef3c7e69b5c6cb47' },
 ]
