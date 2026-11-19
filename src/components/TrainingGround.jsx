@@ -13,7 +13,8 @@
 //   - on the castle's other side a few practice targets: sticks in the ground, spread out
 //     irregularly, of different heights, some upright, some tilted, each topped with a round wooden disc like a road sign,
 //     and on each disc one of the puzzles' emojis (the crown, the goal, among them) -- and a bomb
-//     (the game's 💣) lying on the ground among them.
+//     (the game's 💣) lying on the ground among them;
+//   - an orc (the puzzles' 🧌) standing in front of the castle, between the mirrors and the sticks.
 // Everything is in the landscape's units (size / 100) around the middle of the castle's ground
 // line, like a <site>-land.svg; `side` = 1 puts the sign and the cauldron on the left and the
 // sticks on the right, -1 mirrors that. Boxes are [x0, y0, x1, y1] (for the map's "what lies flat
@@ -55,6 +56,9 @@ const STICKS = [
 const DISC = 12.5
 // The bomb among the sticks: [x, foot, size].
 const BOMB = [122, 44, 22]
+// The orc (the puzzles' 🧌) standing in front of the castle, between the mirrors and the sticks:
+// [x, foot, size].
+const ORC = [20, 36, 24]
 // One flask lying on the grass in front of the castle, its potion running out: the workshop's
 // round-bottomed flask (Workshop.jsx FLASK, its units), in one of the puzzles' potion colours
 // (mapFlaskPotion). Bulb middle at (x, y), turned by `turn` degrees (90 = neck towards the castle's
@@ -66,7 +70,7 @@ const LYING_FLASK = { x: -88, y: 34, turn: 98, scale: 0.51 }   // between the si
 const BOW = { x: 66, y: 118, turn: -24 }
 const ARROWS = [[36, 138, -8], [80, 136, 14], [104, 112, -32]]
 // The two mirrors in front of the castle: their middles at ±MIRROR.x, standing at `foot`.
-const MIRROR = { x: 36, foot: 94, w: 26, h: 36 }
+const MIRROR = { x: 36, dx: -16, foot: 104, w: 26, h: 36 }   // dx: the pair's middle, a little towards the sign's side
 
 /** The training ground's parts for castle 0 standing at (x, ground) with picture size `size`:
  *  standing things [{ el, foot }] (foot = map y) and the boxes nothing flat may touch (map px). */
@@ -180,7 +184,7 @@ export function trainingGround({ x, ground, size, side, text }) {
   const fy = MIRROR.foot - 8 - MIRROR.h / 2, fx = MIRROR.x - MIRROR.w * 0.36
   const bolt = `M ${-fx} ${fy - 3} L ${-fx * 0.55} ${fy + 3} L ${-fx * 0.2} ${fy - 4} L ${fx * 0.15} ${fy + 4} L ${fx * 0.5} ${fy - 3} L ${fx} ${fy + 2}`
   const mirrors = frame('train-mirrors', (
-    <g>
+    <g transform={`translate(${side * MIRROR.dx} 0)`}>
       <defs>
         <filter id="train-flash" x="-0.5" y="-2" width="2" height="5"><feGaussianBlur stdDeviation="2.2" /></filter>
       </defs>
@@ -237,6 +241,11 @@ export function trainingGround({ x, ground, size, side, text }) {
     </g>
   ))
 
+  // ── the orc ──
+  const orc = frame('train-orc', (
+    <text x={side * ORC[0]} y={ORC[1] - ORC[2] * 0.48} textAnchor="middle" dominantBaseline="central" fontSize={ORC[2]}>🧌</text>
+  ))
+
   // ── the bomb among the sticks ──
   const bomb = frame('train-bomb', (
     <text x={side * BOMB[0]} y={BOMB[1] - BOMB[2] * 0.42} textAnchor="middle" dominantBaseline="central" fontSize={BOMB[2]}>💣</text>
@@ -267,13 +276,15 @@ export function trainingGround({ x, ground, size, side, text }) {
       { el: archery, foot: ground + 110 * k },
       { el: frame('train-flask', flask), foot: ground + (LYING_FLASK.y + 8) * k },
       { el: bomb, foot: ground + BOMB[1] * k },
+      { el: orc, foot: ground + ORC[1] * k },
       ...sticks,
     ],
     taken: [
       toMap([SIGN.near - w, top, SIGN.near + tip, SIGN.foot]),
       toMap([POT_X - r - 4, rim - 8, POT_X + r + 4, POT.foot]),   // the fumes may float over fields
       toMap([STICKS[0][0] - DISC - 4, -50, STICKS_REACH, 62]),
-      toMap([-MIRROR.x - MIRROR.w, MIRROR.foot - MIRROR.h - 14, MIRROR.x + MIRROR.w, MIRROR.foot + 3]),
+      toMap([MIRROR.dx - MIRROR.x - MIRROR.w, MIRROR.foot - MIRROR.h - 14, MIRROR.dx + MIRROR.x + MIRROR.w, MIRROR.foot + 3]),
+      toMap([ORC[0] - 14, ORC[1] - 26, ORC[0] + 14, ORC[1] + 2]),
       toMap([-32, 100, 124, 148]),   // the archery
       toMap([-106, 24, -46, 46]),   // the flask and its puddle
     ],

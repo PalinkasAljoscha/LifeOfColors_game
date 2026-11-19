@@ -300,7 +300,7 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   in a ring of stones (`mapStone*`; the back half behind them, the front half in front), behind and above the sign (not hidden by it), with a copper handle (`wsMedalMid` / `wsMedalEdge`)
   and the end of a big wooden spoon sticking out, its fumes in the win animation's
   style (blurred white puffs, `winVapour`, growing and fading as they rise; still, no animation),
-  in front of the castle two mirrors drawn like the game's mirror cells (`mirrorLink` frame and
+  in front of the castle (a little to the sign's side) two mirrors drawn like the game's mirror cells (`mirrorLink` frame and
   tint, `mirrorGlint` diagonal glints) standing face to face on wooden stands with an electric
   flash between them (zigzag, glowing); between the sign's post and the left mirror ONE small flask lying on the grass -- the workshop's
   round-bottomed flask (Workshop.jsx `FLASK`, its glass and highlights, no stopper) in orchid
@@ -308,7 +308,8 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   into a puddle -- and before the mirrors a bow with three arrows lying around (heads only, no
   fletching: it read as a second head; `mapArrowTip`, `mapBowString`); and on the castle's other side six practice targets: sticks in the ground, spread out irregularly, of different heights,
   some upright, some tilted, each topped with a round wooden disc like a road sign carrying one of the puzzles'
-  emojis (🍄 👑 🐸 💎 🐉 🪨), with the game's bomb (💣) lying among them. All are standing things (each stick on its own foot); the castle's
+  emojis (🍄 👑 🐸 💎 🐉 🪨), with the game's bomb (💣) lying among them; and an orc (the
+  puzzles' 🧌) standing in front of the castle between the mirrors and the sticks. All are standing things (each stick on its own foot); the castle's
   own fields make way for them. Colours `mapSign*`, `mapCauldron*`, `mapFire*`, `mapBrew*`, `mapSpiderThread`.
   (Tried and dropped: a practice board of emoji cells on the grass; a drawn crow on the sign;
   three small flasks in the cell colours.)
