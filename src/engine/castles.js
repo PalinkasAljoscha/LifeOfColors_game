@@ -105,6 +105,13 @@ export function highestUnlocked(states) {
   return h
 }
 
+/** The castle the home map opens on (its door in the middle of the screen): the training castle
+ *  until it is done (castle 1 is open from the start, but a new player begins with the training),
+ *  then the highest open castle. */
+export function startCastle(states) {
+  return states[0]?.unlocked && !states[0].done ? 0 : highestUnlocked(states)
+}
+
 /** Number of castles opened by play (beyond the ones open from the start). */
 export function earnedUnlocks(states) {
   return states.filter((s) => s.unlocked && !s.fromStart).length

@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { palette } from '../theme.js'
-import { highestUnlocked } from '../engine/castles.js'
+import { startCastle } from '../engine/castles.js'
 import { SITE_BOX, SITE_SOLID, parseLand, siteFor, siteName } from '../sites.js'
 import { giveWay, onAnyPath, placeFlat } from './mapClear.js'
 import { PATH_HALF, PATH_REACH, STONE_ROUND, pathStones } from './mapPath.js'
@@ -202,7 +202,7 @@ export default function CastleMap({ states, graph, review = false, loadingCastle
   }, [])
 
   const count = Math.min(states.length, graph.count)
-  const top = highestUnlocked(states)
+  const top = startCastle(states)          // the castle the map opens on (training first)
   const W = box?.w ?? 360
   const cols = graph.columns
   const { offsets, gap } = useMemo(() => stagger(cols), [cols])
@@ -211,8 +211,8 @@ export default function CastleMap({ states, graph, review = false, loadingCastle
   // label apart in height (gap = their smallest height difference, as a fraction of a band)
   const seg = cols > 1 ? Math.max(size * 1.75, (size * 1.5) / gap) : Math.max(150, (box?.h ?? 480) / 3)
   const topPad = size * 1.6
-  // room below castle 0, so that even castle 0 can be scrolled to the middle of the screen
-  const bottomPad = Math.max(seg * 0.55, (box?.h ?? 480) / 2)
+  // room below castle 0 (generous here; the map is cut off again below, see mapH)
+  const bottomPad = Math.max(seg * 0.55, (box?.h ?? 480) / 2) + size
   const H = topPad + (graph.rows - 1 + Math.max(...offsets)) * seg + bottomPad
   const margin = Math.min(W / 2, Math.max(size * 0.85, 58))
   // where a place would stand by its row and column ...
@@ -236,19 +236,38 @@ export default function CastleMap({ states, graph, review = false, loadingCastle
   // where a place stands: the middle of its ground line -- the paths start and end there, so they
   // are already spread out where they come out from behind a building
   const foot = (i) => { const p = pos(i); return { x: p.x, y: p.y + size * 0.4 } }
+  // the middle of a place's door (the castle's gate reaches 0.28 of the picture up from its
+  // ground line, so its middle is 0.14 up); the map's middle goes there
+  const door = (i) => foot(i).y - size * 0.14
+  // the map ends half a screen below the training castle's door: scrolled to the bottom, that
+  // door is in the middle of the screen (the landscape further down is cut off)
+  const mapH = box ? Math.min(H, Math.round(door(0) + box.h / 2)) : H
 
-  // Start with the current (highest open) castle in the middle of the screen, or where the player
-  // left the map if no new castle opened since.
+  // Start with the door of the current (highest open) castle in the middle of the screen, or where
+  // the player left the map if no new castle opened since.
+  // The map's height can still change after the first layout (the consent banner goes, ...): then
+  // it is centred again -- unless the player has moved it (wheel, touch, pointer, keys) or it was
+  // put back where the player left it.
   const ready = box !== null
+  const firstRun = useRef(true)
+  const userMoved = useRef(false)
   useLayoutEffect(() => {
     const el = scrollRef.current
     if (!el || !ready) return
-    const centred = Math.max(0, pos(top).y - el.clientHeight / 2)
-    el.scrollTop = savedScroll !== null && savedTop === top ? savedScroll : centred
+    const centred = Math.max(0, door(top) - el.clientHeight / 2)
+    if (firstRun.current) {
+      firstRun.current = false
+      const back = savedScroll !== null && savedTop === top
+      el.scrollTop = back ? savedScroll : centred
+      if (back) userMoved.current = true
+    } else if (!userMoved.current) {
+      el.scrollTop = centred
+    }
     savedScroll = el.scrollTop
     savedTop = top
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ready])
+  }, [ready, box?.h, mapH])
+  const moved = () => { userMoved.current = true }
 
   // Landscape: every place brings its own (LANDS). Only the stretch below the training castle, where
   // no place stands, gets a couple of fields and trees per band, kept off the path.
@@ -358,10 +377,11 @@ export default function CastleMap({ states, graph, review = false, loadingCastle
   return (
     <div ref={scrollRef} className="no-scrollbar relative flex-1 min-h-0 overflow-y-auto overflow-x-hidden rounded-2xl"
          onScroll={(e) => { savedScroll = e.currentTarget.scrollTop }}
+         onWheel={moved} onTouchStart={moved} onPointerDown={moved} onKeyDown={moved}
          style={{ background: palette.mapGrass }}>
       {box && (
-        <div className="relative" style={{ height: H }}>
-          <svg width={W} height={H} className="absolute inset-0" aria-hidden="true">
+        <div className="relative" style={{ height: mapH }}>
+          <svg width={W} height={mapH} className="absolute inset-0" aria-hidden="true">
             {flat}
             {/* locked paths first (grey, faint, three stones in ten missing), open ones over them, each
                 in reverse order of precedence (a path that gave way lies under the other);

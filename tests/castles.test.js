@@ -3,7 +3,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import {
-  CASTLE_COUNT, assignCastles, requiredStars, castleStates, highestUnlocked, earnedUnlocks, playableUpTo,
+  CASTLE_COUNT, assignCastles, requiredStars, castleStates, highestUnlocked, startCastle, earnedUnlocks, playableUpTo,
 } from '../src/engine/castles.js'
 import { isPlayable } from '../src/engine/engine.js'
 
@@ -132,4 +132,12 @@ test('the shipped catalog fills every castle', () => {
   const castles = assignCastles(all)
   assert.equal(castles.reduce((a, c) => a + c.pool.length, 0), index.count)
   for (const c of castles) assert.ok(c.pool.length > 0, `castle ${c.castle} is empty`)
+})
+
+test('the map opens on the training castle until it is done, then on the highest open castle', () => {
+  const st = (castle, unlocked, done = false) => ({ castle, unlocked, done })
+  assert.equal(startCastle([st(0, true), st(1, true), st(2, false)]), 0)               // a new player
+  assert.equal(startCastle([st(0, true, true), st(1, true), st(2, false)]), 1)
+  assert.equal(startCastle([st(0, true, true), st(1, true, true), st(2, true)]), 2)
+  assert.equal(startCastle([st(0, false), st(1, true)]), 1)                             // no training puzzles
 })

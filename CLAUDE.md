@@ -232,7 +232,14 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   nothing improves. So two places of neighbouring rows may end up side by side (e.g. forest hut
   25 next to forest lodge 24, a user suggestion the optimiser finds by itself since crossings
   count); on the current graph all four counts end at 0. Place
-  pictures are 56-72 px (`size`, from the width). The WHOLE map is shown: open places in colour,
+  pictures are 56-72 px (`size`, from the width). The map ends half a screen below the training
+  castle's door (`mapH`; the door's middle = 0.14 picture heights above the ground line, `door`),
+  so scrolled to the bottom that door is in the middle of the screen. The map opens with the door
+  of `startCastle` (castles.js, tested) in the middle: the training castle until it is done (castle
+  1 is open from the start, but a new player begins with the training), then the highest open
+  castle; coming back from a castle restores where the player left the map. While the player has
+  not moved the map (wheel / touch / pointer / keys), a change of its height (the consent banner
+  going) centres it again. The WHOLE map is shown: open places in colour,
   locked ones grey with a padlock (no fog). A path runs between the two places' ground centres (where
   the buildings stand, `foot`) and is paved with rows of near-rectangular stones of different sizes, no
   border line (`components/mapPath.js` `pathStones`: deterministic per path, tested; about 12 px wide,
