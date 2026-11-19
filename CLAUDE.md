@@ -198,7 +198,7 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   and 9 (levels 6, 13, 22, 24; row 7's House of the Tulip, level 19, dropped 2026-11-19; the upper
   rows only the usual way), each with a fixed challenge
   puzzle (its place's hardest puzzle without special cells, export of 2026-11-13 -- except level 22,
-  Argon Castle: Fleeting Fractal, a special puzzle, chosen by hand 2026-11-19; if an export moves
+  Argon Castle: Pondering Dune, a special puzzle, chosen by hand 2026-11-19; if an export moves
   it away, `wildcardPuzzle` falls back to the place's hardest one without special cells). While such
   a place is locked the map shows the wildcard -- a playing card with a key and a gold star in each
   corner (`WildcardCard.jsx`) -- at the top right of its picture (no sticky card). Tapping any card
