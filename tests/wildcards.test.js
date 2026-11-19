@@ -15,9 +15,9 @@ const graph = parseLevelGraph(JSON.parse(readFileSync(new URL('../public/catalog
 const catalog = JSON.parse(readFileSync(new URL('../public/catalog/puzzles.json', import.meta.url))).instances
 const { castles } = fitToScenes(assignCastles(catalog, graph.count))
 
-test('the config: one wildcard on each of the rows 3, 5, 7, 8 and 9, its puzzle in its place', () => {
+test('the config: one wildcard on each of the rows 3, 5, 8 and 9, its puzzle in its place', () => {
   assert.equal(WILDCARD_STARS, 5)
-  assert.deepEqual(WILDCARDS.map((w) => graph.layer[w.level]), [3, 5, 7, 8, 9])
+  assert.deepEqual(WILDCARDS.map((w) => graph.layer[w.level]), [3, 5, 8, 9])
   for (const w of WILDCARDS) {
     const inst = wildcardPuzzle(castles, w)
     assert.equal(inst?.id, w.puzzle, `wildcard ${w.level}: its configured puzzle is in its place`)

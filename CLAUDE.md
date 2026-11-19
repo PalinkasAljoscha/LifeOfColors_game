@@ -194,8 +194,9 @@ tests/                    # engine vectors (generated), classic-rule test, catal
   scene takes no more taps after a win, and the player goes on with Retry or Back. Random within
   limits, drawn once per win. Colours `win*` in theme.js, keyframes `win-*` in index.css.
 - **Wildcards** (2026-11-18) -- a way up for strong players, `src/wildcards.js` (config + pure
-  functions, `tests/wildcards.test.js`). `WILDCARDS`: one place on each of the map rows 3, 5, 7, 8
-  and 9 (levels 6, 13, 19, 22, 24; the upper rows only the usual way), each with a fixed challenge
+  functions, `tests/wildcards.test.js`). `WILDCARDS`: one place on each of the map rows 3, 5, 8
+  and 9 (levels 6, 13, 22, 24; row 7's House of the Tulip, level 19, dropped 2026-11-19; the upper
+  rows only the usual way), each with a fixed challenge
   puzzle (its place's hardest puzzle without special cells, export of 2026-11-13 -- except level 22,
   Argon Castle: Fleeting Fractal, a special puzzle, chosen by hand 2026-11-19; if an export moves
   it away, `wildcardPuzzle` falls back to the place's hardest one without special cells). While such
