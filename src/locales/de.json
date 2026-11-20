@@ -123,6 +123,7 @@
     "progressTraining": "{{solved}} von {{required}} Puzzles gelöst",
     "locked": "gesperrt",
     "lockedHint": "Sammle erst {{count}} Sterne an einem Ort davor",
+    "lockedWildcard": "…oder öffne ihn mit der Wildcard:",
     "starsNeeded": "{{count}} Sterne öffnen den nächsten Ort",
     "starsNeededMany": "{{count}} Sterne eröffnen die nächsten Orte",
     "nextOpen": "{{name}} ist freigespielt!",

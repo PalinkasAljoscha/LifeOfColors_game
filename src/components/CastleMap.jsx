@@ -31,7 +31,8 @@ import { STICKS_REACH, trainingGround } from './TrainingGround.jsx'
 // opens it -- "Get 20 stars in a preceding place first" -- in a small bubble over it while the
 // mouse is over it, it has the keyboard focus, or for HINT_MS after a tap.
 // Wildcards (src/wildcards.js): a locked place with a wildcard shows the card (WildcardCard) at the
-// top right of its picture, a little tilted; tapping it opens the wildcard scroll (onWildcard).
+// top right of its picture, a little tilted and floating gently; tapping it opens the wildcard scroll
+// (onWildcard). The locked place's bubble says the wildcard opens it too and carries a card to tap.
 // A path into a place opened by a wildcard is drawn open once the place it starts from is open.
 // Drawing is SVG (decoration only, nothing moves); the places themselves are HTML buttons laid over
 // it.
@@ -91,6 +92,8 @@ const placed = (box, x, y, size) => {
 }
 
 const HINT_MS = 2600         // how long a tapped locked place shows what opens it
+const WILD_HINT_MS = 5000    // ... when its bubble also offers the wildcard (time to tap it)
+const HINT_LEAVE_MS = 250    // the mouse may cross from the place into its bubble without it closing
 
 // Where else a flat thing may go when its own spot is taken, in the landscape's units: [out, down]
 // (out = away from the place's middle; each is tried as it is and mirrored, in this order).
@@ -188,7 +191,12 @@ export default function CastleMap({ states, graph, review = false, loadingCastle
     setHint(i)
     if (ms) hintTimer.current = setTimeout(() => setHint(null), ms)
   }
-  const hideHint = (i) => { clearTimeout(hintTimer.current); setHint((h) => (h === i ? null : h)) }
+  // closing waits a moment, so the mouse or the focus can move into the bubble (its wildcard button)
+  const hideHint = (i) => {
+    clearTimeout(hintTimer.current)
+    hintTimer.current = setTimeout(() => setHint((h) => (h === i ? null : h)), HINT_LEAVE_MS)
+  }
+  const keepHint = () => clearTimeout(hintTimer.current)
 
   useLayoutEffect(() => {
     const el = scrollRef.current
@@ -412,11 +420,12 @@ export default function CastleMap({ states, graph, review = false, loadingCastle
             const name = siteName(t, i)
             // a locked place: its name and what opens it ("Get 20 stars in a preceding place first")
             const lockedHint = s.unlocked ? null : t('castles.lockedHint', { count: s.required })
+            const wild = !s.unlocked && !!wildcards?.has(i)   // a locked place with a wildcard
             const label = s.unlocked
               ? `${name}: ${s.training
                   ? t('castles.progressTraining', { solved: s.solved, required: s.required })
                   : t('progress.stars', { count: s.stars })}`
-              : `${name}: ${t('castles.locked')}. ${lockedHint}`
+              : `${name}: ${t('castles.locked')}. ${lockedHint}${wild ? `. ${t('castles.lockedWildcard')}` : ''}`
             const counted = s.unlocked && (s.training ? s.solved > 0 : s.stars > 0)
             const loading = loadingCastle === i
             // keep the badge inside the map: its width is estimated from its text (11px bold),
@@ -430,7 +439,7 @@ export default function CastleMap({ states, graph, review = false, loadingCastle
               <div key={i}>
                 {/* a locked place is not `disabled`: it still takes the mouse, the focus and taps for its hint */}
                 <button
-                  onClick={() => (s.unlocked ? onSelect(i) : showHint(i, HINT_MS))}
+                  onClick={() => (s.unlocked ? onSelect(i) : showHint(i, wild ? WILD_HINT_MS : HINT_MS))}
                   onPointerEnter={s.unlocked ? undefined : (e) => { if (e.pointerType === 'mouse') showHint(i) }}
                   onPointerLeave={s.unlocked ? undefined : (e) => { if (e.pointerType === 'mouse') hideHint(i) }}
                   onFocus={s.unlocked ? undefined : () => showHint(i)}
@@ -443,26 +452,42 @@ export default function CastleMap({ states, graph, review = false, loadingCastle
                   style={{ left: x - size * 0.6, top: y - size * 1.05, width: size * 1.2, height: size * 1.5 }}
                 />
                 {hint === i && lockedHint && (() => {
-                  // the bubble over the place, kept inside the map's width
-                  const w = Math.min(190, W - 8)
+                  // the bubble over the place, kept inside the map's width; with a wildcard it also
+                  // says so and carries the card, which opens the wildcard scroll like the one on the map
+                  const w = Math.min(wild ? 236 : 190, W - 8)
                   return (
-                    <span className="absolute z-10 -translate-x-1/2 -translate-y-full rounded-xl px-2.5 py-1.5 text-center text-xs
-                                     font-sans font-bold leading-snug text-white bg-game-badge ring-2 shadow-lg pointer-events-none"
+                    <span className={`absolute z-10 -translate-x-1/2 -translate-y-full rounded-xl px-2.5 py-1.5 text-center text-xs
+                                     font-sans font-bold leading-snug text-white bg-game-badge ring-2 shadow-lg
+                                     ${wild ? '' : 'pointer-events-none'}`}
                           style={{
                             left: Math.min(Math.max(x, w / 2 + 4), W - w / 2 - 4), top: y - size * 0.95, width: 'max-content', maxWidth: w,
                             '--tw-ring-color': palette.starGold,
-                          }} aria-hidden="true">
-                      <span className="block font-black">{name}</span>
-                      <span className="block font-semibold">{lockedHint}</span>
+                          }}
+                          aria-hidden={wild ? undefined : 'true'}
+                          onPointerEnter={wild ? keepHint : undefined}
+                          onPointerLeave={wild ? (e) => { if (e.pointerType === 'mouse') hideHint(i) } : undefined}>
+                      <span className="block font-black" aria-hidden="true">{name}</span>
+                      <span className="block font-semibold" aria-hidden="true">{lockedHint}</span>
+                      {wild && (
+                        <button onClick={onWildcard} onFocus={keepHint} onBlur={() => hideHint(i)}
+                                aria-label={t('wildcard.card')} title={t('wildcard.card')}
+                                className="mt-1 flex w-full items-center justify-center gap-2 font-semibold active:scale-95 transition-transform">
+                          <span className="text-left">{t('castles.lockedWildcard')}</span>
+                          <WildcardCard width={30} className="shrink-0" style={{ transform: 'rotate(8deg)' }} />
+                        </button>
+                      )}
                     </span>
                   )
                 })()}
                 {/* a wildcard: the card at the top right of the locked place's picture */}
-                {!s.unlocked && wildcards?.has(i) && (
+                {/* it floats a little around its spot (each card on its own beat; still with reduced motion) */}
+                {wild && (
                   <button onClick={onWildcard} aria-label={t('wildcard.card')} title={t('wildcard.card')}
                           className="absolute z-[5] active:scale-90 transition-transform"
-                          style={{ left: x + size * 0.3, top: y - size * 0.95, transform: 'rotate(12deg)' }}>
-                    <WildcardCard width={Math.round(size * 0.4)} />
+                          style={{ left: x + size * 0.28, top: y - size * 0.98, transform: 'rotate(12deg)' }}>
+                    <span className="wild-float block" style={{ animationDelay: `${-((i * 1.7) % 6)}s`, animationDuration: `${5.2 + (i % 3) * 0.7}s` }}>
+                      <WildcardCard width={Math.round(size * 0.44)} />
+                    </span>
                   </button>
                 )}
                 {/* the badge: "★ 12" once stars were collected there (✓ when done); "…" while loading */}

@@ -272,3 +272,13 @@ body {
   100% { opacity: 0.9; transform: translate(-50%, -50%) rotate(var(--tilt)) scale(1); }
 }
 @media (prefers-reduced-motion: reduce) { .stamp-in { animation: none; } }
+
+/* the wildcard on the map (CastleMap.jsx): floats a few pixels around its spot, slowly and unevenly */
+.wild-float { animation: wild-float 6s ease-in-out infinite; }
+@keyframes wild-float {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  22%      { transform: translate(1.5px, -3px) rotate(2deg); }
+  48%      { transform: translate(-1px, -4.5px) rotate(-1deg); }
+  74%      { transform: translate(-2px, -1.5px) rotate(-2.5deg); }
+}
+@media (prefers-reduced-motion: reduce) { .wild-float { animation: none; } }

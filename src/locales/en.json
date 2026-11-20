@@ -123,6 +123,7 @@
     "progressTraining": "{{solved}} of {{required}} puzzles solved",
     "locked": "locked",
     "lockedHint": "Get {{count}} stars in a preceding place first",
+    "lockedWildcard": "…or open it with the wildcard:",
     "starsNeeded": "{{count}} stars needed to open the next place",
     "starsNeededMany": "{{count}} stars needed to open the next places",
     "nextOpen": "{{name}} is open!",
