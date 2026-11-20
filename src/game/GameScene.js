@@ -56,17 +56,16 @@ const CLOCK_BULGE = 1.28   // the clock cell's circle: this x the cell's half si
 const CLOCK_SQUARE_RADIUS = 16  // corner radius of the clock's square: round enough to stay inside the circle
 const CLOCK_ARROW_AT = -Math.PI * 3 / 4   // the turning arrow's place on the outer circle: half past 10
 const CLOCK_OUTLINE_LIGHTEN = 18 // the clock's outline: the normal cell outline, this much lighter (Phaser lighten %)
-const CLOCK_BIG = 44       // size of the current state (in its circle)
+const CLOCK_BIG = 50       // size of the current state
 const CLOCK_SMALL = 23     // size of the other states (on the ring)
-const CLOCK_RING = 27      // radius of the circle around the current state
-const CLOCK_TOP_GAP = 9    // gap from the outer circle down to the current state's circle (towards the centre)
+const CLOCK_TOP = 12       // the current state's centre: this far above the clock's centre
 const CLOCK_EDGE = 2.5     // gap from the outer circle to the other states (squeezed out to the border)
 // The clock's layout, from the cell's size: the outer circle's inner radius, the current state's
-// circle centre (`top`, above the clock's centre) and the radius the other states sit on.
+// centre (`top`, above the clock's centre) and the radius the other states sit on.
 const clockGeom = () => {
   const inner = ((CELL - GAP) / 2) * CLOCK_BULGE - 3
   return {
-    top: inner - CLOCK_TOP_GAP - CLOCK_RING - 1.5,
+    top: CLOCK_TOP,
     ring: inner - CLOCK_EDGE - CLOCK_SMALL / 2,
   }
 }
@@ -225,9 +224,6 @@ export default class GameScene extends Phaser.Scene {
     if (kind === 'clock') {
       const R = h * CLOCK_BULGE
       g.fillCircle(0, 0, R - 3)
-      // a circle around the active state, towards the centre, clear of the outer circle (CLOCK_TOP_GAP)
-      g.lineStyle(3, border, 1)
-      g.strokeCircle(0, -clockGeom().top, CLOCK_RING)
       // an arrowhead on the outer circle at half past 10, pointing along it counter-clockwise (the
       // ring's turning direction)
       const a = CLOCK_ARROW_AT, rr = R - 1.5
@@ -326,9 +322,9 @@ export default class GameScene extends Phaser.Scene {
   }
 
   // The clock's ring with the turn `t` (0..1) of the step to the next state done: the current
-  // state at the top in its circle, big and opaque; the others along the ring (out near the
+  // state high up near the centre, big and opaque; the others along the ring (out near the
   // border) clockwise in cycle order, small and faded. Turning moves every state counter-clockwise
-  // by one place, sliding in and out between the circle and the ring.
+  // by one place, sliding in and out between that spot and the ring.
   _layoutClock(t) {
     const n = this.clockItems.length
     const geo = clockGeom()
