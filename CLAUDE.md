@@ -192,7 +192,7 @@ tests/                    unit tests; vectors.json = golden engine vectors (GENE
     `full` (5 stars) adds twinkling colored stars; `text` (training or reduced motion) = result box
     only. When a win reaches `UNLOCK_STARS` and opens a locked place, a copper plate comes down on
     chains: "New places unlocked!". The win that completes the training brings the same plate:
-    `win.trainingPlate` ("Training complete! Off into the wide world!"). After a win the board takes no taps; the player continues with
+    `win.trainingPlate` ("Training complete!"); its result box is the same as every other training day's. After a win the board takes no taps; the player continues with
     Retry or Back.
 - **Wildcards** (`wildcards.js`) — a way up for strong players. One locked place on map rows 3, 6,
   8 and 9 (levels 6, 15, 22, 24) carries a wildcard with a fixed challenge puzzle (falls back to the

@@ -35,11 +35,9 @@
     "trainingDay": "Passed training day {{n}}",
     "trainingPlan": "Training plan",
     "trainingComplete": "Training complete",
-    "trainingReady": "You are ready for the journey now.",
-    "trainingNext": "{{castle}} is waiting.",
     "startJourney": "Start journey",
     "unlocked": "New places unlocked!",
-    "trainingPlate": "Training complete! Off into the wide world!"
+    "trainingPlate": "Training complete!"
   },
   "levelScreen": {
     "back": "Map",

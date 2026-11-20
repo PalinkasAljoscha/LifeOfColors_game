@@ -35,11 +35,9 @@
     "trainingDay": "Trainingstag {{n}} bestanden",
     "trainingPlan": "Trainingsplan",
     "trainingComplete": "Training abgeschlossen",
-    "trainingReady": "Du bist jetzt bereit für die Reise.",
-    "trainingNext": "{{castle}} wartet.",
     "startJourney": "Reise beginnen",
     "unlocked": "Neue Orte freigeschaltet!",
-    "trainingPlate": "Training abgeschlossen! Hinaus in die weite Welt!"
+    "trainingPlate": "Training abgeschlossen!"
   },
   "levelScreen": {
     "back": "Karte",

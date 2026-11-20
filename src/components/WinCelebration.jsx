@@ -8,7 +8,7 @@ import { palette } from '../theme.js'
 //   1. stars    yellow stars of different sizes pop up over the board          0 ..
 //   2. vapour   they get brighter and brighter, turn white and evaporate (white puffs rise);
 //               meanwhile the result box shows: the won stars (1-5), "New best!", the
-//               training-complete message, moves and best (no title)   TEXT_AT .. TEXT_AT + TEXT_MS
+//               moves and best (no title; the same for every training day)   TEXT_AT .. TEXT_AT + TEXT_MS
 // How much of it plays depends on the win (`mode`, engine/stars.js winMode):
 //   'full'   a 5-star win outside the training castle: as 'stars', plus a few bigger coloured
 //            stars that sparkle (twinkle, with rotating glints) before they fade
@@ -111,7 +111,7 @@ function Glint({ size }) {
   )
 }
 
-/** training: null or { day, complete, next }; moves, best (null = unknown), stars (1-5 or null),
+/** training: null or { day, complete, next } (complete: only the plate tells it); moves, best (null = unknown), stars (1-5 or null),
  *  newBest. */
 export default function WinCelebration({ boardRef, training = null, moves, best = null, stars = null,
                                          newBest = false, unlocked = false, unlockText = null, note = null, onDone }) {
@@ -150,7 +150,6 @@ export default function WinCelebration({ boardRef, training = null, moves, best 
     return () => clearTimeout(id)
   }, [doneAt])
 
-  const complete = training?.complete === true
 
   return createPortal(
     <div className="fixed inset-0 z-40 pointer-events-none overflow-hidden" role="status" aria-live="polite">
@@ -220,11 +219,6 @@ export default function WinCelebration({ boardRef, training = null, moves, best 
           <div className="win-text rounded-3xl px-5 py-4 text-center"
                style={{ animationDelay: `${still ? 0 : TEXT_AT}ms`, animationDuration: `${still ? TEXT_ONLY_MS - 100 : TEXT_MS}ms`,
                         background: palette.winTextBack }}>
-            {complete && (
-              <p className="mt-1.5 first:mt-0 font-sans font-bold text-white">
-                {t('win.trainingReady')}{training.next && <> {t('win.trainingNext', { castle: training.next })}</>}
-              </p>
-            )}
             {stars !== null && (
               <p className="mt-2 first:mt-0 flex justify-center gap-1 text-3xl leading-none" role="img"
                  aria-label={t('win.stars', { count: stars })}>

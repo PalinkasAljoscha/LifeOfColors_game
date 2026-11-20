@@ -35,11 +35,9 @@
     "trainingDay": "Jour d’entraînement {{n}} réussi",
     "trainingPlan": "Plan d’entraînement",
     "trainingComplete": "Entraînement terminé",
-    "trainingReady": "Tu es prêt pour le voyage.",
-    "trainingNext": "{{castle}} t’attend.",
     "startJourney": "Commencer le voyage",
     "unlocked": "Nouveaux lieux débloqués !",
-    "trainingPlate": "Entraînement terminé ! En route vers le vaste monde !"
+    "trainingPlate": "Entraînement terminé !"
   },
   "levelScreen": {
     "back": "Carte",
