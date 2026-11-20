@@ -69,10 +69,11 @@ const DISC = 12.5
 // The bomb among the sticks: [x, foot, size].
 const BOMB = [122, 44, 22]
 // Mushrooms, as the workshop pictures draw them (a pale stem, a half-round cap in red, orange or
-// purple with two white dots): a pair by the sign's post and a group of three left of it. Each
+// purple with two white dots): a pair by the sign's post and, apart from it, a group of three
+// further left and a little lower. Each
 // [x, foot, stem height, cap radius, colour], in the pictures' units, drawn MUSHROOM_SCALE x.
 const MUSHROOMS = [
-  [-196, 91, 9, 5, 'mapMushroomOrange'], [-175, 86, 12, 6, 'mapMushroomRed'], [-154, 90, 10, 6, 'mapMushroomOrange'],
+  [-218, 105, 9, 5, 'mapMushroomOrange'], [-197, 100, 12, 6, 'mapMushroomRed'], [-176, 104, 10, 6, 'mapMushroomOrange'],
   [-130, 92, 11, 6, 'mapMushroomRed'], [-105, 94, 9, 5, 'mapMushroomPurple'],
 ]
 const MUSHROOM_SCALE = 1.6
@@ -371,7 +372,7 @@ export function trainingGround({ x, ground, size, side, text, maxReach = Infinit
       toMap([SIGN.near - w, top, SIGN.near + tip, SIGN.foot]),
       toMap([POT_X - r - 26, rim - 8, POT_X + r + 26, POT.foot + 22]),   // the fumes may float over fields
       toMap([STICKS[0][0] - DISC - 4, -50, STICKS_REACH, 62]),
-      toMap([-208, 64, -96, 98]),   // the mushrooms by the sign's post
+      toMap([-230, 64, -96, 112]),  // the mushrooms by the sign's post
       toMap([MIRROR.dx - MIRROR.x - MIRROR.w, MIRROR.foot - MIRROR.h - 14, MIRROR.dx + MIRROR.x + MIRROR.w, MIRROR.foot + 3]),
       toMap([ORC[0] - 26, ORC[1] - 50, ORC[0] + 26, ORC[1] + 2]),
       toMap([-32, 100, 124, 148]),   // the archery
