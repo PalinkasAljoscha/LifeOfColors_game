@@ -38,7 +38,8 @@
     "trainingReady": "Du bist jetzt bereit für die Reise.",
     "trainingNext": "{{castle}} wartet.",
     "startJourney": "Reise beginnen",
-    "unlocked": "Neue Orte freigeschaltet!"
+    "unlocked": "Neue Orte freigeschaltet!",
+    "trainingPlate": "Training abgeschlossen! Hinaus in die weite Welt!"
   },
   "levelScreen": {
     "back": "Karte",
@@ -54,7 +55,8 @@
       "5": "Tag Fünf"
     },
     "dayN": "Tag {{n}}",
-    "journey": "… und hinaus in die weite Welt …"
+    "journey": "… und hinaus in die weite Welt …",
+    "completed": "Abgeschlossen"
   },
   "progress": {
     "title": "Gesammelte Sterne",

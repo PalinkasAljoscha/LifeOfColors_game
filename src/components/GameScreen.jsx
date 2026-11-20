@@ -32,7 +32,8 @@ import { SpecialTile, isSpecial } from './LevelScreen.jsx'
 // observed transformations (src/engine/training.js; the notes survive Retry, the rules stay the
 // same; a new one is taken down by the note animation, components/NoteFlight.jsx, and lands in
 // the notebook at the bottom of the screen, which opens only when tapped) and the training texts of
-// the win animation ("Passed training day X"; "Training complete" for the win that completes the plan).
+// the win animation ("Passed training day X"; "Training complete" for the win that completes the plan,
+// which also brings down the copper plate on its chains, as a place's 20th star does).
 // A win plays the win animation (components/WinCelebration.jsx) over the board; afterwards the board
 // stays as it is and only Retry / Back go on. onHome is no longer used here (no win dialog).
 // Goal intro (GameScene _showGoalIntro): at every start of a puzzle, also after Retry, the goal
@@ -352,8 +353,8 @@ export default function GameScreen({ instance, place, training = null, pick, onP
         <WinCelebration key={round} boardRef={boardBoxRef}
                         training={training && { day: training.day, next: training.next, complete: result?.trainingComplete === true }}
                         moves={moves} best={minMoves} stars={result?.stars ?? null} newBest={result?.newBest ?? false}
-                        unlocked={result?.unlocked === true || result?.wildcardWon === true}
-                        unlockText={result?.wildcardWon ? t('wildcard.won') : null}
+                        unlocked={result?.unlocked === true || result?.wildcardWon === true || result?.trainingComplete === true}
+                        unlockText={result?.wildcardWon ? t('wildcard.won') : result?.trainingComplete ? t('win.trainingPlate') : null}
                         note={result?.wildcardMissed ? t('wildcard.needMoves', { count: minMoves ?? 0 }) : null}
                         onDone={() => setWon(false)} />
       )}

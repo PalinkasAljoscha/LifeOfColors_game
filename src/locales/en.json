@@ -38,7 +38,8 @@
     "trainingReady": "You are ready for the journey now.",
     "trainingNext": "{{castle}} is waiting.",
     "startJourney": "Start journey",
-    "unlocked": "New places unlocked!"
+    "unlocked": "New places unlocked!",
+    "trainingPlate": "Training complete! Off into the wide world!"
   },
   "levelScreen": {
     "back": "Map",
@@ -54,7 +55,8 @@
       "5": "Day Five"
     },
     "dayN": "Day {{n}}",
-    "journey": "… and into the wide world …"
+    "journey": "… and into the wide world …",
+    "completed": "Completed"
   },
   "progress": {
     "title": "Stars collected",

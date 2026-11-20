@@ -275,6 +275,7 @@ export default function CastleMap({ states, graph, review = false, loadingCastle
   // placed below (placeFlat); standing = [{ foot, el }], see rule 2 above; taken = boxes that
   // nothing flat may touch.
   const flatWish = [], standing = [], taken = []
+  let signBadge = null   // the training castle's badge goes under the training sign (TrainingGround)
   const sceneryFields = []
   const bandH = Math.max(150, (box?.h ?? 480) / 3)
   const bands = Math.ceil(bottomPad / bandH)
@@ -324,6 +325,7 @@ export default function CastleMap({ states, graph, review = false, loadingCastle
     const tg = trainingGround({ x, ground: foot(0).y, size, side, text, maxReach })
     standing.push(...tg.standing)
     taken.push(...tg.taken)
+    signBadge = tg.badge
   }
   for (const i of ids) {
     const { x, y } = pos(i), site = siteFor(i), ground = y + size * 0.4
@@ -421,7 +423,9 @@ export default function CastleMap({ states, graph, review = false, loadingCastle
             // and a badge that would stick out at an edge is moved in
             const chars = loading ? 1 : 2 + (s.training ? `${s.solved}/${s.required}` : `${s.stars}`).length + (s.done ? 2 : 0)
             const half = (chars * 6.6 + 14) / 2
-            const lx = Math.min(Math.max(x, half + 2), W - half - 2)
+            // the training castle's badge hangs under the training sign, the others under their place
+            const under = s.training && signBadge ? signBadge : { x, y: y + size * 0.45 }
+            const lx = Math.min(Math.max(under.x, half + 2), W - half - 2)
             return (
               <div key={i}>
                 {/* a locked place is not `disabled`: it still takes the mouse, the focus and taps for its hint */}
@@ -466,7 +470,7 @@ export default function CastleMap({ states, graph, review = false, loadingCastle
                   <span className={`absolute -translate-x-1/2 whitespace-nowrap rounded-full px-1.5 py-px text-[11px] font-black
                                     pointer-events-none ${counted ? 'bg-game-badge ring-2' : 'bg-game-badge/80'}`}
                         style={{
-                          left: lx, top: y + size * 0.45,
+                          left: lx, top: under.y,
                           '--tw-ring-color': s.done ? palette.correctGreen : palette.starGold,
                         }} aria-hidden="true">
                     {loading ? '…' : (

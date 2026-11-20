@@ -137,7 +137,8 @@ tests/                    unit tests; vectors.json = golden engine vectors (GENE
   staggered per band and then nudged by `mapLayout.relax` to minimize paths through buildings,
   crossings, overlapping paths and crowding. Open places in color, locked ones grey with a padlock
   (no fog). Place names are not written on the map (tooltip/aria-label only); a badge shows "★ n"
-  (✓ when done) once stars are collected; the training castle shows "✓ solved/all". A locked place
+  (✓ when done) once stars are collected; the training castle shows "✓ solved/all", hung under
+  the training sign (`trainingGround(...).badge`) instead of under the castle. A locked place
   shows its name and `castles.lockedHint` in a bubble on hover/focus and for `HINT_MS` after a tap
   (so locked places are `aria-disabled`, not `disabled`). Paths are paved with stones
   (`mapPath.pathStones`, deterministic); locked paths are grey, faint, with stones missing;
@@ -159,8 +160,11 @@ tests/                    unit tests; vectors.json = golden engine vectors (GENE
   flash, a spilled flask, bow and arrows, practice targets with puzzle emojis, an orc, mushrooms,
   and a chimney with smoke. All are standing things; the castle's own fields make way for them.
 - **Place screen** (`LevelScreen.jsx`):
-  - *Training castle*: a vertical path of bars (Introduction, Day One … Day Five, then "… and into
-    the wide world …"), solved steps with a medal, the next one framed with "Start".
+  - *Training castle*: the map button (the workshop's rounded 🗺️) on top, the title, then a
+    vertical path of bars (Introduction, Day One … Day Five, then "… and into the wide world …"),
+    solved steps with a medal, the next one framed with "Start". Once every day is solved, a red
+    rubber stamp "Completed" (`levelScreen.completed`, `stampInk`, worn edges) sits tilted across
+    the title's lower edge, half on it, half below; it lands with a small thump (`stamp-in`).
   - *Other places*: a workshop scene (`Workshop.jsx`, data in `workshops.js`); castle n uses scene
     `(n − 1) mod 6` of hut, cupboard, lab, tower, study, crypt. Flat pictures in the app's navy and
     palette; each puzzle is a potion in its `name_color` — test tube = base puzzle, round-bottomed
@@ -187,7 +191,8 @@ tests/                    unit tests; vectors.json = golden engine vectors (GENE
   - *Win* (`WinCelebration.jsx`, mode from `winMode`): `stars` = rising, evaporating stars;
     `full` (5 stars) adds twinkling colored stars; `text` (training or reduced motion) = result box
     only. When a win reaches `UNLOCK_STARS` and opens a locked place, a copper plate comes down on
-    chains: "New places unlocked!". After a win the board takes no taps; the player continues with
+    chains: "New places unlocked!". The win that completes the training brings the same plate:
+    `win.trainingPlate` ("Training complete! Off into the wide world!"). After a win the board takes no taps; the player continues with
     Retry or Back.
 - **Wildcards** (`wildcards.js`) — a way up for strong players. One locked place on map rows 3, 6,
   8 and 9 (levels 6, 15, 22, 24) carries a wildcard with a fixed challenge puzzle (falls back to the

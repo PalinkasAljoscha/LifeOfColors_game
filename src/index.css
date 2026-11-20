@@ -262,3 +262,13 @@ body {
   100% { transform: translateY(-19px) rotate(14deg); opacity: 0; }
 }
 @media (prefers-reduced-motion: reduce) { .ws-press { transition: none; } .ws-lifted, .ws-unstop { animation: none; } }
+
+/* the training castle's "Completed" stamp (LevelScreen.jsx CompletedStamp): it lands, a little
+   thump, on the title's lower edge -- centred on it (translate), tilted (--tilt) */
+.stamp-in { transform: translate(-50%, -50%) rotate(var(--tilt)); animation: stamp-in 420ms cubic-bezier(.3, 1.6, .5, 1) 250ms both; }
+@keyframes stamp-in {
+  0%   { opacity: 0; transform: translate(-50%, -50%) rotate(var(--tilt)) scale(2.2); }
+  60%  { opacity: 0.95; transform: translate(-50%, -50%) rotate(var(--tilt)) scale(0.94); }
+  100% { opacity: 0.9; transform: translate(-50%, -50%) rotate(var(--tilt)) scale(1); }
+}
+@media (prefers-reduced-motion: reduce) { .stamp-in { animation: none; } }

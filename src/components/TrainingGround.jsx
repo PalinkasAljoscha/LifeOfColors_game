@@ -352,6 +352,9 @@ export function trainingGround({ x, ground, size, side, text, maxReach = Infinit
   })
 
   return {
+    // where the training castle's badge ("✓ 3/6") goes on the map: just under the sign's plank, on
+    // its post (map px; its top middle)
+    badge: { x: x + sx * k, y: ground + (bot + 4) * k },
     standing: [
       { el: sign, foot: ground + SIGN.foot * k },
       { el: pot, foot: ground + POT.foot * k },

@@ -92,6 +92,32 @@ export function TileMark({ state, best }) {
   return null
 }
 
+// The training castle's "Completed" stamp: a rubber stamp in red ink, tilted, centred on the
+// title's lower edge; a double frame, capitals, worn edges and a few gaps in the ink (SVG filter);
+// it lands with a little thump when the screen opens (CSS `stamp-in`; none with "reduce motion").
+function CompletedStamp({ text }) {
+  return (
+    <span className="absolute left-1/2 top-full pointer-events-none" aria-hidden="false">
+      <svg width="0" height="0" className="absolute" aria-hidden="true">
+        <filter id="stamp-worn" x="-10%" y="-20%" width="120%" height="140%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7" result="noise" />
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="2.2" result="rough" />
+          <feTurbulence type="fractalNoise" baseFrequency="0.22" numOctaves="2" seed="3" result="spots" />
+          <feColorMatrix in="spots" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -9 6.2" result="holes" />
+          <feComposite in="rough" in2="holes" operator="in" />
+        </filter>
+      </svg>
+      <span className="stamp-in block whitespace-nowrap rounded-md px-2 py-px text-sm font-black uppercase"
+            style={{ color: palette.stampInk, border: `3px solid ${palette.stampInk}`,
+                     outline: `1px solid ${palette.stampInk}`, outlineOffset: '2px',
+                     letterSpacing: '0.12em', borderWidth: '2.5px', filter: 'url(#stamp-worn)', opacity: 0.9,
+                     '--tilt': '-9deg' }}>
+        {text}
+      </span>
+    </span>
+  )
+}
+
 // Training castle: the puzzles in their fixed order, one card each, with arrows in between.
 function TrainingPath({ pool, states, onPick }) {
   const { t } = useTranslation()
@@ -191,20 +217,28 @@ export default function LevelScreen({ title, next, state, pool, onPick, onBack, 
     )
   }
 
-  // The training castle: the Home button alone on top, the title centred below it, then the path.
+  // The training castle: the map button alone on top (the workshop's rounded 🗺️ button), the title
+  // centred below it, then the path. Once every training day is solved, a "Completed" stamp sits
+  // tilted across the title's lower edge (half on it, half below).
+  const complete = pool.length > 0 && states.every((s) => s === 'solved')
   return (
     <div className="h-[100dvh] w-full flex flex-col bg-game-bg safe-pad">
       <div className="mx-auto w-full max-w-md">
         <div className="flex flex-col">
-          <div className="order-2 mt-3 mb-6 text-center">
-            <h1 className="text-3xl font-black leading-tight">{title}</h1>
+          <div className={`order-2 mt-3 text-center ${complete ? 'mb-8' : 'mb-6'}`}>
+            <h1 className="relative inline-block text-3xl font-black leading-tight">
+              {title}
+              {complete && <CompletedStamp text={t('levelScreen.completed')} />}
+            </h1>
           </div>
           <button
             onClick={onBack}
-            className="ml-auto h-12 px-4 rounded-2xl bg-game-panel border-2 border-white/15 active:scale-95 transition-transform
-                       text-base font-black shrink-0"
+            className="ml-auto mr-1 w-20 h-11 rounded-2xl bg-game-panel border-2 border-white/15 active:scale-95 transition-transform
+                       flex items-center justify-center text-2xl shrink-0"
+            aria-label={t('levelScreen.back')}
+            title={t('levelScreen.back')}
           >
-            {t('levelScreen.back')}
+            <span aria-hidden="true">🗺️</span>
           </button>
         </div>
       </div>
