@@ -200,7 +200,8 @@ tests/                    unit tests; vectors.json = golden engine vectors (GENE
   8 and 9 (levels 6, 15, 22, 24) carries a wildcard with a fixed challenge puzzle (falls back to the
   place's hardest non-special puzzle if an export moves it). The card on the map (shiny gold, floating gently around its
   spot; still with reduced motion) opens the wildcard scroll. Tapping such a locked place shows the
-  usual bubble plus `castles.lockedWildcard` and a card that opens the scroll too. A 5-star win (`WILDCARD_STARS`) opens that place and every place on a lower row; opened
+  usual bubble plus `castles.lockedWildcard` and a card that opens the scroll too; that bubble sits
+  lower, covering the map's card. A 5-star win (`WILDCARD_STARS`) opens that place and every place on a lower row; opened
   places are saved in progress `w`, never as stars (open, not done). The game screen shows
   "Wildcard try" and the allowed move count (`wildcard.needMoves_*`).
 

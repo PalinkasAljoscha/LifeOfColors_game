@@ -453,14 +453,15 @@ export default function CastleMap({ states, graph, review = false, loadingCastle
                 />
                 {hint === i && lockedHint && (() => {
                   // the bubble over the place, kept inside the map's width; with a wildcard it also
-                  // says so and carries the card, which opens the wildcard scroll like the one on the map
+                  // says so and carries the card, which opens the wildcard scroll like the one on the map;
+                  // it sits lower then and covers the map's card, so only its own card shows
                   const w = Math.min(wild ? 236 : 190, W - 8)
                   return (
                     <span className={`absolute z-10 -translate-x-1/2 -translate-y-full rounded-xl px-2.5 py-1.5 text-center text-xs
                                      font-sans font-bold leading-snug text-white bg-game-badge ring-2 shadow-lg
                                      ${wild ? '' : 'pointer-events-none'}`}
                           style={{
-                            left: Math.min(Math.max(x, w / 2 + 4), W - w / 2 - 4), top: y - size * 0.95, width: 'max-content', maxWidth: w,
+                            left: Math.min(Math.max(x, w / 2 + 4), W - w / 2 - 4), top: wild ? y - size * 0.3 : y - size * 0.95, width: 'max-content', maxWidth: w,
                             '--tw-ring-color': palette.starGold,
                           }}
                           aria-hidden={wild ? undefined : 'true'}
