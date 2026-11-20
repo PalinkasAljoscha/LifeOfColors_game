@@ -179,9 +179,10 @@ tests/                    unit tests; vectors.json = golden engine vectors (GENE
 - **Game screen** (`GameScreen.jsx`) — top row: 🗺️ (map), Retry, the place picture (back to the
   place), info button (RulesDialog). Below: puzzle name with its color tile and the move counter.
   Special puzzles' tiles have a wavy white border (`SpecialTile`).
-  - *Goal intro*: the goal object blinks with a pointing hand — in the training castle (2 s, not on
-    its first puzzle) and in castles 1..`GOAL_INTRO_LEVELS` (`GOAL_INTRO_MS`), at every start incl.
-    Retry. Never blocks taps.
+  - *Goal intro*: the goal object blinks briefly (1 s, two blinks) with a pointing hand — in the
+    training castle (`INTRO_MS`, not on its first puzzle) and in castles 1..`GOAL_INTRO_LEVELS`
+    (now 1: only the first place after the training; `GOAL_INTRO_MS`), when a puzzle is opened,
+    not after Retry. Never blocks taps.
   - *Training intro* (`TrainingIntro.jsx`, training puzzle 1 only): four speech bubbles (tap a
     field, the neighborhood decides, the goal, the notebook); the board takes no moves until the
     last one. Not repeated on Retry.
