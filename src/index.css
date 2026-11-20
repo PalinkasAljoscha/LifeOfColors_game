@@ -273,14 +273,17 @@ body {
 }
 @media (prefers-reduced-motion: reduce) { .stamp-in { animation: none; } }
 
-/* the wildcard on the map (CastleMap.jsx): wanders around its spot -- far to the sides (--dx),
-   a little up and down (--dy) -- so it catches the eye while scrolling */
-.wild-float { animation: wild-float 5s ease-in-out infinite; }
-@keyframes wild-float {
-  0%, 100% { transform: translate(0, 0) rotate(0deg); }
-  20%      { transform: translate(calc(var(--dx) * 0.9), calc(var(--dy) * -0.8)) rotate(7deg); }
-  40%      { transform: translate(calc(var(--dx) * 0.3), calc(var(--dy) * 0.6)) rotate(2deg); }
-  60%      { transform: translate(calc(var(--dx) * -1), calc(var(--dy) * -0.4)) rotate(-8deg); }
-  80%      { transform: translate(calc(var(--dx) * -0.5), calc(var(--dy) * 1)) rotate(-3deg); }
+/* the wildcard on the map (CastleMap.jsx): glides round its spot on a flat ellipse -- far to the
+   sides (--dx, tilting as it goes), a little up and down (--dy) -- two sine swings a quarter round
+   apart, so it never stops; it catches the eye while scrolling */
+.wild-x { animation: wild-x 2.5s cubic-bezier(0.37, 0, 0.63, 1) infinite alternate; }
+.wild-y { animation: wild-y 2.5s cubic-bezier(0.37, 0, 0.63, 1) infinite alternate; }
+@keyframes wild-x {
+  from { transform: translateX(calc(var(--dx) * -1)) rotate(-7deg); }
+  to   { transform: translateX(var(--dx)) rotate(7deg); }
 }
-@media (prefers-reduced-motion: reduce) { .wild-float { animation: none; } }
+@keyframes wild-y {
+  from { transform: translateY(calc(var(--dy) * -1)); }
+  to   { transform: translateY(var(--dy)); }
+}
+@media (prefers-reduced-motion: reduce) { .wild-x, .wild-y { animation: none; } }

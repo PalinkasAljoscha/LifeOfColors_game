@@ -486,10 +486,19 @@ export default function CastleMap({ states, graph, review = false, loadingCastle
                   <button onClick={onWildcard} aria-label={t('wildcard.card')} title={t('wildcard.card')}
                           className="absolute z-[5] active:scale-90 transition-transform"
                           style={{ left: x + size * 0.28, top: y - size * 0.98, transform: 'rotate(12deg)' }}>
-                    <span className="wild-float block" style={{ animationDelay: `${-((i * 1.7) % 6)}s`, animationDuration: `${4.6 + (i % 3) * 0.6}s`,
-                                                                  '--dx': `${Math.round(size * 0.45)}px`, '--dy': `${Math.round(size * 0.1)}px` }}>
-                      <WildcardCard width={Math.round(size * 0.44)} />
-                    </span>
+                    {(() => {
+                      // a smooth ellipse: side to side and up and down are two sine swings, a quarter
+                      // of a round apart (each card on its own round and start)
+                      const round = 5 + (i % 3) * 0.6
+                      const start = -((i * 1.7) % round)
+                      return (
+                        <span className="wild-x block" style={{ animationDuration: `${round / 2}s`, animationDelay: `${start}s`, '--dx': `${Math.round(size * 0.45)}px` }}>
+                          <span className="wild-y block" style={{ animationDuration: `${round / 2}s`, animationDelay: `${start - round / 4}s`, '--dy': `${Math.round(size * 0.1)}px` }}>
+                            <WildcardCard width={Math.round(size * 0.44)} />
+                          </span>
+                        </span>
+                      )
+                    })()}
                   </button>
                 )}
                 {/* the badge: "★ 12" once stars were collected there (✓ when done); "…" while loading */}
