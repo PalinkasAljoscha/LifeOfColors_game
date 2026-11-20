@@ -7,6 +7,7 @@ import { HANDWRITING } from './TrainingNotes.jsx'
 import { playableUpTo } from '../engine/castles.js'
 import { emptySlots, placePuzzles, workshopFor } from '../workshops.js'
 import Workshop from './Workshop.jsx'
+import { SIGN_FONT } from './TrainingGround.jsx'
 
 // One castle. Every castle except the training castle shows its puzzles as potions in a
 // sorcerer's workshop (components/Workshop.jsx, one of the scenes in src/workshops.js per castle):
@@ -92,8 +93,9 @@ export function TileMark({ state, best }) {
   return null
 }
 
-// The training castle's "Completed" stamp: a rubber stamp in red ink, tilted, centred on the
-// title's lower edge; a double frame, capitals, worn edges and a few gaps in the ink (SVG filter);
+// The training castle's "Completed" stamp: a rubber stamp in green ink, lettered in the training
+// sign's playful Mystery Quest, tilted, centred on the title's lower edge; a double frame, worn
+// edges and a few gaps in the ink (SVG filter);
 // it lands with a little thump when the screen opens (CSS `stamp-in`; none with "reduce motion").
 function CompletedStamp({ text }) {
   return (
@@ -103,15 +105,15 @@ function CompletedStamp({ text }) {
           <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7" result="noise" />
           <feDisplacementMap in="SourceGraphic" in2="noise" scale="2.2" result="rough" />
           <feTurbulence type="fractalNoise" baseFrequency="0.22" numOctaves="2" seed="3" result="spots" />
-          <feColorMatrix in="spots" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -9 6.2" result="holes" />
+          <feColorMatrix in="spots" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -9 7.4" result="holes" />
           <feComposite in="rough" in2="holes" operator="in" />
         </filter>
       </svg>
-      <span className="stamp-in block whitespace-nowrap rounded-md px-2 py-px text-sm font-black uppercase"
-            style={{ color: palette.stampInk, border: `3px solid ${palette.stampInk}`,
+      <span className="stamp-in block whitespace-nowrap rounded-xl px-3 leading-snug"
+            style={{ color: palette.stampInk, border: `2.5px solid ${palette.stampInk}`,
                      outline: `1px solid ${palette.stampInk}`, outlineOffset: '2px',
-                     letterSpacing: '0.12em', borderWidth: '2.5px', filter: 'url(#stamp-worn)', opacity: 0.9,
-                     '--tilt': '-9deg' }}>
+                     fontFamily: SIGN_FONT, fontSize: '1.4rem', letterSpacing: '0.02em',
+                     filter: 'url(#stamp-worn)', opacity: 0.92, '--tilt': '-7deg' }}>
         {text}
       </span>
     </span>

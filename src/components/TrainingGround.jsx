@@ -25,7 +25,7 @@ import { palette } from '../theme.js'
 
 // The sign's lettering: Mystery Quest (magic, mystery and fun), bundled with the app
 // (@fontsource/mystery-quest, latin 400, imported in main.jsx) -- never loaded from another server.
-const SIGN_FONT = "'Mystery Quest', 'Arial Black', cursive"
+export const SIGN_FONT = "'Mystery Quest', 'Arial Black', cursive"
 
 // The sign: its plank ends at `near` on the castle's side (the pointed tip reaches TIP further),
 // its middle at height y, the post's foot at `foot`. Its width follows its text, so a longer word

@@ -69,7 +69,7 @@ tests/                    unit tests; vectors.json = golden engine vectors (GENE
   (not "sites"), puzzles are "solved".
 - **Asset paths** — relative only; `import.meta.env.BASE_URL` for files in `public/`.
 - **Fonts and resources** — never load anything from another server. The app font is Arial Black;
-  the only bundled fonts are Cinzel (crypt motto) and Mystery Quest (training sign), via npm
+  the only bundled fonts are Cinzel (crypt motto) and Mystery Quest (training sign and stamp), via npm
   `@fontsource/*`.
 - **Engine** — game rules live ONLY in `src/engine/engine.js`. Any behavior change needs the same
   change in the factory's `instance.py` first, a new export with new golden vectors, and a new
@@ -162,8 +162,9 @@ tests/                    unit tests; vectors.json = golden engine vectors (GENE
 - **Place screen** (`LevelScreen.jsx`):
   - *Training castle*: the map button (the workshop's rounded 🗺️) on top, the title, then a
     vertical path of bars (Introduction, Day One … Day Five, then "… and into the wide world …"),
-    solved steps with a medal, the next one framed with "Start". Once every day is solved, a red
-    rubber stamp "Completed" (`levelScreen.completed`, `stampInk`, worn edges) sits tilted across
+    solved steps with a medal, the next one framed with "Start". Once every day is solved, a green
+    rubber stamp "Completed" (`levelScreen.completed`, `stampInk`, in the sign's Mystery Quest, not
+    capitals -- friendly, not "rejected"; worn edges) sits tilted across
     the title's lower edge, half on it, half below; it lands with a small thump (`stamp-in`).
   - *Other places*: a workshop scene (`Workshop.jsx`, data in `workshops.js`); castle n uses scene
     `(n − 1) mod 6` of hut, cupboard, lab, tower, study, crypt. Flat pictures in the app's navy and

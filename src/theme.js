@@ -11,7 +11,7 @@ export const palette = {
   panel:        '#22284a',
   journeyDim:   '#4b5070',   // training path's last line ("The young sorcerer sets out!"): nothing won yet ...
   journeyGold:  '#f5c518',   // ... all training puzzles won
-  stampInk:     '#e8483c',   // the training castle's "Completed" stamp (red ink)
+  stampInk:     '#3fd27a',   // the training castle's "Completed" stamp (green ink: done, well done)
   divider:      '#2c3e50',
 
   // ── Text / UI ──
