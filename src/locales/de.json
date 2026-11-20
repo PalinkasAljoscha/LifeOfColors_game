@@ -136,8 +136,8 @@
   },
   "intro": {
     "tap": "Tippe auf ein Feld, um etwas ver- oder herzu-zaubern.",
-    "hood": "Die Nachbarn eines Feldes bestimmen, wie dein Zauber es verwandeln wird.",
-    "goal": "Das Ziel: Zaubere ein {{goal}} auf das gold umrandete Feld.",
+    "hood": "Die Nachbarn eines Feldes bestimmen, wie deine Magie es verwandeln wird.",
+    "goal": "Das Ziel: Lass ein {{goal}} auf dam gold umrandete Feld erscheinen.",
     "next": "Weiter",
     "start": "Los geht's!",
     "notes": "Hier stehen die Regeln, die du schon beobachtet hast.",
