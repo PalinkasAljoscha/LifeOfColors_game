@@ -25,8 +25,8 @@
   },
   "win": {
     "title": "Geschafft!",
-    "moves_one": "Gelöst mit {{count}} Zug.",
-    "moves_other": "Gelöst mit {{count}} Zügen.",
+    "moves_one": "Geschafft mit {{count}} Zug.",
+    "moves_other": "Geschafft mit {{count}} Zügen.",
     "stars_one": "{{count}} von 5 Sternen",
     "stars_other": "{{count}} von 5 Sternen",
     "newBest": "Neuer Bestwert!",
@@ -118,13 +118,13 @@
     "wizardTower": ["Turm des Merkur", "Turm der Venus", "Turm der Erde", "Turm des Mars", "Turm des Jupiter", "Turm des Saturn", "Turm des Uranus", "Turm des Neptun"]
   },
   "castles": {
-    "tutorial": "Trainingsburg",
+    "tutorial": "Trainingsplan",
     "trainingSign": "Training",
     "progressTraining": "{{solved}} von {{required}} Puzzles gelöst",
     "locked": "gesperrt",
     "lockedHint": "Sammle erst {{count}} Sterne an einem Ort davor",
     "starsNeeded": "{{count}} Sterne öffnen den nächsten Ort",
-    "starsNeededMany": "{{count}} Sterne öffnen die nächsten Orte",
+    "starsNeededMany": "{{count}} Sterne eröffnen die nächsten Orte",
     "nextOpen": "{{name}} ist freigespielt!",
     "nextOpenMany": "{{count}} neue Orte sind freigespielt!",
     "review": "Ansicht: alle Level frei"
