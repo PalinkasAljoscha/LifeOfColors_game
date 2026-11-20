@@ -7,7 +7,7 @@ import { Emoji } from './Emoji.jsx'
 // Overlays of the special cells on the board box (components/GameScreen.jsx; rules in
 // src/engine/engine.js tap):
 //   IntroTicker     the opening explanation of a bomb, mirror or clock puzzle: one line of grey
-//                   text between two marks (🪞 mirror, 🕰️ clock; the bomb's has none: INTRO_MARKS) that passes
+//                   text between two marks (💣 bomb, 🪞 mirror, 🕰️ clock, INTRO_MARKS) that passes
 //                   from right to left, visible only between the outer edges of the board's outer
 //                   cells, just above the board (over its top edge when there
 //                   is no room above), TICKER_PASSES times, then it is gone. Never takes taps.
@@ -37,7 +37,7 @@ const DUST_DRIFT_S = 40   // seconds for the dust to cross the board once (slowe
 export const TICKER_PASSES = 2
 const TICKER_PASS_MS = 7800      // one pass over the cells' width
 const TICKER_LIFT_EM = 0.3       // the line sits this much higher (about twice a full stop's height)
-export const INTRO_MARKS = { bomb: '', mirror: '🪞', clock: '🕰️' }   // at both ends of the line (bomb: just the text)
+export const INTRO_MARKS = { bomb: '💣', mirror: '🪞', clock: '🕰️' }   // at both ends of the line
 const TICKER_STILL_MS = 4500     // "reduce motion": the line just stands there this long
 
 /** A special puzzle's explanation passing just above the board in `boardRef`, visible only between
