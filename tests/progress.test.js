@@ -3,7 +3,7 @@ import { test, beforeEach } from 'node:test'
 import assert from 'node:assert/strict'
 import {
   initProgress, resetProgressForTests, storageConsent, setStorageConsent, recordTried, recordSolved,
-  puzzleState, bestStars, progressTotals, recentlyPlayed, HISTORY_MAX, castleStars, seedCastleStars, STORAGE_CONSENT_KEY, PROGRESS_KEY, CONSENT_GRANTED, CONSENT_DENIED,
+  puzzleState, bestStars, progressTotals, recentlyPlayed, hasActivity, recordWildcard, HISTORY_MAX, castleStars, seedCastleStars, STORAGE_CONSENT_KEY, PROGRESS_KEY, CONSENT_GRANTED, CONSENT_DENIED,
 } from '../src/engine/progress.js'
 
 function fakeStorage(initial = {}) {
@@ -164,4 +164,18 @@ test('recently played is saved only with consent and comes back next visit', () 
   assert.deepEqual(recentlyPlayed(), ['c', 'b', 'a'])
   setStorageConsent(CONSENT_DENIED)
   assert.equal(store.getItem(PROGRESS_KEY), null)
+})
+
+test('hasActivity: false on a first visit, true once anything was played or saved', () => {
+  assert.equal(hasActivity(), false)
+  recordTried('a')
+  assert.equal(hasActivity(), true)
+  resetProgressForTests()
+  initProgress(fakeStorage())
+  recordWildcard([3])
+  assert.equal(hasActivity(), true)
+  // saved progress from an earlier visit counts too
+  resetProgressForTests()
+  initProgress(fakeStorage({ [STORAGE_CONSENT_KEY]: CONSENT_GRANTED, [PROGRESS_KEY]: JSON.stringify({ v: 2, p: { x: 3 }, c: { 1: 3 } }) }))
+  assert.equal(hasActivity(), true)
 })

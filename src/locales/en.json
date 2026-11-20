@@ -162,5 +162,10 @@
     "needMoves_other": "{{count}} moves allowed",
     "won": "Wildcard won! Many new places unlocked.",
     "close": "Close"
+  },
+  "guide": {
+    "learn": "Learn how",
+    "play": "Start playing",
+    "skip": "Skip levels"
   }
 }

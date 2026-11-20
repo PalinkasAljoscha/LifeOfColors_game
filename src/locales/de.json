@@ -162,5 +162,10 @@
     "needMoves_other": "{{count}} Züge erlaubt",
     "won": "Wildcard gewonnen! Viele neue Orte stehen dir offen.",
     "close": "Schließen"
+  },
+  "guide": {
+    "learn": "So geht's",
+    "play": "Los geht's",
+    "skip": "Level überspringen"
   }
 }

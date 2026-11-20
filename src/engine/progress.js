@@ -260,6 +260,12 @@ export function recentlyPlayed() {
   return [...history]
 }
 
+/** Has anything been played yet (this visit or saved)? False on a first visit: the map then
+ *  shows the first-visit guide (CastleMap.jsx FirstGuide). */
+export function hasActivity() {
+  return entries.size > 0 || history.length > 0 || opened.size > 0 || castleCounts.size > 0
+}
+
 /** The castles opened by won wildcards (a copy). */
 export function wildcardOpened() {
   return new Set(opened)

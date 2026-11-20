@@ -287,3 +287,11 @@ body {
   to   { transform: translateY(var(--dy)); }
 }
 @media (prefers-reduced-motion: reduce) { .wild-x, .wild-y { animation: none; } }
+
+/* the first-visit guide on the map (CastleMap.jsx FirstGuide): fades in, then its arrows nudge
+   towards what they point at */
+.guide-in { animation: guide-in 600ms ease-out 500ms both; }
+@keyframes guide-in { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+.guide-nudge { animation: guide-nudge 1.6s ease-in-out infinite; }
+@keyframes guide-nudge { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(var(--nx), var(--ny)); } }
+@media (prefers-reduced-motion: reduce) { .guide-in, .guide-nudge { animation: none; } }

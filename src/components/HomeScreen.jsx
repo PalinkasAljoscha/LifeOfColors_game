@@ -11,6 +11,7 @@ import RulesDialog from './RulesDialog.jsx'
 import HistoryDialog, { HistoryIcon } from './HistoryDialog.jsx'
 import { ConsentBannerSpacer, ConsentDialog } from './ConsentBanner.jsx'
 import { useProgress } from '../hooks/useProgress.js'
+import { hasActivity } from '../engine/progress.js'
 
 const theme = activeTheme()
 // The theme's default look (first choice of every per-game choice: pumpkin, ghost, green candy).
@@ -111,7 +112,8 @@ export default function HomeScreen({ castleStates, graph, review = false, error,
         )}
         {castleStates && graph && (
           <CastleMap states={castleStates} graph={graph} review={review} loadingCastle={loadingCastle} onSelect={onSelectCastle}
-                     wildcards={wildcardLevels} onWildcard={() => setShowWildcards(true)} />
+                     wildcards={wildcardLevels} onWildcard={() => setShowWildcards(true)}
+                     guide={!review && !hasActivity()} />
         )}
 
         {/* Privacy line; "opt in/out" opens the saved-progress choice (ConsentDialog). */}

@@ -162,5 +162,10 @@
     "needMoves_other": "{{count}} coups autorisés",
     "won": "Wildcard gagnée ! Plein de lieux débloqués.",
     "close": "Fermer"
+  },
+  "guide": {
+    "learn": "Apprendre",
+    "play": "Jouer",
+    "skip": "Sauter des niveaux"
   }
 }
