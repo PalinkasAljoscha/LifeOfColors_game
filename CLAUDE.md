@@ -164,7 +164,7 @@ tests/                    unit tests; vectors.json = golden engine vectors (GENE
     vertical path of bars (Introduction, Day One … Day Five, then "… and into the wide world …"),
     solved steps with a medal, the next one framed with "Start". Once every day is solved, a green
     rubber stamp "Completed" (`levelScreen.completed`, `stampInk`, in the sign's Mystery Quest, not
-    capitals -- friendly, not "rejected"; worn edges) sits tilted across
+    capitals -- friendly, not "rejected"; clean edges with just a few worn spots) sits tilted across
     the title's lower edge, half on it, half below; it lands with a small thump (`stamp-in`).
   - *Other places*: a workshop scene (`Workshop.jsx`, data in `workshops.js`); castle n uses scene
     `(n − 1) mod 6` of hut, cupboard, lab, tower, study, crypt. Flat pictures in the app's navy and

@@ -94,8 +94,8 @@ export function TileMark({ state, best }) {
 }
 
 // The training castle's "Completed" stamp: a rubber stamp in green ink, lettered in the training
-// sign's playful Mystery Quest, tilted, centred on the title's lower edge; a double frame, worn
-// edges and a few gaps in the ink (SVG filter);
+// sign's playful Mystery Quest, tilted, centred on the title's lower edge; a double frame, nearly
+// clean edges and just a few small worn spots here and there (SVG filter);
 // it lands with a little thump when the screen opens (CSS `stamp-in`; none with "reduce motion").
 function CompletedStamp({ text }) {
   return (
@@ -103,9 +103,9 @@ function CompletedStamp({ text }) {
       <svg width="0" height="0" className="absolute" aria-hidden="true">
         <filter id="stamp-worn" x="-10%" y="-20%" width="120%" height="140%">
           <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7" result="noise" />
-          <feDisplacementMap in="SourceGraphic" in2="noise" scale="2.2" result="rough" />
-          <feTurbulence type="fractalNoise" baseFrequency="0.22" numOctaves="2" seed="3" result="spots" />
-          <feColorMatrix in="spots" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -9 7.4" result="holes" />
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="0.7" result="rough" />
+          <feTurbulence type="fractalNoise" baseFrequency="0.18" numOctaves="2" seed="3" result="spots" />
+          <feColorMatrix in="spots" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -14 10.6" result="holes" />
           <feComposite in="rough" in2="holes" operator="in" />
         </filter>
       </svg>
