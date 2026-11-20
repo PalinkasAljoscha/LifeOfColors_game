@@ -481,12 +481,13 @@ export default function CastleMap({ states, graph, review = false, loadingCastle
                   )
                 })()}
                 {/* a wildcard: the card at the top right of the locked place's picture */}
-                {/* it floats a little around its spot (each card on its own beat; still with reduced motion) */}
+                {/* it floats around its spot, wide to the sides (--dx), a little up and down (--dy) (each card on its own beat; still with reduced motion) */}
                 {wild && (
                   <button onClick={onWildcard} aria-label={t('wildcard.card')} title={t('wildcard.card')}
                           className="absolute z-[5] active:scale-90 transition-transform"
                           style={{ left: x + size * 0.28, top: y - size * 0.98, transform: 'rotate(12deg)' }}>
-                    <span className="wild-float block" style={{ animationDelay: `${-((i * 1.7) % 6)}s`, animationDuration: `${5.2 + (i % 3) * 0.7}s` }}>
+                    <span className="wild-float block" style={{ animationDelay: `${-((i * 1.7) % 6)}s`, animationDuration: `${4.6 + (i % 3) * 0.6}s`,
+                                                                  '--dx': `${Math.round(size * 0.45)}px`, '--dy': `${Math.round(size * 0.1)}px` }}>
                       <WildcardCard width={Math.round(size * 0.44)} />
                     </span>
                   </button>

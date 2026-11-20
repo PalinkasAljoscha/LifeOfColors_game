@@ -273,12 +273,14 @@ body {
 }
 @media (prefers-reduced-motion: reduce) { .stamp-in { animation: none; } }
 
-/* the wildcard on the map (CastleMap.jsx): floats a few pixels around its spot, slowly and unevenly */
-.wild-float { animation: wild-float 6s ease-in-out infinite; }
+/* the wildcard on the map (CastleMap.jsx): wanders around its spot -- far to the sides (--dx),
+   a little up and down (--dy) -- so it catches the eye while scrolling */
+.wild-float { animation: wild-float 5s ease-in-out infinite; }
 @keyframes wild-float {
   0%, 100% { transform: translate(0, 0) rotate(0deg); }
-  22%      { transform: translate(1.5px, -3px) rotate(2deg); }
-  48%      { transform: translate(-1px, -4.5px) rotate(-1deg); }
-  74%      { transform: translate(-2px, -1.5px) rotate(-2.5deg); }
+  20%      { transform: translate(calc(var(--dx) * 0.9), calc(var(--dy) * -0.8)) rotate(7deg); }
+  40%      { transform: translate(calc(var(--dx) * 0.3), calc(var(--dy) * 0.6)) rotate(2deg); }
+  60%      { transform: translate(calc(var(--dx) * -1), calc(var(--dy) * -0.4)) rotate(-8deg); }
+  80%      { transform: translate(calc(var(--dx) * -0.5), calc(var(--dy) * 1)) rotate(-3deg); }
 }
 @media (prefers-reduced-motion: reduce) { .wild-float { animation: none; } }
