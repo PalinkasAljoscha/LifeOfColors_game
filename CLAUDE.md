@@ -150,11 +150,13 @@ tests/                    unit tests; vectors.json = golden engine vectors (GENE
   scroll position when coming back.
 - **First-visit guide** (`CastleMap.jsx`, layout in `mapGuide.js`) — only while nothing has been
   played (`progress.hasActivity()` false; not with `?map=all`): three ways to start in big Mystery
-  Quest letters (`guideInk` with a `guideEdge` outline) and arrows that nudge gently — "Learn how"
+  Quest letters (`guideInk` = the title's orange, `guideEdge` outline) and arrows — "Learn how"
   above the training castle's free side, arrow to the castle; "Start playing" below the first place,
   arrow to it; and stuck to the top of the visible map an up arrow, "Skip levels" and a wildcard
-  (opens the wildcard scroll). Strings `guide.*`. Taps go through the words and arrows. The map
-  then opens between the training castle and the first place. Gone as soon as a puzzle is opened.
+  (opens the wildcard scroll). Strings `guide.*`. Each time the map opens they pop in, bottom to top
+  within 2 s (`GUIDE_AT`), then fade away within 2 s more (`GUIDE_MS`; reduced motion: still, then
+  gone). Taps go through the words and arrows. The map then opens between the training castle and
+  the first place. Not shown at all once a puzzle has been opened.
 - **Sites** (`sites.js`) — castle 0 is a castle; levels 1, 2, 3, … cycle through `SITE_ORDER`
   (forest hut, tavern, manor, castle, wizard's tower, windmill, yurt, forest lodge). A site is
   only a look and a name. Each level has its own name: the k-th level of a site takes the k-th entry

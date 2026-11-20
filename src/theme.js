@@ -108,7 +108,7 @@ export const palette = {
   mapSignWood:       '#9a6a3a',
   mapSignWoodDark:   '#5e3b1c',
   mapSignInk:        '#fff3d6',
-  guideInk:          '#ffd84a',   // the first-visit guide on the map (CastleMap.jsx FirstGuide): letters and arrows ...
+  guideInk:          '#e67e22',   // the title's orange (cellOrangeFill): the first-visit guide on the map (CastleMap.jsx FirstGuide): letters and arrows ...
   guideEdge:         '#2a1a05',   // ... with a dark edge
   mapCauldron:       '#4a4c56',   // dark grey, not black
   mapCauldronRim:    '#5f626e',

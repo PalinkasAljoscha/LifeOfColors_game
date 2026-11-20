@@ -8,7 +8,7 @@ import { PATH_HALF, PATH_REACH, STONE_ROUND, pathStones } from './mapPath.js'
 import { relax } from './mapLayout.js'
 import WildcardCard from './WildcardCard.jsx'
 import { SIGN_FONT, STICKS_REACH, trainingGround } from './TrainingGround.jsx'
-import { guideLayout } from './mapGuide.js'
+import { guideLayout, wordWidth } from './mapGuide.js'
 
 // The home-screen map: the levels ("castles" in the code) as different places -- a castle, a forest
 // hut, a tavern, ... (src/sites.js: which level is which place) -- each with its own bit of
@@ -183,8 +183,12 @@ export function stagger(n) {
 // The first-visit guide (guide = nothing played yet, progress.js hasActivity): three ways to start,
 // in big Mystery Quest letters with arrows -- "Learn how" to the training castle, "Start playing" to
 // the first place (mapGuide.js guideLayout), and at the top of the visible map an arrow up,
-// "Skip levels" and a wildcard (which opens the wildcard scroll). Taps go through it; it is gone
-// once anything is played. The map then opens between the training castle and the first place.
+// "Skip levels" and a wildcard (which opens the wildcard scroll). When the map opens they pop in one
+// after the other, bottom to top (GUIDE_AT), and fade away again: gone after GUIDE_MS (with reduced
+// motion: shown still for that long). Taps go through. The map then opens between the training
+// castle and the first place.
+const GUIDE_AT = { learn: 0.2, play: 0.8, skip: 1.4 }   // when each part pops in (s)
+const GUIDE_MS = 4000
 function GuideArrow({ a }) {
   const pts = a.head.map((p) => p.join(',')).join(' ')
   return (
@@ -221,6 +225,13 @@ export default function CastleMap({ states, graph, review = false, loadingCastle
     hintTimer.current = setTimeout(() => setHint((h) => (h === i ? null : h)), HINT_LEAVE_MS)
   }
   const keepHint = () => clearTimeout(hintTimer.current)
+  // the first-visit guide shows once when the map opens, then goes
+  const [guideOn, setGuideOn] = useState(guide)
+  useEffect(() => {
+    if (!guide) { setGuideOn(false); return undefined }
+    const id = setTimeout(() => setGuideOn(false), GUIDE_MS)
+    return () => clearTimeout(id)
+  }, [guide])
 
   useLayoutEffect(() => {
     const el = scrollRef.current
@@ -363,7 +374,7 @@ export default function CastleMap({ states, graph, review = false, loadingCastle
     signBadge = tg.badge
     freeSide = side
   }
-  const guided = guide && count > 0 ? guideLayout({
+  const guided = guideOn && count > 0 ? guideLayout({
     W, size, side: freeSide,
     castle: { x: pos(0).x, door: door(0) },
     first: count > 1 ? { x: pos(1).x, door: door(1) } : null,
@@ -426,7 +437,7 @@ export default function CastleMap({ states, graph, review = false, loadingCastle
       {/* the guide's "Skip levels": stays at the top of the visible map */}
       {box && guided.length > 0 && (
         <div className="sticky top-0 z-20 h-0 pointer-events-none">
-          <div className="guide-in flex items-center justify-center gap-2.5 pt-2">
+          <div className="guide-bam flex items-center justify-center gap-2.5 pt-2" style={{ '--at': `${GUIDE_AT.skip}s` }}>
             <svg width="22" height="34" viewBox="0 0 22 34" aria-hidden="true" className="guide-nudge" style={{ '--nx': '0px', '--ny': '-4px' }}>
               <path d="M11,31 L11,8 M3,14 L11,4 L19,14" fill="none" stroke={palette.guideEdge} strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
               <path d="M11,31 L11,8 M3,14 L11,4 L19,14" fill="none" stroke={palette.guideInk} strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -465,16 +476,21 @@ export default function CastleMap({ states, graph, review = false, loadingCastle
           </svg>
           {/* the guide's words and arrows, over the map; taps go through */}
           {guided.length > 0 && (
-            <div className="guide-in absolute inset-0 z-[6] pointer-events-none" aria-hidden="true">
-              <svg width={W} height={mapH} className="absolute inset-0 overflow-visible">
-                {guided.map((g) => <GuideArrow key={g.key} a={g.arrow} />)}
-              </svg>
+            <div className="absolute inset-0 z-[6] pointer-events-none" aria-hidden="true">
               {guided.map((g) => (
-                <span key={g.key} className="absolute whitespace-nowrap leading-none"
-                      style={{ ...guideWord, fontSize: g.fs, top: g.y - g.fs * 0.8,
-                               ...(g.anchor === 'end' ? { right: W - g.x } : { left: g.x }) }}>
-                  {g.text}
-                </span>
+                // each word with its arrow pops in from the word's middle
+                <div key={g.key} className="guide-bam absolute inset-0"
+                     style={{ '--at': `${GUIDE_AT[g.key]}s`,
+                              '--origin': `${g.anchor === 'end' ? g.x - wordWidth(g.text, g.fs) / 2 : g.x + wordWidth(g.text, g.fs) / 2}px ${g.y - g.fs * 0.3}px` }}>
+                  <svg width={W} height={mapH} className="absolute inset-0 overflow-visible">
+                    <GuideArrow a={g.arrow} />
+                  </svg>
+                  <span className="absolute whitespace-nowrap leading-none"
+                        style={{ ...guideWord, fontSize: g.fs, top: g.y - g.fs * 0.8,
+                                 ...(g.anchor === 'end' ? { right: W - g.x } : { left: g.x }) }}>
+                    {g.text}
+                  </span>
+                </div>
               ))}
             </div>
           )}
