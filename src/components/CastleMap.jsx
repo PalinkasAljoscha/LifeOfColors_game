@@ -188,7 +188,7 @@ export function stagger(n) {
 // motion: shown still for that long). Taps go through. The map then opens between the training
 // castle and the first place.
 const GUIDE_AT = { learn: 0.2, play: 0.8, skip: 1.4 }   // when each part pops in (s)
-const GUIDE_MS = 4000
+const GUIDE_MS = 6500                                     // fade-out (index.css guide-out) ends at 6.4 s
 function GuideArrow({ a }) {
   const pts = a.head.map((p) => p.join(',')).join(' ')
   return (
