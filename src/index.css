@@ -262,3 +262,28 @@ body {
   100% { transform: translateY(-19px) rotate(14deg); opacity: 0; }
 }
 @media (prefers-reduced-motion: reduce) { .ws-press { transition: none; } .ws-lifted, .ws-unstop { animation: none; } }
+
+/* the training castle's "Completed" stamp (LevelScreen.jsx CompletedStamp): it lands, a little
+   thump, on the title's lower edge -- centred on it (translate), tilted (--tilt) */
+.stamp-in { transform: translate(-50%, -50%) rotate(var(--tilt)); animation: stamp-in 420ms cubic-bezier(.3, 1.6, .5, 1) 250ms both; }
+@keyframes stamp-in {
+  0%   { opacity: 0; transform: translate(-50%, -50%) rotate(var(--tilt)) scale(2.2); }
+  60%  { opacity: 0.95; transform: translate(-50%, -50%) rotate(var(--tilt)) scale(0.94); }
+  100% { opacity: 0.9; transform: translate(-50%, -50%) rotate(var(--tilt)) scale(1); }
+}
+@media (prefers-reduced-motion: reduce) { .stamp-in { animation: none; } }
+
+/* the wildcard on the map (CastleMap.jsx): glides round its spot on a flat ellipse -- far to the
+   sides (--dx, tilting as it goes), a little up and down (--dy) -- two sine swings a quarter round
+   apart, so it never stops; it catches the eye while scrolling */
+.wild-x { animation: wild-x 2.5s cubic-bezier(0.37, 0, 0.63, 1) infinite alternate; }
+.wild-y { animation: wild-y 2.5s cubic-bezier(0.37, 0, 0.63, 1) infinite alternate; }
+@keyframes wild-x {
+  from { transform: translateX(calc(var(--dx) * -1)) rotate(-7deg); }
+  to   { transform: translateX(var(--dx)) rotate(7deg); }
+}
+@keyframes wild-y {
+  from { transform: translateY(calc(var(--dy) * -1)); }
+  to   { transform: translateY(var(--dy)); }
+}
+@media (prefers-reduced-motion: reduce) { .wild-x, .wild-y { animation: none; } }

@@ -35,10 +35,9 @@
     "trainingDay": "Trainingstag {{n}} bestanden",
     "trainingPlan": "Trainingsplan",
     "trainingComplete": "Training abgeschlossen",
-    "trainingReady": "Du bist jetzt bereit für die Reise.",
-    "trainingNext": "{{castle}} wartet.",
     "startJourney": "Reise beginnen",
-    "unlocked": "Neue Orte freigeschaltet!"
+    "unlocked": "Neue Orte freigeschaltet!",
+    "trainingPlate": "Training abgeschlossen!"
   },
   "levelScreen": {
     "back": "Karte",
@@ -54,7 +53,8 @@
       "5": "Tag Fünf"
     },
     "dayN": "Tag {{n}}",
-    "journey": "… und hinaus in die weite Welt …"
+    "journey": "… und hinaus in die weite Welt …",
+    "completed": "Abgeschlossen"
   },
   "progress": {
     "title": "Gesammelte Sterne",
@@ -123,6 +123,7 @@
     "progressTraining": "{{solved}} von {{required}} Puzzles gelöst",
     "locked": "gesperrt",
     "lockedHint": "Sammle erst {{count}} Sterne an einem Ort davor",
+    "lockedWildcard": "…oder öffne ihn mit der Wildcard:",
     "starsNeeded": "{{count}} Sterne öffnen den nächsten Ort",
     "starsNeededMany": "{{count}} Sterne eröffnen die nächsten Orte",
     "nextOpen": "{{name}} ist freigespielt!",

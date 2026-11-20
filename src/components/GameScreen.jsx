@@ -32,13 +32,14 @@ import { SpecialTile, isSpecial } from './LevelScreen.jsx'
 // observed transformations (src/engine/training.js; the notes survive Retry, the rules stay the
 // same; a new one is taken down by the note animation, components/NoteFlight.jsx, and lands in
 // the notebook at the bottom of the screen, which opens only when tapped) and the training texts of
-// the win animation ("Passed training day X"; "Training complete" for the win that completes the plan).
+// the win animation ("Passed training day X"; "Training complete" for the win that completes the plan,
+// which also brings down the copper plate on its chains, as a place's 20th star does).
 // A win plays the win animation (components/WinCelebration.jsx) over the board; afterwards the board
 // stays as it is and only Retry / Back go on. onHome is no longer used here (no win dialog).
-// Goal intro (GameScene _showGoalIntro): at every start of a puzzle, also after Retry, the goal
-// object blinks on the goal field with a pointing hand -- in the training castle (INTRO_MS; not
-// when its first puzzle opens, TrainingIntro explains the goal there) and in the first
-// GOAL_INTRO_LEVELS levels after it (GOAL_INTRO_MS, src/config.js).
+// Goal intro (GameScene _showGoalIntro): when a puzzle is opened (not after Retry), the goal
+// object blinks on the goal field with a pointing hand, briefly (1 s) -- in the training castle
+// (INTRO_MS; not on its first puzzle, TrainingIntro explains the goal there) and in the first
+// GOAL_INTRO_LEVELS level(s) after it (GOAL_INTRO_MS, src/config.js).
 // Special cells (src/engine/engine.js, components/SpecialOverlays.jsx): a bomb, mirror or clock
 // puzzle opens with its explanation passing just above the board, twice (IntroTicker; each
 // time the puzzle is opened, not on Retry; taps do not stop it); the first tap on a blocked / clock cell (per screen) explains
@@ -94,8 +95,8 @@ export default function GameScreen({ instance, place, training = null, pick, onP
   // each time the puzzle is opened (not again on Retry); null when done / not shown
   const [introStep, setIntroStep] = useState(() => (training?.day === 1 ? 0 : null))
   const level = instance.level
-  const goalIntro = training
-    ? (training.day === 1 && round === 0 ? 0 : INTRO_MS)
+  const goalIntro = round > 0 ? 0                  // only when the puzzle is opened, never after Retry
+    : training ? (training.day === 1 ? 0 : INTRO_MS)
     : (level >= 1 && level <= GOAL_INTRO_LEVELS ? GOAL_INTRO_MS : 0)
   const nextIntro = () => setIntroStep((s) => (s === null || s + 1 >= INTRO_STEPS ? null : s + 1))
 
@@ -352,8 +353,8 @@ export default function GameScreen({ instance, place, training = null, pick, onP
         <WinCelebration key={round} boardRef={boardBoxRef}
                         training={training && { day: training.day, next: training.next, complete: result?.trainingComplete === true }}
                         moves={moves} best={minMoves} stars={result?.stars ?? null} newBest={result?.newBest ?? false}
-                        unlocked={result?.unlocked === true || result?.wildcardWon === true}
-                        unlockText={result?.wildcardWon ? t('wildcard.won') : null}
+                        unlocked={result?.unlocked === true || result?.wildcardWon === true || result?.trainingComplete === true}
+                        unlockText={result?.wildcardWon ? t('wildcard.won') : result?.trainingComplete ? t('win.trainingPlate') : null}
                         note={result?.wildcardMissed ? t('wildcard.needMoves', { count: minMoves ?? 0 }) : null}
                         onDone={() => setWon(false)} />
       )}

@@ -14,7 +14,7 @@
 
 import { TABLE_ORDER } from './engine.js'
 
-export const INTRO_MS = 2000
+export const INTRO_MS = 1000
 export const NOTE_MAX_REPEAT = 3   // a note draws up to 3 neighbours of one kind one by one, more as "4 × X"
 
 /** [[r, c], ...] of the up-to-8 Moore neighbours of (r, c) that lie on a rows x cols board. */

@@ -7,6 +7,7 @@ import { HANDWRITING } from './TrainingNotes.jsx'
 import { playableUpTo } from '../engine/castles.js'
 import { emptySlots, placePuzzles, workshopFor } from '../workshops.js'
 import Workshop from './Workshop.jsx'
+import { SIGN_FONT } from './TrainingGround.jsx'
 
 // One castle. Every castle except the training castle shows its puzzles as potions in a
 // sorcerer's workshop (components/Workshop.jsx, one of the scenes in src/workshops.js per castle):
@@ -90,6 +91,33 @@ export function TileMark({ state, best }) {
   }
   if (state === 'played') return <span className="w-2 h-2 rounded-full bg-black/55 ring-1 ring-white/70" aria-hidden="true" />
   return null
+}
+
+// The training castle's "Completed" stamp: a rubber stamp in green ink, lettered in the training
+// sign's playful Mystery Quest, tilted, centred on the title's lower edge; a double frame, nearly
+// clean edges and just a few small worn spots here and there (SVG filter);
+// it lands with a little thump when the screen opens (CSS `stamp-in`; none with "reduce motion").
+function CompletedStamp({ text }) {
+  return (
+    <span className="absolute left-1/2 top-full pointer-events-none" aria-hidden="false">
+      <svg width="0" height="0" className="absolute" aria-hidden="true">
+        <filter id="stamp-worn" x="-10%" y="-20%" width="120%" height="140%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7" result="noise" />
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="0.7" result="rough" />
+          <feTurbulence type="fractalNoise" baseFrequency="0.18" numOctaves="2" seed="3" result="spots" />
+          <feColorMatrix in="spots" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -14 10.6" result="holes" />
+          <feComposite in="rough" in2="holes" operator="in" />
+        </filter>
+      </svg>
+      <span className="stamp-in block whitespace-nowrap rounded-xl px-3 leading-snug"
+            style={{ color: palette.stampInk, border: `2.5px solid ${palette.stampInk}`,
+                     outline: `1px solid ${palette.stampInk}`, outlineOffset: '2px',
+                     fontFamily: SIGN_FONT, fontSize: '1.4rem', letterSpacing: '0.02em',
+                     filter: 'url(#stamp-worn)', opacity: 0.92, '--tilt': '-7deg' }}>
+        {text}
+      </span>
+    </span>
+  )
 }
 
 // Training castle: the puzzles in their fixed order, one card each, with arrows in between.
@@ -191,20 +219,28 @@ export default function LevelScreen({ title, next, state, pool, onPick, onBack, 
     )
   }
 
-  // The training castle: the Home button alone on top, the title centred below it, then the path.
+  // The training castle: the map button alone on top (the workshop's rounded 🗺️ button), the title
+  // centred below it, then the path. Once every training day is solved, a "Completed" stamp sits
+  // tilted across the title's lower edge (half on it, half below).
+  const complete = pool.length > 0 && states.every((s) => s === 'solved')
   return (
     <div className="h-[100dvh] w-full flex flex-col bg-game-bg safe-pad">
       <div className="mx-auto w-full max-w-md">
         <div className="flex flex-col">
-          <div className="order-2 mt-3 mb-6 text-center">
-            <h1 className="text-3xl font-black leading-tight">{title}</h1>
+          <div className={`order-2 mt-3 text-center ${complete ? 'mb-8' : 'mb-6'}`}>
+            <h1 className="relative inline-block text-3xl font-black leading-tight">
+              {title}
+              {complete && <CompletedStamp text={t('levelScreen.completed')} />}
+            </h1>
           </div>
           <button
             onClick={onBack}
-            className="ml-auto h-12 px-4 rounded-2xl bg-game-panel border-2 border-white/15 active:scale-95 transition-transform
-                       text-base font-black shrink-0"
+            className="ml-auto mr-1 w-20 h-11 rounded-2xl bg-game-panel border-2 border-white/15 active:scale-95 transition-transform
+                       flex items-center justify-center text-2xl shrink-0"
+            aria-label={t('levelScreen.back')}
+            title={t('levelScreen.back')}
           >
-            {t('levelScreen.back')}
+            <span aria-hidden="true">🗺️</span>
           </button>
         </div>
       </div>

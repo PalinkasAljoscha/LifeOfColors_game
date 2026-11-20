@@ -14,7 +14,7 @@
 //     irregularly, of different heights, some upright, some tilted, each topped with a round wooden disc like a road sign,
 //     and on each disc one of the puzzles' emojis (the crown, the goal, among them) -- and a bomb
 //     (the game's 💣) lying on the ground among them;
-//   - two clusters of mushrooms (as in the workshop pictures): by the sign's post and beyond the sticks;
+//   - mushrooms (as in the workshop pictures): a pair by the sign's post, a group of three left of it;
 //   - a crooked chimney on the left tower's roof, smoking white and gold with little stars;
 //   - an orc (the puzzles' 🧌), twice the emojis' size, standing in front of the castle, between the mirrors and the sticks.
 // Everything is in the landscape's units (size / 100) around the middle of the castle's ground
@@ -25,7 +25,7 @@ import { palette } from '../theme.js'
 
 // The sign's lettering: Mystery Quest (magic, mystery and fun), bundled with the app
 // (@fontsource/mystery-quest, latin 400, imported in main.jsx) -- never loaded from another server.
-const SIGN_FONT = "'Mystery Quest', 'Arial Black', cursive"
+export const SIGN_FONT = "'Mystery Quest', 'Arial Black', cursive"
 
 // The sign: its plank ends at `near` on the castle's side (the pointed tip reaches TIP further),
 // its middle at height y, the post's foot at `foot`. Its width follows its text, so a longer word
@@ -43,7 +43,7 @@ export function signFont(text, maxReach = Infinity) {
   return Math.max(14, Math.min(SIGN.font, room))
 }
 /** How far the sticks reach out on the other side. */
-export const STICKS_REACH = 216   // with the mushrooms beyond them
+export const STICKS_REACH = 166
 
 // The cauldron: behind the sign and above it (not hidden by it), dx out from the post, body
 // radius r.
@@ -69,11 +69,12 @@ const DISC = 12.5
 // The bomb among the sticks: [x, foot, size].
 const BOMB = [122, 44, 22]
 // Mushrooms, as the workshop pictures draw them (a pale stem, a half-round cap in red, orange or
-// purple with two white dots), in two clusters: by the sign's post, and beyond the sticks. Each
+// purple with two white dots): a pair by the sign's post and, apart from it, a group of three
+// further left and a little lower. Each
 // [x, foot, stem height, cap radius, colour], in the pictures' units, drawn MUSHROOM_SCALE x.
 const MUSHROOMS = [
+  [-218, 105, 9, 5, 'mapMushroomOrange'], [-197, 100, 12, 6, 'mapMushroomRed'], [-176, 104, 10, 6, 'mapMushroomOrange'],
   [-130, 92, 11, 6, 'mapMushroomRed'], [-105, 94, 9, 5, 'mapMushroomPurple'],
-  [150, 80, 10, 6, 'mapMushroomOrange'], [175, 73, 12, 6, 'mapMushroomRed'], [201, 63, 9, 5, 'mapMushroomOrange'],
 ]
 const MUSHROOM_SCALE = 1.6
 // A crooked chimney on the roof of the castle's LEFT tower (the castle picture is never mirrored,
@@ -352,6 +353,9 @@ export function trainingGround({ x, ground, size, side, text, maxReach = Infinit
   })
 
   return {
+    // where the training castle's badge ("✓ 3/6") goes on the map: just under the sign's plank, on
+    // its post (map px; its top middle)
+    badge: { x: x + sx * k, y: ground + (bot + 4) * k },
     standing: [
       { el: sign, foot: ground + SIGN.foot * k },
       { el: pot, foot: ground + POT.foot * k },
@@ -367,8 +371,8 @@ export function trainingGround({ x, ground, size, side, text, maxReach = Infinit
     taken: [
       toMap([SIGN.near - w, top, SIGN.near + tip, SIGN.foot]),
       toMap([POT_X - r - 26, rim - 8, POT_X + r + 26, POT.foot + 22]),   // the fumes may float over fields
-      toMap([STICKS[0][0] - DISC - 4, -50, STICKS_REACH, 84]),
-      toMap([-142, 70, -96, 98]),   // the mushrooms by the sign's post
+      toMap([STICKS[0][0] - DISC - 4, -50, STICKS_REACH, 62]),
+      toMap([-230, 64, -96, 112]),  // the mushrooms by the sign's post
       toMap([MIRROR.dx - MIRROR.x - MIRROR.w, MIRROR.foot - MIRROR.h - 14, MIRROR.dx + MIRROR.x + MIRROR.w, MIRROR.foot + 3]),
       toMap([ORC[0] - 26, ORC[1] - 50, ORC[0] + 26, ORC[1] + 2]),
       toMap([-32, 100, 124, 148]),   // the archery

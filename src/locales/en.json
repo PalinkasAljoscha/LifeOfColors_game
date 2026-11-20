@@ -35,10 +35,9 @@
     "trainingDay": "Passed training day {{n}}",
     "trainingPlan": "Training plan",
     "trainingComplete": "Training complete",
-    "trainingReady": "You are ready for the journey now.",
-    "trainingNext": "{{castle}} is waiting.",
     "startJourney": "Start journey",
-    "unlocked": "New places unlocked!"
+    "unlocked": "New places unlocked!",
+    "trainingPlate": "Training complete!"
   },
   "levelScreen": {
     "back": "Map",
@@ -54,7 +53,8 @@
       "5": "Day Five"
     },
     "dayN": "Day {{n}}",
-    "journey": "… and into the wide world …"
+    "journey": "… and into the wide world …",
+    "completed": "Completed"
   },
   "progress": {
     "title": "Stars collected",
@@ -123,6 +123,7 @@
     "progressTraining": "{{solved}} of {{required}} puzzles solved",
     "locked": "locked",
     "lockedHint": "Get {{count}} stars in a preceding place first",
+    "lockedWildcard": "…or open it with the wildcard:",
     "starsNeeded": "{{count}} stars needed to open the next place",
     "starsNeededMany": "{{count}} stars needed to open the next places",
     "nextOpen": "{{name}} is open!",

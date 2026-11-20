@@ -35,10 +35,9 @@
     "trainingDay": "Jour d’entraînement {{n}} réussi",
     "trainingPlan": "Plan d’entraînement",
     "trainingComplete": "Entraînement terminé",
-    "trainingReady": "Tu es prêt pour le voyage.",
-    "trainingNext": "{{castle}} t’attend.",
     "startJourney": "Commencer le voyage",
-    "unlocked": "Nouveaux lieux débloqués !"
+    "unlocked": "Nouveaux lieux débloqués !",
+    "trainingPlate": "Entraînement terminé !"
   },
   "levelScreen": {
     "back": "Carte",
@@ -54,7 +53,8 @@
       "5": "Jour cinq"
     },
     "dayN": "Jour {{n}}",
-    "journey": "… et en route vers le vaste monde …"
+    "journey": "… et en route vers le vaste monde …",
+    "completed": "Terminé"
   },
   "progress": {
     "title": "Étoiles récoltées",
@@ -123,6 +123,7 @@
     "progressTraining": "{{solved}} puzzles résolus sur {{required}}",
     "locked": "verrouillé",
     "lockedHint": "Gagne d’abord {{count}} étoiles dans un lieu précédent",
+    "lockedWildcard": "…ou ouvre-le avec la wildcard :",
     "starsNeeded": "{{count}} étoiles pour ouvrir le lieu suivant",
     "starsNeededMany": "{{count}} étoiles pour ouvrir les lieux suivants",
     "nextOpen": "{{name}} : ouvert !",
@@ -157,7 +158,8 @@
     "card": "Wildcard : sauter vers un lieu plus haut",
     "rule": "Gagne le puzzle avec le nombre minimum de coups : ce lieu et tous les lieux des rangées en dessous s’ouvrent. Essais illimités.",
     "try": "Essai Wildcard",
-    "needMoves": "{{count}} coups pour réussir",
+    "needMoves_one": "{{count}} coup autorisé",
+    "needMoves_other": "{{count}} coups autorisés",
     "won": "Wildcard gagnée ! Plein de lieux débloqués.",
     "close": "Fermer"
   }

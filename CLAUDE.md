@@ -69,7 +69,7 @@ tests/                    unit tests; vectors.json = golden engine vectors (GENE
   (not "sites"), puzzles are "solved".
 - **Asset paths** — relative only; `import.meta.env.BASE_URL` for files in `public/`.
 - **Fonts and resources** — never load anything from another server. The app font is Arial Black;
-  the only bundled fonts are Cinzel (crypt motto) and Mystery Quest (training sign), via npm
+  the only bundled fonts are Cinzel (crypt motto) and Mystery Quest (training sign and stamp), via npm
   `@fontsource/*`.
 - **Engine** — game rules live ONLY in `src/engine/engine.js`. Any behavior change needs the same
   change in the factory's `instance.py` first, a new export with new golden vectors, and a new
@@ -137,7 +137,8 @@ tests/                    unit tests; vectors.json = golden engine vectors (GENE
   staggered per band and then nudged by `mapLayout.relax` to minimize paths through buildings,
   crossings, overlapping paths and crowding. Open places in color, locked ones grey with a padlock
   (no fog). Place names are not written on the map (tooltip/aria-label only); a badge shows "★ n"
-  (✓ when done) once stars are collected; the training castle shows "✓ solved/all". A locked place
+  (✓ when done) once stars are collected; the training castle shows "✓ solved/all", hung under
+  the training sign (`trainingGround(...).badge`) instead of under the castle. A locked place
   shows its name and `castles.lockedHint` in a bubble on hover/focus and for `HINT_MS` after a tap
   (so locked places are `aria-disabled`, not `disabled`). Paths are paved with stones
   (`mapPath.pathStones`, deterministic); locked paths are grey, faint, with stones missing;
@@ -159,8 +160,12 @@ tests/                    unit tests; vectors.json = golden engine vectors (GENE
   flash, a spilled flask, bow and arrows, practice targets with puzzle emojis, an orc, mushrooms,
   and a chimney with smoke. All are standing things; the castle's own fields make way for them.
 - **Place screen** (`LevelScreen.jsx`):
-  - *Training castle*: a vertical path of bars (Introduction, Day One … Day Five, then "… and into
-    the wide world …"), solved steps with a medal, the next one framed with "Start".
+  - *Training castle*: the map button (the workshop's rounded 🗺️) on top, the title, then a
+    vertical path of bars (Introduction, Day One … Day Five, then "… and into the wide world …"),
+    solved steps with a medal, the next one framed with "Start". Once every day is solved, a green
+    rubber stamp "Completed" (`levelScreen.completed`, `stampInk`, in the sign's Mystery Quest, not
+    capitals -- friendly, not "rejected"; clean edges with just a few worn spots) sits tilted across
+    the title's lower edge, half on it, half below; it lands with a small thump (`stamp-in`).
   - *Other places*: a workshop scene (`Workshop.jsx`, data in `workshops.js`); castle n uses scene
     `(n − 1) mod 6` of hut, cupboard, lab, tower, study, crypt. Flat pictures in the app's navy and
     palette; each puzzle is a potion in its `name_color` — test tube = base puzzle, round-bottomed
@@ -174,9 +179,10 @@ tests/                    unit tests; vectors.json = golden engine vectors (GENE
 - **Game screen** (`GameScreen.jsx`) — top row: 🗺️ (map), Retry, the place picture (back to the
   place), info button (RulesDialog). Below: puzzle name with its color tile and the move counter.
   Special puzzles' tiles have a wavy white border (`SpecialTile`).
-  - *Goal intro*: the goal object blinks with a pointing hand — in the training castle (2 s, not on
-    its first puzzle) and in castles 1..`GOAL_INTRO_LEVELS` (`GOAL_INTRO_MS`), at every start incl.
-    Retry. Never blocks taps.
+  - *Goal intro*: the goal object blinks briefly (1 s, two blinks) with a pointing hand — in the
+    training castle (`INTRO_MS`, not on its first puzzle) and in castles 1..`GOAL_INTRO_LEVELS`
+    (now 1: only the first place after the training; `GOAL_INTRO_MS`), when a puzzle is opened,
+    not after Retry. Never blocks taps.
   - *Training intro* (`TrainingIntro.jsx`, training puzzle 1 only): four speech bubbles (tap a
     field, the neighborhood decides, the goal, the notebook); the board takes no moves until the
     last one. Not repeated on Retry.
@@ -187,12 +193,15 @@ tests/                    unit tests; vectors.json = golden engine vectors (GENE
   - *Win* (`WinCelebration.jsx`, mode from `winMode`): `stars` = rising, evaporating stars;
     `full` (5 stars) adds twinkling colored stars; `text` (training or reduced motion) = result box
     only. When a win reaches `UNLOCK_STARS` and opens a locked place, a copper plate comes down on
-    chains: "New places unlocked!". After a win the board takes no taps; the player continues with
+    chains: "New places unlocked!". The win that completes the training brings the same plate:
+    `win.trainingPlate` ("Training complete!"); its result box is the same as every other training day's. After a win the board takes no taps; the player continues with
     Retry or Back.
 - **Wildcards** (`wildcards.js`) — a way up for strong players. One locked place on map rows 3, 6,
   8 and 9 (levels 6, 15, 22, 24) carries a wildcard with a fixed challenge puzzle (falls back to the
-  place's hardest non-special puzzle if an export moves it). The card on the map opens the wildcard
-  scroll. A 5-star win (`WILDCARD_STARS`) opens that place and every place on a lower row; opened
+  place's hardest non-special puzzle if an export moves it). The card on the map (shiny gold, gliding smoothly round its spot on a flat ellipse -- far to the sides,
+  a little up and down; still with reduced motion) opens the wildcard scroll. Tapping such a locked place shows the
+  usual bubble plus `castles.lockedWildcard` and a card that opens the scroll too; that bubble sits
+  lower, covering the map's card. A 5-star win (`WILDCARD_STARS`) opens that place and every place on a lower row; opened
   places are saved in progress `w`, never as stars (open, not done). The game screen shows
   "Wildcard try" and the allowed move count (`wildcard.needMoves_*`).
 
