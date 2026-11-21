@@ -154,7 +154,7 @@ tests/                    unit tests; vectors.json = golden engine vectors (GENE
   above the training castle's free side, arrow to the castle; "Start playing" below the first place,
   arrow to it; and stuck to the top of the visible map an up arrow, "Skip levels" and a wildcard
   (opens the wildcard scroll). Strings `guide.*`. Each time the map opens they pop in, bottom to top
-  within 2 s (`GUIDE_AT`), then fade away over 4 s (`GUIDE_MS`; reduced motion: still, then
+  within 2 s (`GUIDE_AT`), then fade away steadily to nothing over 5 s (`GUIDE_MS`; reduced motion: still, then
   gone). Taps go through the words and arrows. The map then opens between the training castle and
   the first place. Not shown at all once a puzzle has been opened.
 - **Sites** (`sites.js`) — castle 0 is a castle; levels 1, 2, 3, … cycle through `SITE_ORDER`

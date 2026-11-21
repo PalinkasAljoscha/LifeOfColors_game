@@ -289,12 +289,13 @@ body {
 @media (prefers-reduced-motion: reduce) { .wild-x, .wild-y { animation: none; } }
 
 /* the first-visit guide on the map (CastleMap.jsx): bam, bam, bam -- each part pops in at its
-   --at (bottom to top within 2 s), then all fade away over 4 s (GUIDE_MS); its arrows
+   --at (bottom to top within 2 s), then all fade away over 5 s, steadily
+   down to nothing (taken away only after that: GUIDE_MS); its arrows
    nudge towards what they point at meanwhile */
 .guide-bam {
   transform-origin: var(--origin, center);
   animation: guide-bam 420ms cubic-bezier(0.3, 1.7, 0.5, 1) var(--at) both,
-             guide-out 4000ms ease-in 2400ms forwards;
+             guide-out 5000ms cubic-bezier(0.25, 0.5, 0.45, 1) 2400ms forwards;
 }
 @keyframes guide-bam { from { opacity: 0; transform: scale(0.2); } to { opacity: 1; transform: scale(1); } }
 @keyframes guide-out { from { opacity: 1; } to { opacity: 0; } }
