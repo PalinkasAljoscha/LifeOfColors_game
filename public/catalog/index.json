@@ -1,7 +1,7 @@
 {
  "schema_version": "1.1",
- "catalog_version": "20261121-48b19999",
- "generated_at": "2026-11-21T23:02:09+00:00",
+ "catalog_version": "20261122-3be5365c",
+ "generated_at": "2026-11-22T00:02:50+00:00",
  "features": [
   "core",
   "special-blocked",
@@ -10,8 +10,8 @@
   "special-mirror"
  ],
  "file": "puzzles.json",
- "count": 1639,
- "ranked": 1639,
+ "count": 1641,
+ "ranked": 1641,
  "training": 6,
  "names": {
   "ghostlyarc": "loc_0008b5cd8324925c",
@@ -487,6 +487,7 @@
   "copperstar": "loc_48a9743e586f295e",
   "aquamarineknot": "loc_48c462c4f77b84d3",
   "knowingpeninsula": "loc_48c49e7d94aad901",
+  "radiantcove": "loc_48f165e75cce8200",
   "buriedprairie": "loc_48f8d7c3f3a6a6fd",
   "grumpyglacier": "loc_497c836ee713822b",
   "intoxicatingoctagon": "loc_49d6e0ac9fa721fe",
@@ -1462,6 +1463,7 @@
   "ancientpentagon": "loc_d979f68aa20061c2",
   "scarletridge": "loc_d99c5a3c7d326344",
   "awakeningsphere": "loc_d99cdfb112891cf5",
+  "giddycanyon": "loc_d9b1ffcfb7bdc5ae",
   "cozysquare": "loc_d9e2229e5f2c78c5",
   "starryprism": "loc_d9eb060a51256e3b",
   "sandystar": "loc_d9eb4c1227490766",
